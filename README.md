@@ -20,6 +20,9 @@ Requirements:
         - 02
         - 03
 
+Run: 
+UAV_rectification_v08_2023_function_based.mlx (will then run user_input_data.m and user_input_products.m)
+
 
 Housekeeping:
 - find global directory where CODES and DATA folder are stored.
