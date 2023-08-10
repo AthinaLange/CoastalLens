@@ -416,3 +416,4 @@ end
        % close all
     end % for ff = 1:length(flights)
 end % for dd = 1:length(data_files)
+cd(global_dir)
