@@ -21,7 +21,7 @@ Requirements:
         - 03
 
 
-Please download the movie at XXX to get and put it in folder DATA/20211026_Torrey/01 as sample data.
+Please download the movie at drone/data/cbathy/20211026_Torrey/1/DJI_0003.MOV to get and put it in folder DATA/20211026_Torrey/01 as sample data.
 
 Run: 
 UAV_rectification_v08_2023_function_based.mlx (will then run user_input_data.m and user_input_products.m)
