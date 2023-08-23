@@ -1,34 +1,42 @@
 # UAV_automated_rectification
 Toolbox to rectify UAV video in coastal oceanography
 
-Flight recommendations: 
+#### Testing:
+This toolbox is currently in testing phase on the following systems:
+- MacBook Pro M1 2020 (OS 12.6), Matlab 2022b
+
+#### Flight recommendations:
 - take pre- and post-video image for additional metadata, including RTK data
 - Toggle distortion correction on
 
-
-Requirements:
-- CODES folder
-    - CIRN
-    - cBathy_2.0
-    - basicFunctions
-- DATA folder
-    - YYYYMMDD_Location1
-        - 01
-        - 02
-        - 03
-    - YYYYMMDD_Location2
-        - 01
-        - 02
-        - 03
-
-To get started: 
- - Download the movie at drone/data/cbathy/20211026_Torrey/1/DJI_0003.MOV to get and put it in folder DATA/20211026_Torrey/01 as sample data.
+## To get started:
+ - Download the movie at drone/data/cbathy/20211026_Torrey/1/DJI_0003.MOV to get and put it in folder DATA/20211026_Torrey/01 (see folder structure below) as sample data.
  - Install exiftool (details on how to install here: https://exiftool.org/). This will be used to extract the metadata from the images.
+ - Install ffmpeg (details here: https://ffmpeg.org/download.html). Note to ARM mac users (M1, M2 silicon): ffmpeg is not built for ARM macs, but the intel install should work fine. You will need to allow ffmpeg to run on your computer by explicity allowing the application in the security & privacy tab of system preferences.
+ - _TODO_ What should be in the cBathy2.0 folder?? Should it be the full cBathy-Toolbox repo? (details here: https://github.com/Coastal-Imaging-Research-Network/cBathy-Toolbox)
+
+#### General Folder Structure:
+```bash
+.
+├── CODES
+│ ├── CIRN
+│ ├── basicFunctions
+│ ├── cBathy_2.0
+├── DATA
+│ └── YYYYMMDD_Location1
+│     ├── 01
+│     ├── 02
+│     ├── 03
+│ └── YYYYMMDD_Location2
+│     ├── 01
+│     ├── 02
+│     ├── 03
+```
 
 
-Run: 
+## To Run:
 UAV_rectification_v08_2023_function_based.mlx (will then run user_input_data.m and user_input_products.m)
-
+_TODO_ What's the best way to run this? I am confused by the live scripts...
 
 Housekeeping:
 - find global directory where CODES and DATA folder are stored.
