@@ -81,7 +81,7 @@ end
 
         system(sprintf('exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/DJI_0* > %s/%s', odir, [odir 'Processed_data/'], [oname '.csv']));
         
-        C = readtable(fullfile(odir, [oname '.csv']))
+        C = readtable(fullfile(odir,'Processed_data', [oname '.csv']))
         format long
         % get indices of images and videos to extract from
         form = char(C.FileName);
@@ -118,9 +118,11 @@ end
 %% 
 % Extract 1st frame to use as example
 
+
         if ~exist([odir 'Processed_data/Initial_frame.jpg'], 'file')    
             system(['ffmpeg -ss 00:00:00 -i ' char(string(C.FileName(mov_id(1)))) ' -frames:v 1 -loglevel quiet -stats -qscale:v 2 Processed_data/Initial_frame.jpg']);
         end
+
 
 %% 
 % Confirm whether distortion was on or off
