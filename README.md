@@ -5,6 +5,7 @@ Flight recommendations:
 - take pre- and post-video image for additional metadata, including RTK data
 - Toggle distortion correction on
 
+
 Requirements:
 - CODES folder
     - CIRN
@@ -20,8 +21,10 @@ Requirements:
         - 02
         - 03
 
+To get started: 
+ - Download the movie at drone/data/cbathy/20211026_Torrey/1/DJI_0003.MOV to get and put it in folder DATA/20211026_Torrey/01 as sample data.
+ - Install exiftool (details on how to install here: https://exiftool.org/). This will be used to extract the metadata from the images.
 
-Please download the movie at drone/data/cbathy/20211026_Torrey/1/DJI_0003.MOV to get and put it in folder DATA/20211026_Torrey/01 as sample data.
 
 Run: 
 UAV_rectification_v08_2023_function_based.mlx (will then run user_input_data.m and user_input_products.m)
