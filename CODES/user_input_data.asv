@@ -278,7 +278,6 @@ for dd = 1 : length(data_files)
                 elseif ind_lidar_option == 2 % local LiDAR survey
                         get_local_lidar
                 end
-                %get_lidar_gcp %% TODO XXX
 
           elseif ind_gcp_option == 2 % manual selection from LiDAR
                 [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR'}, {'Local LiDAR survey'}],...
@@ -292,8 +291,8 @@ for dd = 1 : length(data_files)
                 world_gcp = lidar_gcp;
                 
           elseif ind_gcp_option == 3 % manual selection from SfM
-                %get_local_sfm %% TODO XXX
-                %select_sfm_gcp %% TODO XXX
+                get_local_sfm
+                select_sfm_gcp
                 world_gcp = sfm_gcp;
 
           elseif ind_gcp_option == 4 % manual selection of GCP targets (QCIT Toolbox)
@@ -306,22 +305,43 @@ for dd = 1 : length(data_files)
           end
 
 
-        % TODO add in reprojectionError
-        % TODO check that grid size all consistent
+
+            %%
+       % extrinsicsInitialGuess= [UTMEasting UTMNorthing C.RelativeAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(jpg_id)+360) deg2rad(C.CameraPitch(jpg_id)+90) deg2rad(C.CameraRoll(jpg_id))]; % [ x y z azimuth tilt swing]
         extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
+
+
+
+
         [extrinsics extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess,extrinsicsKnownsFlag,intrinsics,image_gcp, world_gcp);
 
+        %%
         figure(3);clf
         imshow(I)
         hold on
-        scatter(image_gcp(:,1), image_gcp(:,2), 100, 'r', 'filled')
+        scatter(image_gcp(:,1), image_gcp(:,2), 50, 'r')
         for ii = 1:length(image_gcp)
-            text(image_gcp(ii,1)+25, image_gcp(ii,2)-25, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
+            text(image_gcp(ii,1)+50, image_gcp(ii,2)-50, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
         end
-         [UVd,flag] = xyz2DistUV(intrinsics,extrinsics,world_gcp); UVd = reshape(UVd, [],2);
-         scatter(UVd(:,1), UVd(:,2), 50, 'y', 'LineWidth', 3)
+         [UVd,flag] = xyz2DistUV(intrinsics,extrinsics,xyz)
+        %%
+        C_singleExtrinsicSolution
+        extrinsics(3)=ceil(C.RelativeAltitude(jpg_id))-zgeoid_offset;
+        save([odir '/Processed_data/' oname '_IOEOInitial' ],'initialCamSolutionMeta','extrinsics','intrinsics')
 
-        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsics','intrinsics')
+
+          [worldPose,i] = estworldpose(image_gcp,world_gcp,cameraParams.Intrinsics, 'MaxReprojectionError', 10);worldPose.Translation(3)=-worldPose.Translation(3);
+                eul = rotm2eul(worldPose.R)
+                figure(1);clf
+                scatter3(lidarPoints(:,1), lidarPoints(:,2), lidarPoints(:,3), 20, lidarPoints(:,3), 'filled')
+                set(gca,'YDir', 'reverse')
+                colorbar
+                caxis([0 20])
+                zlim([0 20])
+                hold on
+                pcshow(lidar_gcp, 'r',MarkerSize=50);
+                plotCamera(Size=10,Orientation=worldPose.R', ...
+                Location=worldPose.Translation);
 
         %% ========================productsCheck============================================
         %                          CHECK PRODUCTS ON INITIAL IMAGE       

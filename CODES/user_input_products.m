@@ -258,6 +258,6 @@ switch answer4
         info = inputdlg({'Filename to be saved'});
         disp('Location where Products file to be saved.')
         temp_file_path = uigetdir(global_dir, 'Products file save location');
-        save(fullfile(temp_file_path, [info{1} '.mat']), 'Products')
+        save(fullfile(temp_file_path, [info{1} '.mat']), 'Products', 'origin_grid')
 end
     

@@ -6,41 +6,41 @@ switch answer2
     case 'Yes'
         [temp_file, temp_file_path] = uigetfile(global_dir, 'Grid file');
         load(fullfile(temp_file_path, temp_file)); clear temp_file*
-        if abs(grid(1)) < 90
-            Product_base.lat = grid(1);
+        if abs(origin_grid(1)) < 90
+            Product_base.lat = origin_grid(1);
         else
             Product_base.lat = double(string(inputdlg('Latitude of Origin')));
         end
 
-        if abs(grid(2)) < 180
-            Product_base.lon = grid(2);
+        if abs(origin_grid(2)) < 180
+            Product_base.lon = origin_grid(2);
         else
             Product_base.lon = double(string(inputdlg('Longitude of Origin')));
         end
 
-        if grid(5) < 360 && grid(5) > 0 
-            Product_base.angle = grid(5);
+        if origin_grid(5) < 360 && origin_grid(5) > 0 
+            Product_base.angle = origin_grid(5);
         else
             Product_base.angle = double(string(inputdlg('Angle (CC degrees from North)')));
         end
 
     case 'No'
-        grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
-        grid = double(string(grid));
-        if abs(grid(1)) < 90
-            Product_base.lat = grid(1);
+        origin_grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
+        origin_grid = double(string(origin_grid));
+        if abs(origin_grid(1)) < 90
+            Product_base.lat = origin_grid(1);
         else
             Product_base.lat = double(string(inputdlg('Latitude of Origin')));
         end
 
-        if abs(grid(2)) < 180
-            Product_base.lon = grid(2);
+        if abs(origin_grid(2)) < 180
+            Product_base.lon = origin_grid(2);
         else
             Product_base.lon = double(string(inputdlg('Longitude of Origin')));
         end
 
-        if grid(3) < 360 && grid(3) > 0 
-            Product_base.angle = grid(3);
+        if origin_grid(3) < 360 && origin_grid(3) > 0 
+            Product_base.angle = origin_grid(3);
         else
             Product_base.angle = double(string(inputdlg('Angle (CC degrees from North)')));
         end

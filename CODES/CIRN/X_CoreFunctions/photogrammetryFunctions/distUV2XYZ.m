@@ -112,8 +112,8 @@ if strcmp(knownDim,'z')==1
     X = ((N.*S - R.*O).*Z + (R.*P - N.*T))./(R.*M - N.*Q);
     Y = ((M.*S - Q.*O).*Z + (Q.*P - M.*T))./(Q.*N - M.*R);
 end
-
-
+X
+Y
 % Reformat into one Matrix
 xyz = [X' Y' Z'];
 
