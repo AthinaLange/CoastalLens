@@ -276,10 +276,9 @@ for dd = 1 : length(data_files)
         %% ========================GCPs============================================
         %                          GET GCPs HERE (TODO)       
         %                           - Option 1: Fully Automated from LiDAR points
-        %        DONE                   - Option 2: Manual from hand selection from LiDAR (airborne or local)
-        %                           - Option 3: Manual from hand selection from SfM (local)
-        %                           - Option 4: Manual from hand selection from GoogleEarth
-        %        DONE                   - Option 5: Manual from GCP targets
+        %        DONE                   - Option 2: Manual from hand selection from LiDAR or SfM (airborne or local)
+        %                           - Option 3: Manual from hand selection from GoogleEarth
+        %        DONE                   - Option 4: Manual from GCP targets
         %  =====================================================================
         % whichever method generates image_gcp (N x 2) and world_gcp (N x 3)
 
@@ -292,33 +291,31 @@ for dd = 1 : length(data_files)
                 if ind_lidar_option == 1 % airborne LiDAR
                         get_noaa_lidar %% TODO XXX
                 elseif ind_lidar_option == 2 % local LiDAR survey
-                        get_local_lidar
+                        get_local_survey
                 end
                 %get_lidar_gcp %% TODO XXX
 
           elseif ind_gcp_option == 2 % manual selection from LiDAR
-              gcp_method = 'manual_LiDAR';
-                [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR'}, {'Local LiDAR survey'}],...
-                                                     'SelectionMode','single', 'InitialValue',1, 'PromptString', {'LiDAR survey'});
+                [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR'}, {'Local LiDAR/SfM survey'}],...
+                                                     'SelectionMode','single', 'InitialValue',1, 'PromptString', {'LiDAR/SfM survey'});
                 if ind_lidar_option == 1 % airborne LiDAR
                         get_noaa_lidar %% TODO XXX
                 elseif ind_lidar_option == 2 % local LiDAR survey
-                        get_local_lidar
+                        get_local_survey
                 end
-                select_lidar_gcp % includes select_image_gcp
-                world_gcp = lidar_gcp;
+                select_survey_gcp % includes select_image_gcp
+                world_gcp = survey_gcp;
+                if ~isempty(pc.Color)
+                    gcp_method = 'manual_SfM';
+                else
+                    gcp_method = 'manual_LiDAR';
+                end
                 
-          elseif ind_gcp_option == 3 % manual selection from SfM
-                gcp_method = 'manual_SfM';
-                get_local_sfm
-                select_sfm_gcp %% TODO XXX
-                world_gcp = sfm_gcp;
-
-          elseif ind_gcp_option == 4 % manual selection from GoogleEarth
+          elseif ind_gcp_option == 3 % manual selection from GoogleEarth
               gcp_method = 'manual_GoogleEarth';
               % Discuss with Rafael and Erwin
 
-          elseif ind_gcp_option == 5 % manual selection of GCP targets (QCIT Toolbox)
+          elseif ind_gcp_option == 4 % manual selection of GCP targets (QCIT Toolbox)
                gcp_method = 'manual_targets';
                 select_image_gcp
                 select_target_gcp

@@ -60,7 +60,7 @@ for dd = 1 : length(data_files)
     cd([data_files(dd).folder '/' data_files(dd).name])
     [ind_drone,tf] = listdlg('ListString',[{'DJI'}, {'Other'}], 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'What drone platform was used?'});
     if ind_drone == 1
-        drone_type = string('DJI');
+        drone_type = "DJI";
     else
         drone_type = string(inputdlg({'What drone system?'}));
     end
@@ -292,37 +292,36 @@ for dd = 1 : length(data_files)
                 if ind_lidar_option == 1 % airborne LiDAR
                         get_noaa_lidar %% TODO XXX
                 elseif ind_lidar_option == 2 % local LiDAR survey
-                        get_local_lidar
+                        get_local_survey
                 end
                 %get_lidar_gcp %% TODO XXX
 
           elseif ind_gcp_option == 2 % manual selection from LiDAR
-              gcp_method = 'manual_LiDAR';
-                [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR'}, {'Local LiDAR survey'}],...
-                                                     'SelectionMode','single', 'InitialValue',1, 'PromptString', {'LiDAR survey'});
+              gcp_method = 'manual_LiDAR/SfM';
+                [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR'}, {'Local LiDAR/SfM survey'}],...
+                                                     'SelectionMode','single', 'InitialValue',1, 'PromptString', {'LiDAR/SfM survey'});
                 if ind_lidar_option == 1 % airborne LiDAR
                         get_noaa_lidar %% TODO XXX
                 elseif ind_lidar_option == 2 % local LiDAR survey
-                        get_local_lidar
+                        get_local_survey
                 end
-                select_lidar_gcp % includes select_image_gcp
-                world_gcp = lidar_gcp;
+                select_survey_gcp % includes select_image_gcp
+                world_gcp = survey_gcp;
+               if ~isempty(pc.Color)
+    cPoints = pc.Color;
+else
+    cPoints = Points(:,3);
+end
                 
-          elseif ind_gcp_option == 3 % manual selection from SfM
-                gcp_method = 'manual_SfM';
-                get_local_sfm
-                select_sfm_gcp %% TODO XXX
-                world_gcp = sfm_gcp;
+          elseif ind_gcp_option == 3 % manual selection from GoogleEarth
+              gcp_method = 'manual_GoogleEarth';
+              % Discuss with Rafael and Erwin
 
           elseif ind_gcp_option == 4 % manual selection of GCP targets (QCIT Toolbox)
-              gcp_method = 'manual_targets';
+               gcp_method = 'manual_targets';
                 select_image_gcp
                 select_target_gcp
                 world_gcp = target_gcp;
-
-          elseif ind_gcp_option == 5 % manual selection from GoogleEarth
-              gcp_method = 'manual_GoogleEarth';
-              % Discuss with Rafael and Erwin
 
           end
 
@@ -363,8 +362,6 @@ for dd = 1 : length(data_files)
         %% ========================grid============================================
         %                          GRID       
         %                           - Projects grid onto inital frame
-        %                           - Orientation might be incorrect based on inital position and pose estimate 
-        %                               - will be updated to use GCP extrinsics location (TODO)
         %                           - If unhappy, can reinput grid data
         %  =====================================================================
         for pp = ids_grid % repeat for all grids
@@ -448,11 +445,10 @@ for dd = 1 : length(data_files)
         end % for pp = 1:length(ids_grid)
 
         clearvars ids_grid info gridChangeIndex answer localIr Ir pp x2 y2 localExtrinsics ixlim iylim iX iY iz iZ X Y Z localX localY localZ
+        
         %% ========================xTransects============================================
         %                          xTransects       
         %                           - Projects all xTransects onto inital frame
-        %                           - Orientation might be incorrect based on inital position and pose estimate 
-        %                               - will be updated to use GCP extrinsics location (TODO)
         %                           - If unhappy, can reinput grid data
         %  =====================================================================
         if ~isempty(ids_xtransect)
@@ -506,8 +502,6 @@ for dd = 1 : length(data_files)
         %% ========================yTransects============================================
         %                         yTransects       
         %                           - Projects all yTransects onto inital frame
-        %                           - Orientation might be incorrect based on inital position and pose estimate 
-        %                               - will be updated to use GCP extrinsics location (TODO)
         %                           - If unhappy, can reinput grid data
         %  =====================================================================
         if ~isempty(ids_ytransect)
@@ -562,9 +556,9 @@ for dd = 1 : length(data_files)
         %                         SEND EMAIL WITH INPUT DATA  
         %                           - Inital Camera Position
         %                           - Origin of Coordinate System
+        %                           - Initial and corrected extrinsics
         %                           - Data extraction frame rates
         %                           - Products
-        %                               - will be updated to use GCP extrinsics location (TODO)
         %                           - If unhappy, can reinput grid data
         %  =====================================================================
         clear grid_text grid_plot
