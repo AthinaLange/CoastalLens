@@ -1,30 +1,41 @@
 %% UAV_automated_rectification toolbox
 %
-% - Obtain day relevant data 
-%       - camera intrinsics
-%       - Products
-%       - extraction frame rates
-% - Do flight specific checks
-%       - Pull initial drone position and pose from metadata (using exiftool)
-%       - extract initial frame (using ffmpeg)
-%       - confirm distortion
-%       - confirm inital drone position and pose from gcps
-%       - check products
 %
+%   Housekeeping
+%       - confirm CODES path
+%       - confirm DATA path - which day or multiple days are you processing
+%       - get user email 
 %
+%  User Input
+%       - Obtain day relevant data 
+%               - camera intrinsics
+%               - Products
+%               - extraction frame rates
+%       - Do flight specific checks
+%               - Pull initial drone position and pose from metadata (using exiftool)
+%               - extract initial frame (using ffmpeg)
+%               - confirm distortion
+%               - confirm inital drone position and pose from gcps
+%               - check products
 %
+%  Extract Images
+%       - Repeat for each day + flight
+%               - For each extraction frame rate:
+%                   - make Hz directory for images
+%                   - for every movie to be extracted: extract images from video at extraction frame rate using ffmpeg (into seperate folder intially)
+%                   - move images from movie folders into group folder and rename sequentially
+%               - Send email that image extraction complete
 %
 %
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
-%% Housekeeping
-%       - confirm CODES path
-%       - confirm DATA path - which day or multiple days are you processing
-%       - get user email 
-
 %% ====================================================================
-%                                                         Get global directory location
+%                          Housekeeping         
+%                           - confirm CODES path
+%                           - confirm DATA path - which day or multiple days are you processing
+%                           - get user email 
 %  =====================================================================
+%% =============== Get global directory location. =====================================================================
 clearvars
 
 if ismac
@@ -48,9 +59,7 @@ global_dir = uigetdir('.', 'UAV Rectification');
 cd(global_dir)
 setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
 
-%% ====================================================================
-%                                          Check that all necessary codes are loaded.                            
-%  =====================================================================
+%% =============== Check that all necessary codes are loaded. =====================================================================
 % Check for CODES folder dependencies
 code_dir = fullfile(global_dir, 'UAV_automated_rectification', 'CODES');
 
@@ -67,11 +76,14 @@ if ~exist(fullfile(code_dir, 'basicFunctions'), 'dir')
     disp('Please download basicFunctions codes from GitHub.')
 end
 
+% Check that helper Functions are downloaded.
+if ~exist(fullfile(code_dir, 'helperFunctions'), 'dir')
+    disp('Please download helperFunctions codes from GitHub.')
+end
+
 addpath(genpath(code_dir))
 
-%% ====================================================================
-%                                                    Select days to process                           
-%  =====================================================================
+%% =============== Select days to process.  =====================================================================
 % Load which data folders are to be processed
 data_dir = fullfile(global_dir, 'DATA');
 
@@ -80,9 +92,7 @@ data_files = dir(data_dir); data_files([data_files.isdir]==0)=[]; data_files(con
 [ind_datafiles,~] = listdlg('ListString',{data_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
 data_files = data_files(ind_datafiles);
 
-%% ====================================================================
-%                                          Confirm update emails and get email address                           
-%  =====================================================================
+%% =============== Confirm update emails and get email address. =====================================================================
 % Get user email
 answer = questdlg('Recieve update emails?', 'Confirmation Emails?', 'Yes', 'No', 'Yes');
     switch answer

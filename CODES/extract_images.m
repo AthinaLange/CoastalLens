@@ -1,19 +1,13 @@
 %% extract_images
 %
-% - Obtain day relevant data 
-%       - camera intrinsics
-%       - Products
-%       - extraction frame rates
-% - Do flight specific checks
-%       - Pull initial drone position and pose from metadata (using exiftool)
-%       - extract initial frame (using ffmpeg)
-%       - confirm distortion
-%       - confirm inital drone position and pose from gcps
-%       - check products
+% Repeat for each day + flight
 %
+%   For each extraction frame rate:
+%           - make Hz directory for images
+%           - for every movie to be extracted: extract images from video at extraction frame rate using ffmpeg (into seperate folder intially)
+%           - move images from movie folders into group folder and rename sequentially
 %
-% TODO
-%
+%  Send email that image extraction complete
 %
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
