@@ -94,14 +94,21 @@ UAV_rectification_v09_2023_function_based.m (will then run user_input_data.m and
         - making initial extrinsics guess based on meta data [GPSLatitude, GPSLongitude, RelativeAltitude - zgeoid_offset, CameraYaw + 360, CameraPitch+90, CameraRoll]
         - Extract 1st frame of video to do initial extrinsics calibration on
         - Confirm whether correct cameraParameters are used - assuming a distorted and undistorted camera calibration has been done, confirm which distortion model to use - Default for our flights is distortion correction ON, so cameraParams_undistorted would be used. 
-        - use ground control points to obtain initial camera position and pose (extrinsics).
+        - use ground control points to obtain initial camera position and pose (extrinsics) - select method to use
+          (see Wiki for more info on various options).
+            - Option 1: Automated with LiDAR survey
+            - Option 2: Manual gcp selection from LiDAR survey
+            - Option 3: Manual gcp selection from SfM survey
+            - Option 4: Manual gcp selection from GoogleEarth
+            - Option 5: Manual gcp selection from targets (QCIT Toolbox)
         - check that grid dimensions for cBathy data and timestacks is appropriate. If not, follow prompt until you are happy (currently requires input, changed grid cannot be a file).
         - send email with provided information:
             - Origin coordinates
-            - initial extrinsics guess (and TBD LiDAR-based correction)
+            - initial extrinsics guess
+            - gcp-corrected extrinsics with method note
             - frame rate of data to be extracted
             - Products to produce with type, frame rate and dimensions
-            - Intrinsics corrected image, Rectified grid, and timestacks on oblique image
+            - Distortion-corrected image, GCP image,  Rectified grid, and timestacks on oblique image
 
 
 ### Extract Images
