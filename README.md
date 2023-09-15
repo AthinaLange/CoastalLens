@@ -1,6 +1,10 @@
 # UAV_automated_rectification
 Toolbox to rectify UAV video in coastal oceanography
 
+## Still TODO
+ - SMTP Server stuff
+ - DEM option
+
 #### Testing:
 This toolbox is currently in testing phase on the following systems:
 - MacBook Pro M1 2020 (OS 12.6), Matlab 2022b
@@ -17,12 +21,13 @@ This toolbox is currently in testing phase on the following systems:
  - Install ffmpeg (details here: https://ffmpeg.org/download.html). Note to ARM mac users (M1, M2 silicon): ffmpeg is not built for ARM macs, but the intel install should work fine. You will need to allow ffmpeg to run on your computer by explicity allowing the application in the security & privacy tab of system preferences.
  - _TODO_ What should be in the cBathy2.0 folder?? Should it be the full cBathy-Toolbox repo? (details here: https://github.com/Coastal-Imaging-Research-Network/cBathy-Toolbox)
 
-#### General Folder Structure:
+### General Folder Structure:
 ```bash
 .
 ├── CODES
 │ ├── CIRN
 │ ├── basicFunctions
+│ ├── helperFunctions
 │ ├── cBathy_2.0
 ├── DATA
 │ └── YYYYMMDD_Location1
@@ -37,18 +42,20 @@ This toolbox is currently in testing phase on the following systems:
 
 
 ## To Run:
-UAV_rectification_v08_2023_function_based.mlx (will then run user_input_data.m and user_input_products.m)
-_TODO_ What's the best way to run this? I am confused by the live scripts...
+UAV_rectification_v09_2023_function_based.m (will then run user_input_data.m and extract_images.m)
 
-Housekeeping:
+### Housekeeping:
 - find global directory where CODES and DATA folder are stored.
+- add CODES file to path and confirm the CIRN, cBathy 2.0, and basic/helperFunctions folders are loaded
 - specify which UAV hovers you want to process (have to do all of a given day at once)
 - Input name and email where test emails will go to
+    - The SMTP server might need to be fixed. 
 - Save: directory paths, data_folders to process and user email
 
-User Input:
+### User Input:
 - confirm that you get test email
 - for every hover day folder repeat process:
+    - specify drone system, e.g. DJI or other. Will help define name and duration of videos to be used.
     - find MATLAB camera calibration file for UAV (cameraParameters) - otherwise go do that and come back - should have a distortion and undistorted version of camera calibration (cameraParams_distorted and cameraParams_undistorted) - if only a single calibration (cameraParams)
     - define your data products to be created (do you want to load in a Products .mat file or define them here?)
         - load in .mat file of origin data grid = (Lat, Lon, shorenormal angle) OR define in pop-up window - lat has to be +-90deg, lon +-180 and shorenormal angle within 360deg defined CC from North (see CDIP MOP angle definitions for examples)
@@ -80,21 +87,29 @@ User Input:
           
     - find the minimum number of frames needed to be extracted (2Hz data can be pulled from 10Hz images, but 3Hz cannot. Code will then extract frames at 3Hz and 10Hz)
     
-    - Save cameraParameters, extraction frame rate, Products data and number of flights on given day
+    - Save cameraParameters, extraction frame rate, Products data, number of flights on given day, grid origin, and drone type
  
     - for every flight repeat process:
-        - extract meta data from images and videos (REQUIRES EXIFTOOL) - to account for false-start videos, only starting at first full length video (DJI: 5:28min) and going to end - MORE INPUT FROM OTHER SYSTEMS/USES REQUIRED
+        - extract meta data from images and videos (REQUIRES EXIFTOOL) - to account for false-start videos, only starting at first full length video (DJI: 5:28min) and going to end - INPUT FOR OTHER SYSTEMS/USES REQUIRED
         - making initial extrinsics guess based on meta data [GPSLatitude, GPSLongitude, RelativeAltitude - zgeoid_offset, CameraYaw + 360, CameraPitch+90, CameraRoll]
         - Extract 1st frame of video to do initial extrinsics calibration on
         - Confirm whether correct cameraParameters are used - assuming a distorted and undistorted camera calibration has been done, confirm which distortion model to use - Default for our flights is distortion correction ON, so cameraParams_undistorted would be used. 
-    -   check that grid dimensions for cBathy data and timestacks is appropriate. If not, follow prompt until you are happy (currently requires input, changed grid cannot be a file).
-    -   send email with provided information:
-        - Origin coordinates
-        - initial extrinsics guess (and TBD LiDAR-based correction)
-        - frame rate of data to be extracted
-        - Products to produce with type, frame rate and dimensions
-        - Intrinsics corrected image, Rectified grid, and timestacks on oblique image
+        - use ground control points to obtain initial camera position and pose (extrinsics).
+        - check that grid dimensions for cBathy data and timestacks is appropriate. If not, follow prompt until you are happy (currently requires input, changed grid cannot be a file).
+        -   send email with provided information:
+            - Origin coordinates
+            - initial extrinsics guess (and TBD LiDAR-based correction)
+            - frame rate of data to be extracted
+            - Products to produce with type, frame rate and dimensions
+            - Intrinsics corrected image, Rectified grid, and timestacks on oblique image
 
 
+### Extract Images
+- for each day and flight:
+     - for each extraction frame rate:
+            - make directory for given extraction frame rate (e.g. images_10Hz/)
+            - for each movie in directory: extract images from video at extraction frame rate using ffmpeg (images placed in new subfolder)
+            - move images from movie subfolders into extraction rate directory (e.g. images_10Hz/) and name images sequentially. delete movie subfolders.
+     - send email that image extraction complete
 
 
