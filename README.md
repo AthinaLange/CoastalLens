@@ -4,6 +4,13 @@ Toolbox to rectify UAV video in coastal oceanography
 ## Still TODO
  - SMTP Server stuff
  - DEM option
+ - write get_noaa_lidar
+ - improve get_pointcloud_gcp
+ - write google earth method
+ - write automated lidar method
+ - include gcp reprojection error
+ - include grid dimensions check
+ - add documentation for gcp methods
 
 #### Testing:
 This toolbox is currently in testing phase on the following systems:
