@@ -96,7 +96,7 @@ UAV_rectification_v09_2023_function_based.m (will then run user_input_data.m and
         - Confirm whether correct cameraParameters are used - assuming a distorted and undistorted camera calibration has been done, confirm which distortion model to use - Default for our flights is distortion correction ON, so cameraParams_undistorted would be used. 
         - use ground control points to obtain initial camera position and pose (extrinsics).
         - check that grid dimensions for cBathy data and timestacks is appropriate. If not, follow prompt until you are happy (currently requires input, changed grid cannot be a file).
-        -   send email with provided information:
+        - send email with provided information:
             - Origin coordinates
             - initial extrinsics guess (and TBD LiDAR-based correction)
             - frame rate of data to be extracted
@@ -105,11 +105,14 @@ UAV_rectification_v09_2023_function_based.m (will then run user_input_data.m and
 
 
 ### Extract Images
+
 - for each day and flight:
-     - for each extraction frame rate:
-            - make directory for given extraction frame rate (e.g. images_10Hz/)
-            - for each movie in directory: extract images from video at extraction frame rate using ffmpeg (images placed in new subfolder)
-            - move images from movie subfolders into extraction rate directory (e.g. images_10Hz/) and name images sequentially. delete movie subfolders.
-     - send email that image extraction complete
+    - for each extraction frame rate:
+        - make directory for given extraction frame rate (e.g. images_10Hz/)
+        - for each movie in directory: extract images from video at extraction frame rate using ffmpeg (images placed in new subfolder)
+        - move images from movie subfolders into extraction rate directory (e.g. images_10Hz/) and name images sequentially. delete movie subfolders.
+    - send email that image extraction complete
 
 
+
+  
