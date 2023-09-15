@@ -104,10 +104,9 @@ UAV_rectification_v09_2023_function_based.m (will then run user_input_data.m and
         - use ground control points to obtain initial camera position and pose (extrinsics) - select method to use
           (see Wiki for more info on various options).
             - Option 1: Automated with LiDAR survey
-            - Option 2: Manual gcp selection from LiDAR survey
-            - Option 3: Manual gcp selection from SfM survey
-            - Option 4: Manual gcp selection from GoogleEarth
-            - Option 5: Manual gcp selection from targets (QCIT Toolbox)
+            - Option 2: Manual gcp selection from LiDAR or SfM survey
+            - Option 3: Manual gcp selection from GoogleEarth
+            - Option 4: Manual gcp selection from targets (QCIT Toolbox)
         - check that grid dimensions for cBathy data and timestacks is appropriate. If not, follow prompt until you are happy (currently requires input, changed grid cannot be a file).
         - send email with provided information:
             - Origin coordinates
