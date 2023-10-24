@@ -1,9 +1,10 @@
-%% get_image_gcp
+%% select_image_gcp
 % Choose GCP Coordinates on Image
         I = imread( fullfile(odir, 'Processed_data', 'undistortImage.png'));
         hFig = figure(1);clf
         image(I)
         hold on
+        pan on
         
         title('Click outside image when done selecting points.')
         

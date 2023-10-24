@@ -84,11 +84,11 @@ i=rgb2gray(i);
 % Calculate Center of Area of Thresholded Value
 [U V]=meshgrid(udi,vdi);
 
-if strcmp(brightFlag,'bright')==1
+if strcmpi(brightFlag,'bright')==1
     Udn = mean(U(i>Th));
     Vdn = mean(V(i>Th));
 end
-if strcmp(brightFlag,'dark')==1
+if strcmpi(brightFlag,'dark')==1
     Udn = mean(U(i<Th));
     Vdn = mean(V(i<Th));
 end

@@ -7,8 +7,11 @@ answer = questdlg('Do you want to select from LiDAR/SfM or image first?', 'GCP l
 switch answer
     case 'Image'
         %% Choose GCP Coordinates on Image
+        figure
        select_image_gcp
+       gcp_num = length(h);
         %% Find corresponding points on LiDAR
+        figure
         select_pointcloud_gcp
         survey_gcp = selectedPoints;
     case 'LiDAR'
@@ -35,20 +38,24 @@ switch answer
 
         % plot LiDAR/SfM gcps
         hLid = figure(2);clf
-        scatter3(Points(:,1), Points(:,2), Points(:,3), 20, cPoints, 'filled')
-        colorbar
+        ptCloudOut = pcdownsample(pc_new,'random',.1)
+       
+        ax=pcshow(ptCloudOut)
+        hold on
+       colorbar
         caxis([0 20])
         zlim([0 20])
         xlim([min(survey_gcp(:,1))-50 max(survey_gcp(:,1))+50])
         ylim([min(survey_gcp(:,2))-50 max(survey_gcp(:,2))+50])
         hold on; % so we can highlight clicked points without clearing the figure
-        scatter3(survey_gcp(:,1), survey_gcp(:,2), survey_gcp(:,3)+.2, 100, 'r', 'filled')
+        scatter3(survey_gcp(:,1), survey_gcp(:,2), survey_gcp(:,3), 100, 'r', 'filled')
         for ii = 1:length(survey_gcp)
             text(survey_gcp(ii,1)+1, survey_gcp(ii,2)+1, survey_gcp(ii,3)+.4, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
         end
         view(-90,90)
 
         %% Choose GCP Coordinates on Image
+        figure
         select_image_gcp
 end
 
@@ -70,7 +77,7 @@ end
             text(image_gcp(ii,1)+50, image_gcp(ii,2)-50, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
         end
         subplot(121)
-        scatter3(Points(:,1), Points(:,2), Points(:,3), 20, cPoints), 'filled')
+        scatter3(Points(:,1), Points(:,2), Points(:,3), 20, cPoints, 'filled')
         colorbar
         caxis([0 20])
         zlim([0 20])

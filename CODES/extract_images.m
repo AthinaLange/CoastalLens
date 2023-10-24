@@ -14,14 +14,14 @@
 
 %%
 % repeat for each day
-for dd = 1 : length(data_files)
+for dd = 1: length(data_files)
     clearvars -except dd *_dir user_email data_files
     cd(fullfile(data_files(dd).folder, data_files(dd).name))
 
     load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'))
 
     % repeat for each flight
-    for ff = 1 : length(flights)
+    for ff = 1: length(flights)
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [data_files(dd).name '_' flights(ff).name];
         cd(odir) 
@@ -41,14 +41,14 @@ for dd = 1 : length(data_files)
             end
             % Combine images and rename into sequential
             for ii = 1:length(mov_id)
-                L = dir(imageDirectory); L([L.isdir] == 1) = []; if ~isempty(L); L = string(extractfield(L, 'name')');end
+                L = dir(imageDirectory); L([L.isdir] == 1) = []; if ~isempty(L); L = string(extractfield(L, 'name')');end;  if ~isempty(L); L(L=='.DS_Store')=[];end
                 Lfull = length(L);
-                L = dir([imageDirectory char(string(ii))]); L([L.isdir] == 1) = []; L = string(extractfield(L, 'name')');
+                L = dir(fullfile(imageDirectory, char(string(ii)))); L([L.isdir] == 1) = []; L = string(extractfield(L, 'name')');  if ~isempty(L); L(L=='.DS_Store')=[];end
 
                 if ii == 1
                     movefile(fullfile(imageDirectory, char(string(ii)), 'Frame_*'), imageDirectory)
                 else
-                    for ll = 1:length(L)
+                    for ll = 1: length(L)
                         if ll < 10
                             id = ['000' char(string(ll))];
                         elseif ll < 100
@@ -59,7 +59,7 @@ for dd = 1 : length(data_files)
                             id = [char(string(ll))];
                         end
 
-                        movefile(fullfile(imageDirectory, char(string(ii)), ['Frame_' id '.jpg']), fullfile(imageDirectory, char(string(ii)), ['Frame_' char(string(ll+Lfull)) '.jpg']))
+                        movefile(fullfile(imageDirectory, char(string(ii)), ['Frame_' id '.jpg']), fullfile(imageDirectory, ['Frame_' char(string(ll+Lfull)) '.jpg']))
                     end
                 end  % if ii == 1
             end % for ii = 1:length(mov_id)

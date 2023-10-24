@@ -10,6 +10,9 @@
 %       - extract initial frame (using ffmpeg)
 %       - confirm distortion
 %       - confirm inital drone position and pose from gcps
+%               - using LiDAR/SfM survey
+%               - using GoogleEarth
+%               - using GCPs (targets / objects in frame)
 %       - check products
 %
 %
@@ -41,7 +44,7 @@ answer = questdlg('Did you get the test email?','Test email check', 'Yes / Don''
             
             return
     end
-%% ====================================================================
+%% ===========================userInput=========================================
 %                          USER INPUT         
 %                           - Obtain day relevant data 
 %                               - camera intrinsics
@@ -64,8 +67,15 @@ for dd = 1 : length(data_files)
     else
         drone_type = string(inputdlg({'What drone system?'}));
     end
-        
-
+    %% ==========================TimeZone==========================================
+   
+    cont_areas = [{'Africa'}, {'America'}, {'Antarctica'}, {'Arctic'}, {'Asia'}, {'Atlantic'}, {'Australia'}, {'Europe'}, {'Indian'}, {'Pacific'}, {'All'}];
+    [ind_area,tf] = listdlg('ListString', cont_areas, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
+    
+    geo_areas = timezones(char(cont_areas(ind_area)));
+    [ind_area,tf] = listdlg('ListString', geo_areas.Name, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
+    tz = char(geo_areas.Name(ind_area))
+    
     %% ==========================intrinsics==========================================
     %                          Choose intrinsics file for each day of flight         
     %  =====================================================================
@@ -87,7 +97,7 @@ for dd = 1 : length(data_files)
     %                               - If so, can load that in
     %                           - Define origin of grid and products to be made
     %  =====================================================================
-    answer = questdlg('Do you have a .mat Products file?', 'Product file', 'Yes', 'No', 'No');
+    answer = questdlg('Do you have a .mat Products file?', 'Product file', 'Yes', 'No', 'Yes');
 
     switch answer
         case 'Yes'
@@ -127,7 +137,7 @@ for dd = 1 : length(data_files)
     %  =====================================================================
     flights = dir(fullfile(data_files(dd).folder, data_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
     save(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'),...
-         'cameraParams*', 'extract_Hz', 'Products', 'flights', 'origin_grid', 'drone_type')
+         'cameraParams*', 'extract_Hz', 'Products', 'flights', 'origin_grid', 'drone_type', 'tz')
     
     %% ====================================================================
     %                          PROCESS EACH FLIGHT
@@ -161,9 +171,10 @@ for dd = 1 : length(data_files)
             drone_duration = duration(temp_name(2)); clear temp_name
        end
 
-       system(sprintf('exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s_0* > %s', odir, drone_file_name, fullfile(odir, 'Processed_data', [oname '.csv'])));
+       system(sprintf('/usr/local/bin/exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s_0* > %s', odir, drone_file_name, fullfile(odir, 'Processed_data', [oname '.csv'])));
         
-        C = readtable(fullfile(odir, [oname '.csv']));
+        C = readtable(fullfile(odir, 'Processed_data', [oname '.csv']));
+      
         format long
         % get indices of images and videos to extract from
         form = char(C.FileName);
@@ -270,7 +281,7 @@ for dd = 1 : length(data_files)
             intrinsics(7:11) = 0; % no distortion (if distortion correction on)
         end
 
-        save(fullfile(odir, 'Processed_data', [oname '_IO']), 'intrinsics', 'cameraParams')
+        save(fullfile(odir, 'Processed_data', [oname '_IO']), 'intrinsics', 'cameraParams', 'extrinsicsInitialGuess')
         clearvars I J1 J2 tf ind_distortion hFig cameraParams_*
         close all
         %% ========================GCPs============================================
@@ -282,7 +293,7 @@ for dd = 1 : length(data_files)
         %  =====================================================================
         % whichever method generates image_gcp (N x 2) and world_gcp (N x 3)
 
-         [ind_gcp_option,tf] = listdlg('ListString',[{'Automated from Airborne LiDAR'}, {'Select points from LiDAR'}, {'Select points from SfM'}, {'Select points from GoogleEarth'}, {'Select GCP targets'}],...
+         [ind_gcp_option,tf] = listdlg('ListString',[{'Automated from Airborne LiDAR'}, {'Select points from LiDAR/SfM'}, {'Select points from GoogleEarth'}, {'Select GCP targets'}],...
                                                      'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Initial GCP Method'});
           if ind_gcp_option == 1 % automated from LiDAR
               gcp_method = 'auto_LiDAR';
@@ -317,9 +328,9 @@ for dd = 1 : length(data_files)
 
           elseif ind_gcp_option == 4 % manual selection of GCP targets (QCIT Toolbox)
                gcp_method = 'manual_targets';
-                select_image_gcp
-                select_target_gcp
-                world_gcp = target_gcp;
+               select_image_gcp
+               select_target_gcp
+               world_gcp = target_gcp;
 
           end
 
@@ -327,6 +338,7 @@ for dd = 1 : length(data_files)
         % TODO check that grid size all consistent
         extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
         [extrinsics extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess,extrinsicsKnownsFlag,intrinsics,image_gcp, world_gcp);
+
 
         hGCP = figure(3);clf
         imshow(I)
@@ -338,7 +350,7 @@ for dd = 1 : length(data_files)
          [UVd,flag] = xyz2DistUV(intrinsics,extrinsics,world_gcp); UVd = reshape(UVd, [],2);
          scatter(UVd(:,1), UVd(:,2), 50, 'y', 'LineWidth', 3)
 
-        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsics','intrinsics', 'gcp_method')
+        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsics','intrinsics', 'gcp_method', 'image_gcp','world_gcp')
         print(hGCP, '-dpng', fullfile(odir, 'Processed_data', 'gcp.png'))
 
         %% ========================productsCheck============================================
@@ -395,8 +407,8 @@ for dd = 1 : length(data_files)
                 title('Local Coordinates')
                 print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))
         
-                answer = questdlg('Happy with rough grid projection?', ...
-                     'Rough grid projection',...
+                answer = questdlg('Happy with grid projection?', ...
+                     'Grid projection',...
                      'Yes', 'No', 'Yes');
         
                 switch answer

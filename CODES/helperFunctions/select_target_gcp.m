@@ -1,4 +1,4 @@
-%% get_target_gcp
+%% select_target_gcp
 % add check that gps_northings in correct format
 %% Get target world coordinates from file
 
