@@ -12,7 +12,7 @@ else
 end
 %% Cut pointcloud to approximate projection of image
 I = imread(fullfile(odir, 'Processed_data', 'undistortImage.png'));
-%load(fullfile(odir, 'Processed_data', [oname '_IO']), 'intrinsics', 'extrinsicsInitialGuess')
+load(fullfile(odir, 'Processed_data', [oname '_IO']), 'intrinsics', 'extrinsicsInitialGuess')
         
 [m,n,c] = size(I); % image dimensions for edge coordinates
 i_bounds = [0 .1*m; n .1*m; n m; 0 m];

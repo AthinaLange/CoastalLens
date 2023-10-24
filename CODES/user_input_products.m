@@ -25,25 +25,25 @@ switch answer2
         [temp_file, temp_file_path] = uigetfile(global_dir, 'Origin grid file');
         load(fullfile(temp_file_path, temp_file)); clear temp_file*
     case 'No'
-        grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
-        grid = double(string(grid));
+        origin_grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
+        origin_grid = double(string(origin_grid));
 end
 
 % Check latitude
-if abs(grid(1)) < 90
-    Product_base.lat = grid(1);
+if abs(origin_grid(1)) < 90
+    Product_base.lat = origin_grid(1);
 else
     Product_base.lat = double(string(inputdlg('Latitude of Origin')));
 end
 % Check longitude
-if abs(grid(2)) < 180
-    Product_base.lon = grid(2);
+if abs(origin_grid(2)) < 180
+    Product_base.lon = origin_grid(2);
 else
     Product_base.lon = double(string(inputdlg('Longitude of Origin')));
 end
 % Check angle
-if grid(3) < 360 && grid(3) > 0 
-    Product_base.angle = grid(3);
+if origin_grid(3) < 360 && origin_grid(3) > 0 
+    Product_base.angle = origin_grid(3);
 else
     Product_base.angle = double(string(inputdlg('Angle (CC degrees from North)')));
 end
@@ -87,7 +87,7 @@ while productFlag == 0
         Product1.type = 'Grid';
         info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
                          'Southern Alongshore extent (m from Origin)', 'Northern Alongshore extent (m from Origin)',...
-                         'dx', 'dy', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'})));
+                         'dx', 'dy', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'}, Product1.type)));
             
         info = abs(info); % making everything +meters from origin
         
@@ -96,7 +96,7 @@ while productFlag == 0
             disp('Please fill out all boxes (except z elevation if necessary)')
             info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
                          'Southern Alongshore extent (m from Origin)', 'Northern Alongshore extent (m from Origin)',...
-                         'dx', 'dy', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'})));
+                         'dx', 'dy', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'}, Product1.type)));
             info = abs(info); % making everything +meters from origin
         end
             
@@ -131,14 +131,14 @@ while productFlag == 0
     
         info = inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
                          'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]',...
-                         'dx', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'});
+                         'dx', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'}, Product1.type);
             
         % check that there's a value in all the required fields
         if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
             disp('Please fill out all boxes (except z elevation if necessary)')
             info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
                          'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]',...
-                         'dx', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'})));
+                         'dx', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'}, Product1.type)));
         end
     
         info_num = abs(double(string(info([1 2 3 5 6])))); % making everything +meters from origin
@@ -183,14 +183,14 @@ while productFlag == 0
     
         info = inputdlg({'Frame Rate (Hz)', 'Southern alongshore extent (m from Origin)', 'Northern alongshore extent (m from Origin)', ...
                          'Cross-shore location of transects (m from Origin) - e.g. 50, 100, 200 OR [50:50:200]',...
-                         'dx', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'});
+                         'dx', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'}, Product1.type);
             
         % check that there's a value in all the required fields
         if ~isempty(find(isnan(double(string(info([1 2 4]))))))
             disp('Please fill out all boxes (except z elevation if necessary)')
             info = double(string(inputdlg({'Frame Rate (Hz)', 'Southern alongshore extent (m from Origin)', 'Northern alongshore extent (m from Origin)', ...
                          'Cross-shore location of transects (m from Origin) - e.g. 50, 100, 200 OR [50:50:200]',...
-                         'dy', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'})));
+                         'dy', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'}, Product1.type)));
         end
     
         info_num = abs(double(string(info([1 2 3 5 6])))); % making everything +meters from origin
@@ -245,14 +245,14 @@ while productFlag == 0
         % Product1.z = ;
     end
    
-    answer3 = questdlg('Define more products?', 'Do you want to create more products?', 'Yes', 'No', 'Yes');
+    answer3 = questdlg( 'Do you want to create more products?', 'Define more products?','Yes', 'No', 'Yes');
     switch answer3
         case 'No'
             productFlag = 1;
     end 
 end % while productFlag = 0
 
-answer4 = questdlg('Save Products file', 'Do you want to save this product file for the future?', 'Yes', 'No', 'Yes');
+answer4 = questdlg('Do you want to save this product file for the future?', 'Save Products file', 'Yes', 'No', 'Yes');
 switch answer4
     case 'Yes'
         info = inputdlg({'Filename to be saved'});
