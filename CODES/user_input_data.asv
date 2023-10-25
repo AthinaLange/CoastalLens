@@ -66,6 +66,8 @@ for dd = 1 : length(data_files)
     answer = questdlg('Do you have a .mat input data file?','Input Data File', 'Yes', 'No', 'No');
     switch answer
         case 'Yes'
+          %  save(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'),...
+         %'cameraParams*', 'extract_Hz', 'Products', 'flights', 'origin_grid', 'drone_type', 'tz')
             disp('Load in input file.')
             disp('For CPG: ''input_data.mat'' in day files.')
             [temp_file, temp_file_path] = uigetfile(global_dir, 'Input File');
@@ -93,21 +95,19 @@ for dd = 1 : length(data_files)
            %% ==========================intrinsics==========================================
             %                          Choose intrinsics file for each day of flight         
             %  =====================================================================
-            if  (~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var'))
-                if ~exist('cameraParams', 'var')
-                    answer = questdlg('Has the camera been calibrated?', 'Camera Calibration', 'Yes', 'No', 'Yes');
-                    switch answer
-                        case 'Yes'
-                            disp('Load in camera calibration file.')
-                            disp('For CPG: under CPG_data/cameraParams_whitecap.mat') %% XXX
-                            [temp_file, temp_file_path] = uigetfile(global_dir, 'Camera Parameters');
-                            load(fullfile(temp_file_path, temp_file)); clear temp_file*
-                        case 'No'
-                            disp('Please calibrate camera to proceed.')
-                            return
-                    end
-                    clear answer
+            if ~exist('cameraParams', 'var') || ~ischar(tz)
+                answer = questdlg('Has the camera been calibrated?', 'Camera Calibration', 'Yes', 'No', 'Yes');
+                switch answer
+                    case 'Yes'
+                        disp('Load in camera calibration file.')
+                        disp('For CPG: under CPG_data/cameraParams_whitecap.mat') %% XXX
+                        [temp_file, temp_file_path] = uigetfile(global_dir, 'Camera Parameters');
+                        load(fullfile(temp_file_path, temp_file)); clear temp_file*
+                    case 'No'
+                        disp('Please calibrate camera to proceed.')
+                        return
                 end
+                clear answer
             end
            %% ==========================product==========================================
             %                          DEFINE PRODUCT TYPE       
@@ -115,25 +115,23 @@ for dd = 1 : length(data_files)
             %                               - If so, can load that in
             %                           - Define origin of grid and products to be made
             %  =====================================================================
-            if ~exist('Products', 'var') || ~isstruct(Products)
-                answer = questdlg('Do you have a .mat Products file?', 'Product file', 'Yes', 'No', 'Yes');
-            
-                switch answer
-                    case 'Yes'
-                        disp('Please select file of products you want to load in.')
-                        disp('For CPG: CPG_data/products_Torrey.mat') %% XXX
-                        [temp_file, temp_file_path] = uigetfile(global_dir, 'Product file');
-                        load(fullfile(temp_file_path, temp_file)); clear temp_file*
-                        
-                        if ~exist('Products', 'var')
-                            disp('Please create Products file.')
-                            user_input_products
-                        end
-                    case 'No'
+            answer = questdlg('Do you have a .mat Products file?', 'Product file', 'Yes', 'No', 'Yes');
+        
+            switch answer
+                case 'Yes'
+                    disp('Please select file of products you want to load in.')
+                    disp('For CPG: CPG_data/products_Torrey.mat') %% XXX
+                    [temp_file, temp_file_path] = uigetfile(global_dir, 'Product file');
+                    load(fullfile(temp_file_path, temp_file)); clear temp_file*
+                    
+                    if ~exist('Products', 'var')
+                        disp('Please create Products file.')
                         user_input_products
-                end
-                clear answer
+                    end
+                case 'No'
+                    user_input_products
             end
+            clear answer
            %% ==========================extractionRate==========================================
             %                          EXTRACTION FRAME RATES
             %                           - Find frame rates of products
@@ -157,7 +155,7 @@ for dd = 1 : length(data_files)
             %  =====================================================================
             flights = dir(fullfile(data_files(dd).folder, data_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
             save(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'),...
-                 'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
+                 'cameraParams*', 'extract_Hz', 'Products', 'flights', 'origin_grid', 'drone_type', 'tz')
             
 
     %% ====================================================================
