@@ -6,8 +6,7 @@ function [horizon_line] = get_horizon(I, sky, water)
     short_factor = sky(2)-cutoff_lim;
     I_small = I(short_factor : water(2)+cutoff_lim,:,:);
     
-    % TODO - use morphology gradient (with large sigma) for smoothing + gradient 
-    %filteredImage = medfilt2(rgb2gray(I_small), [50,100]);
+     %filteredImage = medfilt2(rgb2gray(I_small), [50,100]);
     filteredImage = imclose(rgb2gray(I_small),strel('rectangle', [10 50]));
     gmag = imgradient(filteredImage); 
     
