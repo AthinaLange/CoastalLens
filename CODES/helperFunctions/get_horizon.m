@@ -7,9 +7,9 @@ function [horizon_line] = get_horizon(I, sky, water)
     I_small = I(short_factor : water(2)+cutoff_lim,:,:);
     
      %filteredImage = medfilt2(rgb2gray(I_small), [50,100]);
-    gmag = max(gradmag(I),'tensor');
- %   filteredImage = imclose(rgb2gray(I_small),strel('rectangle', [10 50]));
-  %  gmag = imgradient(filteredImage); 
+   % gmag = max(gradmag(I),'tensor');
+    filteredImage = imclose(rgb2gray(I_small),strel('rectangle', [10 50]));
+    gmag = imgradient(filteredImage); 
     
     % get foreground and background points
     fgm = zeros(size(gmag,1), size(gmag,2));
@@ -23,16 +23,16 @@ function [horizon_line] = get_horizon(I, sky, water)
     W = watershed(gmag2);
 
     % Plot
-    figure(3);clf
-    labels = imdilate(W==0,ones(3,3)) + 2*bgm + 3*fgm;
-    I4 = labeloverlay(I_small,labels);
-    imshow(I4)
-    title("Markers and Object Boundaries Superimposed on Original Image")
-
-    figure(2);clf
-    Lrgb = label2rgb(W,"jet","w","shuffle");
-    imshow(Lrgb)
-    title("Colored Watershed Label Matrix")
+    % figure(3);clf
+    % labels = imdilate(W==0,ones(3,3)) + 2*bgm + 3*fgm;
+    % I4 = labeloverlay(I_small,labels);
+    % imshow(I4)
+    % title("Markers and Object Boundaries Superimposed on Original Image")
+    % 
+    % figure(2);clf
+    % Lrgb = label2rgb(W,"jet","w","shuffle");
+    % imshow(Lrgb)
+    % title("Colored Watershed Label Matrix")
 
     
     % Get best fit line 

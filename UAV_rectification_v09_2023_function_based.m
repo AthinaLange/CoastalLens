@@ -1,12 +1,38 @@
 %% UAV_automated_rectification toolbox
 %
 %
-% TODO: construct folder architecture and download GitHubs
+% 
+%   1. Housekeeping
+%           Platform Detection: The script identifies the operating system (Mac, Linux, Windows).
+%           Global Directory Selection: Asks the user to choose the directory for UAV rectification.
+%           Path Configuration: Modifies the system's PATH environment variable.
+%   2. Check Necessary Codes
+%           Directory Checking: Checks if required code directories exist, prompting the user to download them if not.
+%           Path Addition: Adds required code directories to MATLAB's search path.
+%   3. Select Days to Process
+%           Data Directory: Lists available data folders for processing.
+%           User Selection: Allows the user to choose which days to process.
+%   4. Confirm Update Emails and Get Email Address
+%           Email Confirmation: Asks the user if they want to receive update emails.
+%           Email Setup: Configures email parameters and sends a test email if requested.
+%           Data Logging: Saves processing details and user input for the current run.
+%   5. User Input Section
+%           Camera Intrinsics: User inputs camera intrinsics file and related details.
+%           Grid & Transect Coordinates: User inputs or loads grid and transect coordinates.
+%           Coordinate System: User specifies local or world coordinates and pixel size (dx).
+%   6. Image Extraction
+%           Data Dependency: Requires data_files and user_email variables.
+%           Image Extraction: Uses FFmpeg to extract images from video files.
+%           Email Notification: Sends an email when image extraction is complete.
+%   7. Extrinsics Through Time (Currently commented out)
+%           Data Dependency: Requires data_files and user_email variables.
+%           Extrinsic Calibration: Determines camera pose from frame to frame using various methods like horizon tracking, drone metadata, or feature detection. This section is currently commented out.
+%       - Platform Detection
 %
 %
 %
-%   Housekeeping
-%       - confirm CODES path
+%
+%  Housekeeping
 %       - confirm DATA path - which day or multiple days are you processing
 %       - get user email 
 %
@@ -45,10 +71,6 @@
 %
 %
 %
-%
-%
-%
-
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
 %% ====================================================================

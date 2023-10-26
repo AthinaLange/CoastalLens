@@ -16,7 +16,18 @@
 %       - check products
 %
 %
-% TODO
+% 1. Test Email Confirmation
+% Email Confirmation: Asks the user if they received a test email to verify email configuration.
+% Email Setup: Configures email parameters and sends a test email if the user didn't receive it yet.
+% Abort Processing: If the test email is not received, the script terminates and prompts the user to check email settings.
+% 2. User Input Section
+% Drone Type: Asks the user about the type of drone platform used (DJI or Other).
+% Time Zone Selection: Prompts the user to select the appropriate time zone.
+% Camera Intrinsics: Checks if camera calibration parameters are available. If not, it prompts the user to load them or calibrate the camera.
+% Product Definition: Asks if the user has a pre-existing product file. If yes, it loads the file. If not, it prompts the user to define products using user_input_products.m.
+% Extraction Frame Rates: Determines extraction frame rates based on the products' frame rates. It checks if lower frame rates can be derived from higher ones.
+% 3. Saving Day-Relevant Data
+% Data Saving: Saves the collected input data (camera intrinsics, extraction frame rates, products, flight details, drone type, and time zone) in a .mat file for each processed day.
 %
 %
 %
