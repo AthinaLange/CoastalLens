@@ -37,7 +37,7 @@ for dd = 1: length(data_files)
             % repeat for each video
             for ii = 1 : length(mov_id)
                 mkdir(fullfile(imageDirectory, char(string(ii))))
-                system(['ffmpeg -i ' char(string(C.FileName(mov_id(ii)))) ' -qscale:v 2 -r ' char(string(extract_Hz(hh))) ' ' fullfile(imageDirectory, char(string(ii)), 'Frame_%04d.jpg')])
+                system(['ffmpeg -i ' char(string(C.FileName(mov_id(ii)))) ' -qscale:v 2 -r ' char(string(extract_Hz(hh))) ' ' fullfile(imageDirectory, char(string(ii)), 'Frame_%05d.jpg')])
             end
             % Combine images and rename into sequential
             for ii = 1:length(mov_id)
@@ -50,16 +50,30 @@ for dd = 1: length(data_files)
                 else
                     for ll = 1: length(L)
                         if ll < 10
-                            id = ['000' char(string(ll))];
+                            id = ['0000' char(string(ll))];
                         elseif ll < 100
-                            id = ['00' char(string(ll))];
+                            id = ['000' char(string(ll))];
                         elseif ll < 1000
+                            id = ['00' char(string(ll))];
+                        elseif ll < 10000
                             id = ['0' char(string(ll))];
                         else
                             id = [char(string(ll))];
                         end
 
-                        movefile(fullfile(imageDirectory, char(string(ii)), ['Frame_' id '.jpg']), fullfile(imageDirectory, ['Frame_' char(string(ll+Lfull)) '.jpg']))
+                         if ll+Lfull < 10
+                            id_full = ['0000' char(string(ll+Lfull))];
+                        elseif ll+Lfull < 100
+                            id_full = ['000' char(string(ll+Lfull))];
+                        elseif ll+Lfull < 1000
+                            id_full = ['00' char(string(ll+Lfull))];
+                        elseif ll+Lfull < 10000
+                            id_full = ['0' char(string(ll+Lfull))];
+                        else
+                            id_full = [char(string(ll+Lfull))];
+                        end
+
+                        movefile(fullfile(imageDirectory, char(string(ii)), ['Frame_' id '.jpg']), fullfile(imageDirectory, ['Frame_' id_full '.jpg']))
                     end
                 end  % if ii == 1
             end % for ii = 1:length(mov_id)

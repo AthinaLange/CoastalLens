@@ -12,6 +12,7 @@
         while true
             % Wait for user to click a point
             a = drawpoint(); 
+            zoom out
             if (floor(a.Position(1)) == 0 || floor(a.Position(1)) == size(I,2) || floor(a.Position(2)) == 0 || floor(a.Position(2)) == size(I,1)) 
                 break;  % Exit the loop when Enter is pressed
             else

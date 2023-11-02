@@ -69,7 +69,22 @@ end
 figure(2)
 hold on
 scatter3(selectedPoints(:,1), selectedPoints(:,2), selectedPoints(:,3), 100, 'r', 'filled')
+%%
+ [selectedPoint,f2] = select_pcshow_point(pc_small);
 
+    scatter3(selectedPoint(1), selectedPoint(2), selectedPoint(3), 100, 'r', 'filled')
+    disp('Check if GCP is in the correct position. After rotating click ''See GCP?''.')
+    c2 = uicontrol('String','See GCP?','Callback','uiresume(f2)');
+    uiwait(f2)
+    answer = questdlg('Are you happy with the point or do you want to reselect?','Happy with point', 'Yes', 'Reselect', 'Yes');
+    switch answer
+        case 'Yes'
+            selectedPoints(size(selectedPoints,1)+1,:)=selectedPoint;
+        case 'Reselect'
+            [selectedPoint,f2] = select_pcshow_point(pc_small)
+            scatter3(selectedPoint(1), selectedPoint(2), selectedPoint(3), 100, 'r', 'filled')
+            selectedPoints(size(selectedPoints,1)+1,:)=selectedPoint;
+    end
 %%
 function [selectedPoint,f2] = select_pcshow_point(pc)
     Points = pc.Location;

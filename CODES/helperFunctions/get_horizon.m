@@ -8,7 +8,11 @@ function [horizon_line] = get_horizon(I, sky, water)
     
      %filteredImage = medfilt2(rgb2gray(I_small), [50,100]);
    % gmag = max(gradmag(I),'tensor');
-    filteredImage = imclose(rgb2gray(I_small),strel('rectangle', [10 50]));
+    if size(I_small,3) == 1
+        filteredImage = imclose(I_small,strel('rectangle', [10 50]));
+    elseif size(I_small,3) == 3
+        filteredImage = imclose(rgb2gray(I_small),strel('rectangle', [10 50]));
+    end
     gmag = imgradient(filteredImage); 
     
     % get foreground and background points

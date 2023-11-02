@@ -9,8 +9,8 @@ tic
 hh=1
 skip_rate = extract_Hz(hh) * 10; % do a every 10sec check on extrinsics
 %%
-for ll = 1:1:length(L)
-
+for ll = 1:1:201%length(L)
+ll
     clearvars -except L ll sky water HorizonPts cameraParams extrinsics intrinsics dd *_dir user_email data_files ind_scp_method Ia Points* extract_Hz skip_rate
 
     if ll == 1
@@ -96,8 +96,21 @@ for ll = 1:1:length(L)
         indexPairs = matchFeatures(featuresA,featuresB);
         Points(ll).prev = pointsA(indexPairs(:,1),:); Points(ll).prev.Location(:,2) = Points(ll).prev.Location(:,2)+cutoff;
         Points(ll).current = pointsB(indexPairs(:,2),:); Points(ll).current.Location(:,2) = Points(ll).current.Location(:,2)+cutoff;
-        if rem(ll-1, skip_rate) == 0
+      
+        
+        if rem(ll-1,skip_rate) == 0
             ll
+            % HORIZON
+             [horizon_line(ll,:)] = get_horizon(I, sky, water);
+
+            x = [0 size(I,2)/2 size(I,2)];
+            HorizonPts(ll,:) = horizon_line(ll,1)*x + horizon_line(ll,2);
+    
+            perc_20 = min(HorizonPts(ll,:))/5;
+            sky =  round([mean(x) min(HorizonPts(ll,:)) - perc_20]);
+            water = round([mean(x) max(HorizonPts(ll,:)) + perc_20]);
+
+            % POINTS
             Ia_10 = rgb2gray(imread(fullfile('images_10Hz', L(ll-skip_rate))));
             Ia_10 = undistortImage(Ia_10, cameraParams);
         
@@ -132,7 +145,7 @@ toc
 %% Extrinsics Optimization
 x = [0 size(I,2)/2 size(I,2)];
 clear rOrientation rLocation
-for ll =2:length(Points)
+for ll = 2:length(Points)
      clear E epipolarInliers inlierPoints* F
     [E, epipolarInliers] = estimateEssentialMatrix(...
     Points(ll).prev, Points(ll).current, cameraParams.Intrinsics, Confidence = 99.99);
@@ -144,6 +157,45 @@ for ll =2:length(Points)
     aa = estrelpose(E, cameraParams.Intrinsics, inlierPoints1, inlierPoints2);
     if size(aa) ==[1 1]
        relPose(ll)=aa;
+    end
+    % [o,l,frac] = relativeCameraPose(E, cameraParams.Intrinsics, inlierPoints1, inlierPoints2);
+    % if size(o,3) == 1
+    %     rOrientation(ll,:,:) = o;
+    %     rLocation(ll,:) = l;
+    % else
+    %     rOritentation(ll,:,:)=zeros(3);
+    %     rLocation(ll,:) = [0 0 0];
+    % end
+   
+
+end
+%%
+
+ll=101
+
+inlierPoints1 = vertcat(Points_10(ll).prev, cornerPoints(round([x; HorizonPts(ll-skip_rate,:)]')));
+inlierPoints2 = vertcat( Points_10(ll).current, cornerPoints(round([x; HorizonPts(ll,:)]')));
+[tform, inlierIdx] = estgeotform3d(Points_10(ll).current,Points_10(ll).prev,'similarity');
+
+
+%% Extrinsics Optimization - every 10sec with horizon
+x = [1 size(I,2)/2 size(I,2)];
+clear rOrientation rLocation
+for ll = 101:skip_rate:length(Points_10)
+     clear E epipolarInliers inlierPoints* F
+    [E, epipolarInliers] = estimateEssentialMatrix(...
+    Points_10(ll).prev, Points_10(ll).current, cameraParams.Intrinsics, Confidence = 99.99);
+    %[F, epipolarInliers] = estimateFundamentalMatrix(Points(ll).prev, Points(ll).current)
+    % Find epipolar inliers
+    inlierPoints1 = Points_10(ll).prev(epipolarInliers, :);
+    inlierPoints2 = Points_10(ll).current(epipolarInliers, :);
+
+    inlierPoints1 = vertcat(inlierPoints1, cornerPoints(round([x; HorizonPts(ll-skip_rate,:)]')));
+    inlierPoints2 = vertcat(inlierPoints2, cornerPoints(round([x; HorizonPts(ll,:)]')));
+    
+    aa = estrelpose(E, cameraParams.Intrinsics, inlierPoints1, inlierPoints2);
+    if size(aa) ==[1 1]
+       relPose_10(ll)=aa;
     end
     % [o,l,frac] = relativeCameraPose(E, cameraParams.Intrinsics, inlierPoints1, inlierPoints2);
     % if size(o,3) == 1

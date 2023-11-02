@@ -239,7 +239,7 @@ for dd = 1 : length(data_files)
         
         save(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'extrinsicsInitialGuess', 'UTMNorthing', 'UTMEasting', 'zgeoid_offset', 'jpg_id', 'mov_id', 'lat', 'long', 'C')
         
-        clearvars C form i_temp  lat long zgeoid_offset UTMNorthing UTMEasting UTMZone
+        clearvars form i_temp  lat long zgeoid_offset UTMNorthing UTMEasting UTMZone
         %% ========================initialFrame============================================
         %                          EXTRACT INITIAL FRAME       
         %                           - Use ffmpeg tool to extract first frame to be used for distortion and product location check
