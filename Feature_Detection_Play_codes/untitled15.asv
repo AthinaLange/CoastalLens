@@ -1,0 +1,177 @@
+%% Looking nadir
+
+camera_bound = [0 0; 3840 0; 3840 2160; 0 2160; 1920 1080];
+
+camera_point=[0 0 50]
+camera_angle = [0 180 0]
+R = eul2rotm(deg2rad(camera_angle), 'XYZ');
+
+tform = rigidtform3d(R,camera_point);
+camera_bound = [0 0; 3840 0; 3840 2160; 0 2160; 1920 1080];
+iW_bounds = img2world2d(camera_bound, tform, cameraParams_undistorted.Intrinsics);
+clf
+subplot(121)
+plotCamera(Size=10,Orientation = R, Location = camera_point)
+hold on
+scatter3(-iW_bounds(:,1), -iW_bounds(:,2), 0, 200, colors(2:6,:), 'filled')
+patch(-iW_bounds(1:4,1), -iW_bounds(1:4,2), 'r', 'FaceColor', 'none')
+xlabel('x ->'); ylabel('y ->'); zlabel('z ->')
+set(gca, 'FontSize', 20)
+grid on
+axis equal
+
+subplot(122)
+scatter(camera_bound(:,1), camera_bound(:,2), 100, colors(2:6,:), 'filled')
+hold on
+patch(camera_bound(1:4,1), camera_bound(1:4,2), 'r', 'FaceColor', 'none')
+xlabel('x ->'); ylabel('<- y')
+set(gca, 'YDir', 'reverse')
+axis equal
+hold on
+
+
+%% x = 0, y = -100
+
+camera_bound = [0 0; 3840 0; 3840 2160; 0 2160; 1920 1080];
+
+camera_point=[0 -100 50]
+camera_angle = [-180-60 0 0]
+R = eul2rotm(deg2rad(camera_angle), 'XYZ');
+tform = rigidtform3d(R,camera_point);
+
+camera_bound = [0 0; 3840 0; 3840 2160; 0 2160; 1920 1080];
+iW_bounds = img2world2d(camera_bound, tform, cameraParams_undistorted.Intrinsics);
+clf
+subplot(121)
+plotCamera(Size=10,Orientation = R, Location = camera_point)
+hold on
+scatter3(-iW_bounds(:,1), -iW_bounds(:,2), 0, 200, colors(2:6,:), 'filled')
+patch(-iW_bounds(1:4,1), -iW_bounds(1:4,2), 'r', 'FaceColor', 'none')
+xlabel('x ->'); ylabel('y ->'); zlabel('z ->')
+set(gca, 'FontSize', 20)
+grid on
+axis equal
+
+subplot(122)
+scatter(camera_bound(:,1), camera_bound(:,2), 100, colors(2:6,:), 'filled')
+hold on
+patch(camera_bound(1:4,1), camera_bound(1:4,2), 'r', 'FaceColor', 'none')
+xlabel('x ->'); ylabel('<- y')
+set(gca, 'YDir', 'reverse')
+axis equal
+hold on
+
+
+%% x = -100, y = -100
+
+camera_bound = [0 0; 3840 0; 3840 2160; 0 2160; 1920 1080];
+
+camera_point=[-100 -100 50]
+camera_angle = [-180-60 0 45] % the smaller the additional value, the closer to nadir
+R = eul2rotm(deg2rad(camera_angle), 'XYZ');
+tform = rigidtform3d(R,camera_point);
+
+world_point = [200 300 0]'
+iP = world2img(world_point', tform, cameraParams_undistorted.Intrinsics );
+iW = img2world2d(iP, tform, cameraParams_undistorted.Intrinsics);
+
+camera_bound = [0 0; 3840 0; 3840 2160; 0 2160; 1920 1080];
+iW_bounds = img2world2d(camera_bound, tform, cameraParams_undistorted.Intrinsics);
+clf
+subplot(121)
+plotCamera(Size=5,Orientation = R, Location = camera_point)
+hold on
+scatter3(-iW_bounds(:,1), -iW_bounds(:,2), 0, 200, colors(2:6,:), 'filled')
+patch(-iW_bounds(1:4,1), -iW_bounds(1:4,2), 'r', 'FaceColor', 'none')
+scatter3(world_point(1,:), world_point(2,:), world_point(3,:),100, colors(1,:), 'filled')
+scatter3(iW(:,1), iW(:,2), 0, 200, colors(1,:))
+xlabel('x ->')
+ylabel('y ->')
+zlabel('z ->')
+set(gca, 'FontSize', 20)
+grid on
+%axis equal
+
+
+subplot(122)
+scatter(camera_bound(:,1), camera_bound(:,2), 100, colors(2:6,:), 'filled')
+hold on
+patch(camera_bound(1:4,1), camera_bound(1:4,2), 'r', 'FaceColor', 'none')
+scatter(3840-iP(:,1), -iP(:,2),100, colors(1,:), 'filled')
+xlabel('x ->')
+ylabel('<- y')
+set(gca, 'YDir', 'reverse')
+axis equal
+hold on
+%plot([0 cameraParams_undistorted.ImageSize(2) cameraParams_undistorted.ImageSize(2) 0 0], [0  0 cameraParams_undistorted.ImageSize(1) cameraParams_undistorted.ImageSize(1) 0])
+
+
+%% image
+%uiopen('/Users/athinalange/Desktop/DATA/Work/UAV_rectification/Athina_Automated_rectification/DATA/20211026_Torrey/01/Processed_data/undistortImage.png',1)
+
+aa=cameraIntrinsics([2673 2673], [1920 1080], [2160 3840]);
+camera_bound = [0 0; 3840 0; 3840 2160; 0 2160; 1920 1080];
+
+camera_point=[-10 -100 67]
+camera_angle = [-180-60 0 270-extrinsicsInitialGuess(4)]
+R = eul2rotm(deg2rad(camera_angle), 'XYZ');
+tform = rigidtform3d(R,camera_point);
+
+% image boundary to world projection
+camera_bound = [0 0; 3840 0; 3840 2160; 0 2160; 1920 1080];
+iW_bounds = img2world2d(camera_bound, tform,aa);
+
+% image to world projection
+imageSize = [size(undistortImage,1) size(undistortImage,2)];
+
+
+%world_point = [0 0 0]'
+%iP = world2img(world_point', tform,aa);
+iP = [2100 1800]
+iW = img2world2d(iP, tform, aa);
+
+
+clf
+subplot(121)
+plotCamera(Size=5,Orientation = R, Location = camera_point)
+hold on
+scatter3(-iW_bounds(:,1), -iW_bounds(:,2), 0, 200, colors(2:6,:), 'filled')
+patch(-iW_bounds(1:4,1),-iW_bounds(1:4,2), 'r', 'FaceColor', 'none')
+%pcolor(iW_image(:,:,1), iW_image(:,:,2), undistortImage)
+%scatter3(world_point(1,:), world_point(2,:), world_point(3,:),100, colors(1,:), 'filled')
+scatter3(-iW(:,1), -iW(:,2), 0, 200, colors(1,:))
+xlabel('x ->')
+ylabel('y ->')
+zlabel('z ->')
+set(gca, 'FontSize', 20)
+grid on
+%axis equal
+
+for ii= 1:3840
+    for jj = 1:2160
+
+        iW_image = img2world2d([ii,jj], tform, aa);
+        image(iW_image(1), iW_image(2), undistortImage(jj,ii,:))
+    end
+end
+
+
+subplot(122)
+imagesc(undistortImage)
+hold on
+scatter(camera_bound(:,1), camera_bound(:,2), 100, colors(2:6,:), 'filled')
+hold on
+patch(camera_bound(1:4,1), camera_bound(1:4,2), 'r', 'FaceColor', 'none')
+scatter(iP(:,1), iP(:,2),100, colors(1,:), 'filled')
+xlabel('x ->')
+ylabel('<- y')
+set(gca, 'YDir', 'reverse')
+axis equal
+hold on
+%plot([0 cameraParams_undistorted.ImageSize(2) cameraParams_undistorted.ImageSize(2) 0 0], [0  0 cameraParams_undistorted.ImageSize(1) cameraParams_undistorted.ImageSize(1) 0])
+
+
+
+
+
+

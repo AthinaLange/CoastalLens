@@ -1,0 +1,92 @@
+
+%%  MATLAB functions
+%
+%% x = -100, y = -100
+camera_bound = [0 0; 3840 0; 3840 2160; 0 2160; 1920 1080];
+camera_point=[-100 -100 50]
+camera_angle = [-180-60 0 45] % the smaller the additional value, the closer to nadir
+R = eul2rotm(deg2rad(camera_angle), 'XYZ');
+tform = rigidtform3d(R,camera_point);
+world_point = [0 0 0; 200 300 0]'
+iP = world2img(world_point', tform, cameraParams_undistorted.Intrinsics );
+iW = img2world2d(iP, tform, cameraParams_undistorted.Intrinsics);
+
+iW_bounds = img2world2d(camera_bound, tform, cameraParams_undistorted.Intrinsics);
+%%
+
+clf
+subplot(121)
+plotCamera(Size=5,Orientation = R, Location = camera_point)
+hold on
+scatter3(-iW_bounds(:,1), -iW_bounds(:,2), 0, 200, colors(2:6,:), 'filled')
+patch(-iW_bounds(1:4,1), -iW_bounds(1:4,2), 'r', 'FaceColor', 'none')
+scatter3(world_point(1,:), world_point(2,:), world_point(3,:),100, colors(1,:), 'filled')
+scatter3(iW(:,1), iW(:,2), 0, 200, colors(1,:))
+xlabel('x ->'); ylabel('y ->'); zlabel('z ->')
+set(gca, 'FontSize', 20)
+grid on
+axis equal
+subplot(122)
+scatter(camera_bound(:,1), camera_bound(:,2), 100, colors(2:6,:), 'filled')
+hold on
+patch(camera_bound(1:4,1), camera_bound(1:4,2), 'r', 'FaceColor', 'none')
+scatter(3840-iP(:,1), -iP(:,2),100, colors(1,:), 'filled')
+xlabel('x ->'); ylabel('<- y')
+set(gca, 'YDir', 'reverse')
+axis equal
+
+
+%% CIRN functions
+% world point to camera
+% CIRN pitch (degrees CCW from looking out to horizon)
+yaw=289
+pitch = 20;
+ [UVd,flag] = xyz2DistUV(intrinsics,[-10, -100, 70, yaw, pitch, 0], world_point'); world_UV = reshape(UVd,2,[]);
+%
+[xyz] = distUV2XYZ(intrinsics,[-10, -100, 70, yaw, pitch, 0],[camera_bound; world_UV]','z',[0 0 0 0 0 0 0])
+% Euler pitch (degrees CCW to nadir)
+camera_point = [-10 -100 70]
+camera_angle = [-180-90+pitch 0 270-yaw] % the smaller the additional value, the closer to nadir
+R = eul2rotm(deg2rad(camera_angle), 'XYZ');
+%% image
+% uiopen('/Users/athinalange/Desktop/DATA/Work/UAV_rectification/Athina_Automated_rectification/DATA/20211026_Torrey/01/Processed_data/undistortImage.png',1)
+x_image = [1:size(undistortImage,2)];
+y_image = [1:size(undistortImage,1)];
+[iX, iY] = meshgrid(x_image, y_image);
+[xyz_image] = distUV2XYZ(intrinsics,[-10, -100, 70, yaw, pitch, 0],[iX(:) iY(:)]','z',zeros(1,length(iX(:))));
+%%
+
+[iX,iY]=meshgrid([xyz(1,1):1:xyz(2,1)],[min(xyz(3:4,2)):1:max(xyz(1:2,2))]);
+[Ir]= imageRectifier(undistortImage,intrinsics,[-10, -100, 70, yaw, pitch, 0],iX,iY,zeros(size(iX,1), size(iX,2)),0);
+figure;rectificationPlotter(Ir,iX,iY,1)
+%%
+
+clf
+subplot(121)
+plotCamera(Size=5,Orientation = R, Location = camera_point)
+hold on
+image(iX(:),iY(:),Ir)
+scatter3(xyz(:,1), xyz(:,2), 0, 200, colors(1:7,:), 'filled')
+patch(xyz(1:4,1), xyz(1:4,2), 'r', 'FaceColor', 'none')
+scatter3(world_point(1,:), world_point(2,:), world_point(3,:),300, colors(6:7,:))
+xlabel('x ->'); ylabel('y ->'); zlabel('z ->')
+set(gca, 'FontSize', 20)
+%ylim([-50 350])
+%xlim([-200 200])
+grid on
+%axis equal
+subplot(122)
+image(x_image, y_image, undistortImage)
+hold on
+scatter(camera_bound(:,1), camera_bound(:,2), 100, colors(1:5,:), 'filled')
+
+patch(camera_bound(1:4,1), camera_bound(1:4,2), 'r', 'FaceColor', 'none')
+scatter(world_UV(:,1), world_UV(:,2),100, colors(6:7,:), 'filled')
+xlabel('x ->'); ylabel('<- y')
+set(gca, 'YDir', 'reverse')
+axis equal
+xlim([-1 3841])
+ylim([-1 2160])
+
+%%
+
