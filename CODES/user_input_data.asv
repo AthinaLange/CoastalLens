@@ -74,8 +74,8 @@ for dd = 1 : length(data_files)
     cd([data_files(dd).folder '/' data_files(dd).name])
 
     disp('For CPG: ''input_data.mat'' in day files.')
-    input_answer = questdlg('Do you have a .mat input data file?','Input Data File', 'Yes', 'No', 'No');
-    switch input_answer
+    answer = questdlg('Do you have a .mat input data file?','Input Data File', 'Yes', 'No', 'No');
+    switch answer
         case 'Yes'
             disp('Load in input file.')
             disp('For CPG: ''input_data.mat'' in day files.')
@@ -167,16 +167,14 @@ for dd = 1 : length(data_files)
             %                           - Save camera intrinsics, extraction frame rates, products and flights for specific day
             %  =====================================================================
             flights = dir(fullfile(data_files(dd).folder, data_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
-           switch input_answer
-               case 'No'
-                    save(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'),...
-                        'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
-           end
+            save(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'),...
+                 'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
+            
 
     %% ====================================================================
     %                          PROCESS EACH FLIGHT
     %  =====================================================================
-    for ff = 1: length(flights)
+    for ff = 2 : length(flights)
         clearvars -except dd ff *_dir user_email data_files
         load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'))
         

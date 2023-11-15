@@ -80,6 +80,13 @@ for dd = 1: length(data_files)
 
             % remove placeholder folders
             for ii = 1:length(mov_id); rmdir(fullfile(imageDirectory, char(string(ii))), 's'); end
+            
+            % replacing 1st image with image extracted as initial frame for gcp and scp accuracy
+            if ispc
+                system(['cp Processed_data\Initial_frame.jpg ' imageDirectory '\Frame_00001.jpg'])
+            else
+                system(['cp Processed_data/Initial_frame.jpg ' imageDirectory '/Frame_00001.jpg'])
+            end
 
         end % for hh = 1:length(extract_Hz)
     

@@ -276,15 +276,15 @@ end
 
 % VISUALIZE CHANGE
 
-% for viewId = 2:length(images.Files)
-%    % figure(100); clf; I1= imshowpair(readimage(images, viewId-1),readimage(images, viewId));
-%     % figure(200); clf; I2=imshowpair(readimage(images, 1), ...
-%     %     imwarp(readimage(images, viewId), R_fullAdjusted(viewId), OutputView=imref2d(size(readimage(images, viewId-1)))));
-%     % figure(1);clf;
-%     % imshowpair(I1.CData, I2.CData, 'montage')
-%     % title('Raw                                                Corrected')
-%     % pause(0.5)
-% end
+for viewId = 2:length(images.Files)
+   figure(100); clf; I1= imshowpair(readimage(images, viewId-1),readimage(images, viewId));
+    figure(200); clf; I2=imshowpair(readimage(images, 1), ...
+        imwarp(readimage(images, viewId), R_fullAdjusted(viewId), OutputView=imref2d(size(readimage(images, viewId-1)))));
+    figure(1);clf;
+    imshowpair(I1.CData, I2.CData, 'montage')
+    title('Raw                                                Corrected')
+    pause(0.5)
+end
 
 
 

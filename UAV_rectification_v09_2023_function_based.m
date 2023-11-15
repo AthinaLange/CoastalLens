@@ -179,4 +179,12 @@ extract_images
 %                           - requires data_files and user_email (if emails wanted)
 %                           - requires XXX
 %  =====================================================================
-%run_extrinsics
+run_extrinsics
+
+%% ====================================================================
+%                           EXTRACT PRODUCTS
+%                           - requires data_files and user_email (if emails wanted)
+%                           - requires XXX
+%  =====================================================================
+get_products
+[iDark, iBright, iTimex] = makeARGUSproducts(images, R.FullRate_OGFrame, intrinsics)

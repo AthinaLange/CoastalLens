@@ -19,14 +19,14 @@
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
 
 %% Do check 
- for dd = 1% : length(data_files)
+ for dd = 1 : length(data_files)
         clearvars -except dd *_dir user_email data_files
         cd(fullfile(data_files(dd).folder, data_files(dd).name))
         
         load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'))
         
         % repeat for each flight
-        for ff = 2% : length(flights)
+        for ff = 1 : length(flights)
             odir = fullfile(flights(ff).folder, flights(ff).name);
             oname = [data_files(dd).name '_' flights(ff).name];
             cd(odir) 
@@ -63,7 +63,7 @@
                     ogFeatures = prevFeatures;
 
                     %% Subsequent Frames
-                    if contains(R.rot_answer, '2D') | worldPose.Translation == [0 0 0] % do 2D rotation
+                    if contains(R.rot_answer, '2D') % do 2D rotation
                         for viewId = 2:length(images.Files)
                             % Read and display the next image
                             Irgb = readimage(images, (viewId));
@@ -91,7 +91,7 @@
                             end
                         end %for viewId = 2:length(images.Files)
 
-                    elseif contains(R.rot_answer, '3D') & worldPose.Translation ~= [0 0 0] % do 3D transformation
+                    elseif contains(R.rot_answer, '3D') % do 3D transformation
                         R.FullRate_Adjusted = worldPose;
                         for viewId = 2:length(images.Files)
     
@@ -105,7 +105,7 @@
                             [currPoints, currFeatures, indexPairs] = helperDetectAndMatchFeatures(ogFeatures, I, R.cutoff, numPoints, 'On');
                     
                             try
-                                [relPose, inlierIdx] = helperEstimateRelativePose(ogPoints(indexPairs(:,1)), currPoints(indexPairs(:, 2)), intrinsics);
+                                [relPose, inlierIdx] = helperEstimateRelativePose(ogPoints(indexPairs(:,1)), currPoints(indexPairs(:, 2)), intrinsics)
                             catch
                                 % Get Essential Matrix 
                                 [E, inlierIdx] = estimateEssentialMatrix(ogPoints(indexPairs(:,1)), currPoints(indexPairs(:, 2)), intrinsics);

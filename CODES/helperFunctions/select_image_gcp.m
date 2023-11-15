@@ -20,7 +20,7 @@
             end
         end
         pointhandles(1,:)=[];
-        
+        clear h
         hFig; clf
         imshow(I)
         hold on
