@@ -333,7 +333,7 @@ for nn = num_flights
     end
     idxdy = str2num(string(grid(5)));
     
-    idir = [odir '/images/']
+    idir = [odir '/images_10Hz/']
     %idir = ['/Volumes/drone/data/cbathy/20211026_Torrey/' char(string(nn)) '/images/']
     imageDirectory = idir;
     L=sort(split(string(ls(imageDirectory)))); L=L(2:end); % Athina: changes
@@ -413,19 +413,19 @@ for nn = num_flights
     % computes the pixel intensity time series for every grid point
     clear ioeopath imageDirectory
     frameRate = 2
-    idir = [odir  '/images/'];
+    idir = [odir  '/images_10Hz/'];
     imageDirectory = idir;
     L=sort(split(string(ls(imageDirectory)))); L=L(2:end); % Athina: changes
     imagePath= append(imageDirectory,L(1));
     ioeopath = [odir '/Processed_data/' oname '_' char(string(frameRate)) '_IOEOVariable.mat'];
-    gname = [oname '_NAVD88.mat'];
+    gname = [oname '_NAVD88_Bingchen.mat'];
     
     clear pixInst
     localFlag = 1;
     
     pixInst.type='Grid';
-    pixInst.dx = 5;%str2num(string(grid(5))); % 5
-    pixInst.dy = 5;%str2num(string(grid(5))); % 5
+    pixInst.dx = 0.1;%str2num(string(grid(5))); % 5
+    pixInst.dy = 0.1;%str2num(string(grid(5))); % 5
     pixInst.xlim = [localX(1) localX(end)];
     pixInst.ylim = [localY(1) localY(end)];
     pixInst.z={}; % Leave empty if you would like it interpolated from input

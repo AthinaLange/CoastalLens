@@ -27,7 +27,7 @@ switch answer
                 [ind_survey_pts,tf] = listdlg('ListString', arrayfun(@num2str, [1:size(survey_gcp,1)], 'UniformOutput', false), 'SelectionMode','multiple', 'InitialValue',[1], 'PromptString', {'What survey points' 'did you use? (command + for multiple)'});
                 survey_gcp = survey_gcp(ind_survey_pts,:);
 
-                if ~exist('survey_gcp', 'var')
+                if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
                     disp('LiDAR/SfM GCPs not correct.')
                     disp('Select LiDAR/SfM GCPs.')
                     gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find?'}));

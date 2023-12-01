@@ -1,7 +1,7 @@
 % GET PRODUCT DATA FROM R
 
  for dd = 1 : length(data_files)
-        clearvars -except dd *_dir user_email data_files
+        clearvars -except dd *_dir user_email data_files P
         cd(fullfile(data_files(dd).folder, data_files(dd).name))
         
         load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'))
@@ -29,62 +29,25 @@
                     load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'worldPose', 'extrinsics', 'intrinsics_CIRN')
                     load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz(hh))) 'Hz' ]),'R','intrinsics')
                     images.Files(length(R.FullRate_OGFrame)+1:end)=[];
-                    if contains(R.rot_answer, '2D') % do 2D rotation
+                    if class(R.FullRate_OGFrame) == 'rigidtform2d' % do 2D rotation
                         %% ===========================2D rotation ==================================
                         for viewId = 1:length(images.Files)
                             viewId
-                           I = undistortImage(readimage(images, viewId), intrinsics);
+                            I = undistortImage(readimage(images, viewId), intrinsics);
                             correction = R.FullRate_OGFrame(viewId);
                             I_corrected = imwarp(I, correction, OutputView=imref2d(size(I)));
                             for pp = 1:length(Products)
-                                if worldPose.Translation ~= [0 0 0] % can do this - otherwise use CIRN extrinsics
-                                    [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics);
-                                    Products(pp).localX = Xout;
-                                    Products(pp).localY = Yout;
-                                    Products(pp).localZ = Z;
-                                    iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
-                               
-                                    clear Irgb_temp
-                                    for ii = 1:length(xyz)
-                                        if any(iP(ii,:) <= 0) || any(iP(ii,[2 1]) >= intrinsics.ImageSize)
-                                            Irgb_temp(ii, :) = uint8([0 0 0]);
-                                        else
-                                            Irgb_temp(ii, :) = I_corrected(iP(ii,2), iP(ii,1),:);
-                                        end
-                                    end
+                                if rem(extract_Hz(hh),Products(pp).frameRate) == 0 % check if at correct extraction rate 
+                                    if extract_Hz(hh) ~= Products(pp).frameRate
+                                    
 
-                                     if contains(Products(pp).type, 'Grid')
-                                        Products(pp).Irgb(viewId, :,:,:) = reshape(Irgb_temp, size(Xout,1), size(Xout,2), 3);
-                                     else
-                                         Products(pp).Irgb(viewId, :,:) = Irgb_temp;
-                                    end
-                                else % use CIRN extrinsics
-                                    [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics, intrinsics_CIRN, I_corrected);
-                                    Products(pp).localX = Xout;
-                                    Products(pp).localY = Yout;
-                                    Products(pp).localZ = Z;
-                                    if contains(Products(pp).type, 'Grid')
-                                        Products(pp).Irgb(viewId, :,:,:) = IrIndv;
-                                    else
-                                        Products(pp).Irgb(viewId, :,:) = permute(IrIndv,[2 1 3]);
-                                    end
-                                end % if worldPose.Translation ~= [0 0 0]
-                            end % for pp = 1:length(Products)
-                        end % for viewId = 1:length(images.Files)
-
-                    elseif contains(R.rot_answer, '3D')
-                    %% ===========================3D rotation ==================================
-                           for viewId = 1:length(images.Files)
-                                I = undistortImage(readimage(images, viewId), intrinsics);
-                                for pp = 1:length(Products)
                                     if worldPose.Translation ~= [0 0 0] % can do this - otherwise use CIRN extrinsics
                                         [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics);
-                                        
                                         Products(pp).localX = Xout;
                                         Products(pp).localY = Yout;
                                         Products(pp).localZ = Z;
-                                        iP = round(world2img(xyz, pose2extr(R.FullRate_OGFrame(viewId)), intrinsics));
-                                       
+                                        iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
+                                   
                                         clear Irgb_temp
                                         for ii = 1:length(xyz)
                                             if any(iP(ii,:) <= 0) || any(iP(ii,[2 1]) >= intrinsics.ImageSize)
@@ -99,31 +62,84 @@
                                          else
                                              Products(pp).Irgb(viewId, :,:) = Irgb_temp;
                                         end
-                                else % use CIRN extrinsics
-                                    disp('REQUIRES WORLDPOSE')
-                                end % if worldPose.Translation ~= [0 0 0]
+                                    else % use CIRN extrinsics
+                                        [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics, intrinsics_CIRN, I_corrected);
+                                        Products(pp).localX = Xout;
+                                        Products(pp).localY = Yout;
+                                        Products(pp).localZ = Z;
+                                        if contains(Products(pp).type, 'Grid')
+                                            Products(pp).Irgb(viewId, :,:,:) = IrIndv;
+                                        else
+                                            Products(pp).Irgb(viewId, :,:) = permute(IrIndv,[2 1 3]);
+                                        end
+                                    end % if worldPose.Translation ~= [0 0 0]
+                                end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0 
+                            end % for pp = 1:length(Products)
+                        end % for viewId = 1:length(images.Files)
+
+                    elseif class(R.FullRate_OGFrame) == 'rigidtform3d' % do 2D rotation
+                    %% ===========================3D rotation ==================================
+                           for viewId = 1:length(images.Files)
+                                viewId
+                                I = undistortImage(readimage(images, viewId), intrinsics);
+                                for pp = 1:length(Products)
+                                    if rem(extract_Hz(hh),Products(pp).frameRate) == 0 
+                                        if worldPose.Translation ~= [0 0 0] % can do this - otherwise use CIRN extrinsics
+                                            [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics);
+                                            
+                                            Products(pp).localX = Xout;
+                                            Products(pp).localY = Yout;
+                                            Products(pp).localZ = Z;
+                                            iP = round(world2img(xyz, pose2extr(R.FullRate_OGFrame(viewId)), intrinsics));
+                                           
+                                            clear Irgb_temp
+                                            for ii = 1:length(xyz)
+                                                if any(iP(ii,:) <= 0) || any(iP(ii,[2 1]) >= intrinsics.ImageSize)
+                                                    Irgb_temp(ii, :) = uint8([0 0 0]);
+                                                else
+                                                    Irgb_temp(ii, :) = I(iP(ii,2), iP(ii,1),:);
+                                                end
+                                            end
+        
+                                             if contains(Products(pp).type, 'Grid')
+                                                Products(pp).Irgb(viewId, :,:,:) = reshape(Irgb_temp, size(Xout,1), size(Xout,2), 3);
+                                             else
+                                                 Products(pp).Irgb(viewId, :,:) = Irgb_temp;
+                                            end
+                                    else % use CIRN extrinsics
+                                        disp('REQUIRES WORLDPOSE')
+                                    end % if worldPose.Translation ~= [0 0 0]
+                                end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0 
                             end % for pp = 1:length(Products)
                         end % for viewId = 1:length(images.Files)
                     end % if contains(R.rot_answer, '2D')
 
                 elseif ind_scp_method == 2 % SCPs
-                    load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics','intrinsics_CIRN')
-             
-
+                    load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_SCP_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics','intrinsics_CIRN')
+                    for viewId = 1:length(images.Files)
+                            viewId
+                            I = readimage(images, viewId);
+                            for pp = 1:length(Products)
+                                        [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics(viewId,:), intrinsics_CIRN, I);
+                                        Products(pp).localX = Xout;
+                                        Products(pp).localY = Yout;
+                                        Products(pp).localZ = Z;
+                                        if contains(Products(pp).type, 'Grid')
+                                            Products(pp).Irgb(viewId, :,:,:) = IrIndv;
+                                        else
+                                            Products(pp).Irgb(viewId, :,:) = permute(IrIndv,[2 1 3]);
+                                        end
+                            end % for pp = 1:length(Products)
+                    end %  for viewId = 1:length(images.Files)
 
 
                 end % if ind_scp_method == 1 % Using Feature Detection/Matching
 
-                    save(fullfile(odir, 'Processed_data', [oname '_Products_' char(string(extract_Hz(hh))) 'Hz' ]),'Products')
+                    save(fullfile(odir, 'Processed_data', [oname '_Products_' char(string(extract_Hz(hh))) 'Hz' ]),'Products', '-v7.3')
             end % for hh = 1 : length(extract_Hz)
         end % for ff = 1 : length(flights)
  end % for dd = 1 : length(data_files)
-
-
-
 %%
- [IrIndv] = getPixels(Products, pp, extrinsics, intrinsics_CIRN, I_corrected);
-
 %% FUNCTIONS
 function [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics, intrinsics_CIRN, I)
 
@@ -241,7 +257,7 @@ end
 function [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics)
 
     [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
-    localExtrinsics = localTransformExtrinsics([x2 y2], 270-Products(pp).angle, 1, extrinsics);
+    localExtrinsics = localTransformExtrinsics([x2 y2], Products(pp).angle-270, 1, extrinsics);
     
 
     if contains(Products(pp).type, 'Grid')
@@ -259,7 +275,7 @@ function [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics)
         iZ=iX*0+iz;
         
         X=iX; Y=iY; Z=iZ; 
-        [Xout Yout]=localTransformEquiGrid([x2 y2], 270-Products(pp).angle,1,iX,iY); 
+        [Xout Yout]=localTransformEquiGrid([x2 y2], Products(pp).angle-270,1,iX,iY); 
         Z=Xout.*0+iz;  
            
         xyz = [Xout(:) Yout(:) Z(:)];     
@@ -274,7 +290,9 @@ function [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics)
         Y = X.*0+iy;
         if isempty(Products(pp).z); iz=0; else; iz = Products(pp).z; end
         Z = X.*0 + iz;
-        [ Xout Yout]= localTransformPoints([x2 y2], 270-Products(pp).angle,1,X,Y);
+        %Xout=X-x2;
+        %Yout=Y-y2;
+        [ Xout Yout]= localTransformPoints([x2 y2], Products(pp).angle-270,1,X,Y);
         xyz = cat(2,Xout(:), Yout(:), Z(:));
     elseif contains(Products(pp).type, 'yTransect')
         if Products(pp).ylim(1) > 0; Products(pp).ylim(1) = -Products(pp).ylim(1); end
@@ -287,7 +305,7 @@ function [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics)
         X = Y.*0+ix;
         if isempty(Products(pp).z); iz=0; else; iz = Products(pp).z; end
         Z = Y.*0 + iz;
-        [ Xout Yout]= localTransformPoints([x2 y2], 270+Products(pp).angle,1,X,Y);
+        [ Xout Yout]= localTransformPoints([x2 y2],Products(pp).angle-270,1,X,Y);
         xyz = cat(2,Xout(:), Yout(:), Z(:));
     end
     xyz = xyz+[x2 y2 0];

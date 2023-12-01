@@ -18,8 +18,8 @@ switch answer2
             Product_base.lon = double(string(inputdlg('Longitude of Origin')));
         end
 
-        if origin_grid(5) < 360 && origin_grid(5) > 0 
-            Product_base.angle = origin_grid(5);
+        if origin_grid(3) < 360 && origin_grid(3) > 0 
+            Product_base.angle = origin_grid(3);
         else
             Product_base.angle = double(string(inputdlg('Angle (CC degrees from North)')));
         end

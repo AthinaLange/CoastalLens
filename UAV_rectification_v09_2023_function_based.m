@@ -129,7 +129,11 @@ addpath(genpath(code_dir))
 
 %% =============== Select days to process.  =====================================================================
 % Load which data folders are to be processed
-data_dir = fullfile(global_dir, 'DATA');
+if ismac || isunix
+    disp('Choose DATA folder.')
+    disp('For Athina: DATA') %% XXX
+end
+data_dir = uigetdir('.', 'DATA Folder');
 
 % Load in all days that need to be processed.
 data_files = dir(data_dir); data_files([data_files.isdir]==0)=[]; data_files(contains({data_files.name}, '.'))=[];

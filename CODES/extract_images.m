@@ -14,7 +14,7 @@
 
 %%
 % repeat for each day
-for dd = 1: length(data_files)
+for dd = length(data_files)
     clearvars -except dd *_dir user_email data_files
     cd(fullfile(data_files(dd).folder, data_files(dd).name))
 
@@ -30,64 +30,64 @@ for dd = 1: length(data_files)
         for hh = 1 : length(extract_Hz)
             if ~exist(sprintf('images_%iHz', extract_Hz(hh)), 'dir')
                 mkdir(sprintf('images_%iHz', extract_Hz(hh)))
-            end
-            imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
-            load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C')
-
-            % repeat for each video
-            for ii = 1 : length(mov_id)
-                mkdir(fullfile(imageDirectory, char(string(ii))))
-                system(['ffmpeg -i ' char(string(C.FileName(mov_id(ii)))) ' -qscale:v 2 -r ' char(string(extract_Hz(hh))) ' ' fullfile(imageDirectory, char(string(ii)), 'Frame_%05d.jpg')])
-            end
-            % Combine images and rename into sequential
-            for ii = 1:length(mov_id)
-                L = dir(imageDirectory); L([L.isdir] == 1) = []; if ~isempty(L); L = string(extractfield(L, 'name')');end;  if ~isempty(L); L(L=='.DS_Store')=[];end
-                Lfull = length(L);
-                L = dir(fullfile(imageDirectory, char(string(ii)))); L([L.isdir] == 1) = []; L = string(extractfield(L, 'name')');  if ~isempty(L); L(L=='.DS_Store')=[];end
-
-                if ii == 1
-                    movefile(fullfile(imageDirectory, char(string(ii)), 'Frame_*'), imageDirectory)
-                else
-                    for ll = 1: length(L)
-                        if ll < 10
-                            id = ['0000' char(string(ll))];
-                        elseif ll < 100
-                            id = ['000' char(string(ll))];
-                        elseif ll < 1000
-                            id = ['00' char(string(ll))];
-                        elseif ll < 10000
-                            id = ['0' char(string(ll))];
-                        else
-                            id = [char(string(ll))];
-                        end
-
-                         if ll+Lfull < 10
-                            id_full = ['0000' char(string(ll+Lfull))];
-                        elseif ll+Lfull < 100
-                            id_full = ['000' char(string(ll+Lfull))];
-                        elseif ll+Lfull < 1000
-                            id_full = ['00' char(string(ll+Lfull))];
-                        elseif ll+Lfull < 10000
-                            id_full = ['0' char(string(ll+Lfull))];
-                        else
-                            id_full = [char(string(ll+Lfull))];
-                        end
-
-                        movefile(fullfile(imageDirectory, char(string(ii)), ['Frame_' id '.jpg']), fullfile(imageDirectory, ['Frame_' id_full '.jpg']))
-                    end
-                end  % if ii == 1
-            end % for ii = 1:length(mov_id)
-
-            % remove placeholder folders
-            for ii = 1:length(mov_id); rmdir(fullfile(imageDirectory, char(string(ii))), 's'); end
             
-            % replacing 1st image with image extracted as initial frame for gcp and scp accuracy
-            if ispc
-                system(['cp Processed_data\Initial_frame.jpg ' imageDirectory '\Frame_00001.jpg'])
-            else
-                system(['cp Processed_data/Initial_frame.jpg ' imageDirectory '/Frame_00001.jpg'])
-            end
-
+                imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
+                load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C')
+    
+                % repeat for each video
+                for ii = 1 : length(mov_id)
+                    mkdir(fullfile(imageDirectory, char(string(ii))))
+                    system(['ffmpeg -i ' char(string(C.FileName(mov_id(ii)))) ' -qscale:v 2 -r ' char(string(extract_Hz(hh))) ' ' fullfile(imageDirectory, char(string(ii)), 'Frame_%05d.jpg')])
+                end
+                % Combine images and rename into sequential
+                for ii = 1:length(mov_id)
+                    L = dir(imageDirectory); L([L.isdir] == 1) = []; if ~isempty(L); L = string(extractfield(L, 'name')');end;  if ~isempty(L); L(L=='.DS_Store')=[];end
+                    Lfull = length(L);
+                    L = dir(fullfile(imageDirectory, char(string(ii)))); L([L.isdir] == 1) = []; L = string(extractfield(L, 'name')');  if ~isempty(L); L(L=='.DS_Store')=[];end
+    
+                    if ii == 1
+                        movefile(fullfile(imageDirectory, char(string(ii)), 'Frame_*'), imageDirectory)
+                    else
+                        for ll = 1: length(L)
+                            if ll < 10
+                                id = ['0000' char(string(ll))];
+                            elseif ll < 100
+                                id = ['000' char(string(ll))];
+                            elseif ll < 1000
+                                id = ['00' char(string(ll))];
+                            elseif ll < 10000
+                                id = ['0' char(string(ll))];
+                            else
+                                id = [char(string(ll))];
+                            end
+    
+                             if ll+Lfull < 10
+                                id_full = ['0000' char(string(ll+Lfull))];
+                            elseif ll+Lfull < 100
+                                id_full = ['000' char(string(ll+Lfull))];
+                            elseif ll+Lfull < 1000
+                                id_full = ['00' char(string(ll+Lfull))];
+                            elseif ll+Lfull < 10000
+                                id_full = ['0' char(string(ll+Lfull))];
+                            else
+                                id_full = [char(string(ll+Lfull))];
+                            end
+    
+                            movefile(fullfile(imageDirectory, char(string(ii)), ['Frame_' id '.jpg']), fullfile(imageDirectory, ['Frame_' id_full '.jpg']))
+                        end
+                    end  % if ii == 1
+                end % for ii = 1:length(mov_id)
+    
+                % remove placeholder folders
+                for ii = 1:length(mov_id); rmdir(fullfile(imageDirectory, char(string(ii))), 's'); end
+                
+                % replacing 1st image with image extracted as initial frame for gcp and scp accuracy
+                if ispc
+                    system(['cp Processed_data\Initial_frame.jpg ' imageDirectory '\Frame_00001.jpg'])
+                else
+                    system(['cp Processed_data/Initial_frame.jpg ' imageDirectory '/Frame_00001.jpg'])
+                end
+            end % if ~exist(sprintf('images_%iHz', extract_Hz(hh)), 'dir')
         end % for hh = 1:length(extract_Hz)
     
         if exist('user_email', 'var')

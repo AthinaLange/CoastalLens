@@ -115,7 +115,6 @@ for dd = 1 : length(data_files)
                             load(fullfile(temp_file_path, temp_file)); clear temp_file*
                         case 'No'
                             disp('Please calibrate camera to proceed.')
-                            cameraCalibrator
                             return
                     end
                     clear answer
@@ -170,8 +169,8 @@ for dd = 1 : length(data_files)
             flights = dir(fullfile(data_files(dd).folder, data_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
            switch input_answer
                case 'No'
-                    save(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'),...
-                        'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
+                    % save(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'),...
+                    %     'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
            end
 
     %% ====================================================================
@@ -199,11 +198,11 @@ for dd = 1 : length(data_files)
         %  =====================================================================
        if contains(drone_type, 'DJI')
            drone_file_name = 'DJI';
-           %drone_duration = duration(0,5,28);
+           drone_duration = duration(0,5,28);
        else
             temp_name = string(inputdlg({'What is the file prefix?'}, {'What is the average video duration (HH:MM:SS)?'}));
             drone_file_name = temp_name(1);
-            %drone_duration = duration(temp_name(2)); clear temp_name
+            drone_duration = duration(temp_name(2)); clear temp_name
        end
 
        system(sprintf('/usr/local/bin/exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s_0* > %s', odir, drone_file_name, fullfile(odir, 'Processed_data', [oname '.csv'])));
@@ -214,11 +213,11 @@ for dd = 1 : length(data_files)
         % get indices of images and videos to extract from
         form = char(C.FileName);
         form = string(form(:,end-2:end));
-        mov_id = find(form == 'MOV' | form == 'MP4')
+        mov_id = find(form == 'MOV'); 
         jpg_id = find(form == 'JPG');
         
         % required: starting on full video 5:28 for DJI
-        %i_temp = find(C.Duration(mov_id) == drone_duration); mov_id(1:i_temp(1)-1)=[];
+        i_temp = find(C.Duration(mov_id) == drone_duration); mov_id(1:i_temp(1)-1)=[];
         i_temp = find(isnan(C.Duration(mov_id))); mov_id(i_temp)=[];
     
         % if image taken at beginning & end of flight - use beginning image
@@ -238,9 +237,9 @@ for dd = 1 : length(data_files)
         end
         [zgeoid_offset] = intg2012b(code_dir, lat,long);
         [UTMNorthing, UTMEasting, UTMZone] = ll_to_utm(lat, long);
-        extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
+        extrinsicsInitialGuess = [UTMEasting UTMNorthing C.RelativeAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
         
-        save(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'extrinsicsInitialGuess', 'UTMNorthing', 'UTMEasting', 'zgeoid_offset', 'jpg_id', 'mov_id', 'lat', 'long', 'C')
+        % save(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'extrinsicsInitialGuess', 'UTMNorthing', 'UTMEasting', 'zgeoid_offset', 'jpg_id', 'mov_id', 'lat', 'long', 'C')
         
         clearvars form i_temp  lat long zgeoid_offset UTMNorthing UTMEasting UTMZone
         %% ========================initialFrame============================================
@@ -262,7 +261,7 @@ for dd = 1 : length(data_files)
         %                           - Save intrinsics fille in suitable format
         %  =====================================================================
         I = imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
-        if exist('cameraParams_distorted', 'var') & exist('cameraParams_undistorted', 'var') 
+        if all( exist('cameraParams_distorted', 'var'), exist('cameraParams_undistorted', 'var') )
             J1 = undistortImage(I, cameraParams_distorted);
             J2 = undistortImage(I, cameraParams_undistorted);
             hFig = figure(1);clf
@@ -295,7 +294,6 @@ for dd = 1 : length(data_files)
                 clf;imshow(J1); imwrite(J1, fullfile(odir, 'Processed_data', 'undistortImage.png'), 'png')
             elseif ind_distortion == 2
                 disp('Please recalibrate camera or check that correct intrinsics file is used.')
-                cameraCalibrator
                 return
             end
 
@@ -309,21 +307,17 @@ for dd = 1 : length(data_files)
         intrinsics(6) = cameraParams.FocalLength(2);         % V components of focal lengths (in pixels)
         intrinsics(7) = cameraParams.RadialDistortion(1);         % Radial distortion coefficient
         intrinsics(8) = cameraParams.RadialDistortion(2);         % Radial distortion coefficient
-        if length(cameraParams.RadialDistortion) == 3
-            intrinsics(9) = cameraParams.RadialDistortion(3);         % Radial distortion coefficient
-        else
-            intrinsics(9) = 0;         % Radial distortion coefficient
-        end
+        intrinsics(9) = cameraParams.RadialDistortion(3);         % Radial distortion coefficient
         intrinsics(10) = cameraParams.TangentialDistortion(1);        % Tangential distortion coefficients
         intrinsics(11) = cameraParams.TangentialDistortion(2);        % Tangential distortion coefficients
         
-        if (exist('cameraParams_distorted', 'var') & exist('cameraParams_undistorted', 'var') ) && ind_distortion == 2 
+        if all( exist('cameraParams_distorted', 'var'), exist('cameraParams_undistorted', 'var') ) && ind_distortion == 2 
             intrinsics(7:11) = 0; % no distortion (if distortion correction on)
         end
 
         intrinsics_CIRN = intrinsics;
         intrinsics = cameraParams.Intrinsics; 
-        save(fullfile(odir, 'Processed_data', [oname '_IO']), 'intrinsics_CIRN', 'intrinsics', 'cameraParams', 'extrinsicsInitialGuess')
+        % save(fullfile(odir, 'Processed_data', [oname '_IO']), 'intrinsics_CIRN', 'intrinsics', 'cameraParams', 'extrinsicsInitialGuess')
         clearvars I J1 J2 tf ind_distortion hFig cameraParams_*
         close all
         %% ========================GCPs============================================
@@ -335,7 +329,7 @@ for dd = 1 : length(data_files)
         %  =====================================================================
         % whichever method generates image_gcp (N x 2) and world_gcp (N x 3)
 
-         [ind_gcp_option,tf] = listdlg('ListString',[{'Automated from Airborne LiDAR'}, {'Select points from LiDAR/SfM'}, {'Select points from GoogleEarth'}, {'Select GCP targets'}, {'Use Metadata'}],...
+         [ind_gcp_option,tf] = listdlg('ListString',[{'Automated from Airborne LiDAR'}, {'Select points from LiDAR/SfM'}, {'Select points from GoogleEarth'}, {'Select GCP targets'}],...
                                                      'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Initial GCP Method'});
           if ind_gcp_option == 1 % automated from LiDAR
               gcp_method = 'auto_LiDAR';
@@ -373,11 +367,6 @@ for dd = 1 : length(data_files)
                select_image_gcp
                select_target_gcp
                world_gcp = target_gcp;
-          elseif ind_gcp_option == 5 % using metadata
-              [worldPose] = CIRN2MATLAB(extrinsics);
-              % check azimuthal, pitch and roll from image - Brittany
-              % method
-              % XXX TBD XXX
 
           end
 
@@ -444,22 +433,15 @@ for dd = 1 : length(data_files)
         end
          [UVd,flag] = xyz2DistUV(intrinsics_CIRN,extrinsics,world_gcp); UVd = reshape(UVd, [],2);
          scatter(UVd(:,1), UVd(:,2), 50, 'y', 'LineWidth', 3)
-         % confirm that worldPose and camera extrinsics agree
-        if max([extrinsics(1:3)-worldPose.Translation]) > 1 % if extrinsics location disagrees by more than 1m than need to reasses
-            answer = questdlg('Problem with extrinsics or worldPose', 'Extrinsics Location Check', 'Yes', 'No', 'Yes')
-            %%% XXX TBD XXX
-        end
 
-
-        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsicsInitialGuess', 'extrinsics','intrinsics_CIRN', 'gcp_method', 'image_gcp','world_gcp', 'worldPose', 'intrinsics')
-        print(hGCP, '-dpng', fullfile(odir, 'Processed_data', 'gcp.png'))
+        % save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsicsInitialGuess', 'extrinsics','intrinsics_CIRN', 'gcp_method', 'image_gcp','world_gcp', 'worldPose', 'intrinsics')
+        % print(hGCP, '-dpng', fullfile(odir, 'Processed_data', 'gcp.png'))
 
         close all
  
         %%  ========extrinsicsMethod=============================================================
-         [ind_scp_method,tf] = listdlg('ListString',[{'Feature Matching'}, {'Using SCPs.'}],...
-                                                     'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Extrinsics Method'});
-         save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
+         ind_scp_method=0
+         % save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
         
       %% ========================coarsePoseEstimation======================================
         %                          - Extract images at every 30sec for a coarse pose estimation
@@ -468,7 +450,6 @@ for dd = 1 : length(data_files)
         %                               - 3D transformation much noisier than 2D, but can do adjustment for full length of video
         %  =================================================================================
      
-        if ind_scp_method == 1
         mkdir('temp_images')
         imageDirectory = 'temp_images';
         load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C')
@@ -518,7 +499,7 @@ for dd = 1 : length(data_files)
         R.cutoff = cutoff;
         rmdir(imageDirectory, 's')
 
-        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'R', '-append')
+        % save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'R', '-append')
         close all
         
        %% ========================SCPs============================================
@@ -526,7 +507,6 @@ for dd = 1 : length(data_files)
         %  - Define search area radius - center of brightest (darkest) pixels in this region will be chosen as stability point from one frame to the next.
         %  - Define intensity threshold of brightest or darkest pixels in search area
         
-    elseif ind_scp_method == 2 % Using SCPs (similar to CIRN QCIT)
             if strcmpi(gcp_method, 'manual_targets')
                 % repeat for each extracted frame rate
                 for hh = 1 : length(extract_Hz)
@@ -648,19 +628,18 @@ for dd = 1 : length(data_files)
                             %  =====================================================================
                         switch answer_z
                             case 'Yes'
-                                [ind_gcp,tf] = listdlg('ListString', gcp_options, 'SelectionMode','single', 'InitialValue',[gg], 'PromptString', {'What ground control points' 'did you use?'});
+                                [ind_gcp,tf] = listdlg('ListString', gcp_options, 'SelectionMode','single', 'InitialValue',[1], 'PromptString', {'What ground control points' 'did you use?'});
                                 scp(gg).z = gps_northings(ind_gcp, 4);
                             case 'No'
                                 scp(gg).z = double(string(inputdlg({'Elevation'})));
                         end
             
                     end % for gg = 1:length(image_gcp)
-                    save(fullfile(odir, 'Processed_data',  [oname '_scpUVdInitial_' char(string(extract_Hz(hh))) 'Hz']), 'scp')
+                    % save(fullfile(odir, 'Processed_data',  [oname '_scpUVdInitial_' char(string(extract_Hz(hh))) 'Hz']), 'scp')
                 end
             else
                 disp('Ground control targets are required to use stability control points.')
             end % if strcmpi(gcp_method, 'manual_targets')
-end % if ind_scp_method == 4
 
         %% ========================productsCheck============================================
         %                          CHECK PRODUCTS ON INITIAL IMAGE       
@@ -713,7 +692,7 @@ end % if ind_scp_method == 4
                 
                 subplot(2,2,[2 4])
                 title('Local Coordinates')
-                print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))
+                % print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))
         
                 answer = questdlg('Happy with grid projection?', ...
                      'Grid projection',...
@@ -872,7 +851,7 @@ end % if ind_scp_method == 4
 
                 end % check answer
             end % check gridCheckIndex
-            print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_xTransects.png' ]))
+            % print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_xTransects.png' ]))
             
         end % if ~isempty(ids_xtransect)
 
@@ -935,7 +914,7 @@ end % if ind_scp_method == 4
                    disp('Please change new transect numbers.')
                    define_product_type
             end
-            print(gcf,'-dpng',fullfile(odir, 'Processed_data', [oname '_yTransects.png' ]))
+            % print(gcf,'-dpng',fullfile(odir, 'Processed_data', [oname '_yTransects.png' ]))
         end
         
         clearvars pp jj x2 y2 iylim ix X Y Z xyz UVd le answer gridChangeIndex
@@ -955,19 +934,7 @@ end % if ind_scp_method == 4
         grid_text{2} = sprintf('Initial Extrinsics Guess: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f', extrinsicsInitialGuess)
         grid_text{3} = sprintf('Corrected Extrinsics Guess: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f with %s method', extrinsics, gcp_method)
         grid_text{4} = sprintf('World Pose: %.2f, %.2f, %.2f', worldPose.Translation);
-        if ind_scp_method == 1
-            if all(abs([R.MinuteRate_OGFrame.RotationAngle]) < 5)
-                grid_text{5} = sprintf('Coarse Pose Estimation: Small Azimuthal Change (2D rotation)')
-            else
-                if contains(R.rot_answer, '2D')
-                    grid_text{5} = sprintf('Coarse Pose Estimation: Large Azimuthal Change - do 2D transformation and stop when rotation angle > 5deg.')
-                elseif contains(R.rot_answer, '3D')
-                    grid_text{5} = sprintf('Coarse Pose Estimation: Large Azimuthal Change - do 3D transformation - noisier')
-                end
-            end
-        elseif ind_scp_method == 2
-            grid_text{5} = sprintf('Using SCPs.')
-        end
+        grid_text{5} = sprintf('All extrinsics methods tested.')
         grid_text{6} = sprintf('Extract data at %i Hz. ', extract_Hz)
         grid_text{7} = sprintf('Products to produce:')
         

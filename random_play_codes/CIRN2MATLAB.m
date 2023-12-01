@@ -8,7 +8,7 @@ azimuth_angle = rad2deg(extrinsics(4)); % angles CW from North
 roll_angle = rad2deg(extrinsics(6)); % angle CW from flat
 
 % Define rotation angles in degrees
-azimuth = 270 - azimuth_angle; 
+azimuth = azimuth_angle-90; 
 pitch = -180 + pitch_angle;
 roll = -roll_angle;
 

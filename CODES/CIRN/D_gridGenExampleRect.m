@@ -249,4 +249,4 @@ end
 
 %% Section 9: Output/Saving
 % Save Grids
-save([odir '/Processed_data/GRID_' gname],'X','Y','Z','worldCoord','localAngle','localOrigin','localX','localY','localZ')
+save([odir '/Processed_data/GRID_' gname '_Bingchen'],'X','Y','Z','worldCoord','localAngle','localOrigin','localX','localY','localZ')
