@@ -1,41 +1,70 @@
 %% user_input_data
-% gets all required input data for UAV_automated_rectification toolbox
-%
-% - Obtain day relevant data 
-%       - camera intrinsics
-%       - Products
-%       - extraction frame rates
-% - Do flight specific checks
-%       - Pull initial drone position and pose from metadata (using exiftool)
-%       - extract initial frame (using ffmpeg)
-%       - confirm distortion
-%       - confirm inital drone position and pose from gcps
-%               - using LiDAR/SfM survey
-%               - using GoogleEarth
-%               - using GCPs (targets / objects in frame)
-%       - check products
-%
+% User provides all required input data for UAV_automated_rectification toolbox
 %
 % 1. Test Email Confirmation
-% Email Confirmation: Asks the user if they received a test email to verify email configuration.
-% Email Setup: Configures email parameters and sends a test email if the user didn't receive it yet.
-% Abort Processing: If the test email is not received, the script terminates and prompts the user to check email settings.
-% 2. User Input Section
-% Drone Type: Asks the user about the type of drone platform used (DJI or Other).
-% Time Zone Selection: Prompts the user to select the appropriate time zone.
-% Camera Intrinsics: Checks if camera calibration parameters are available. If not, it prompts the user to load them or calibrate the camera.
-% Product Definition: Asks if the user has a pre-existing product file. If yes, it loads the file. If not, it prompts the user to define products using user_input_products.m.
-% Extraction Frame Rates: Determines extraction frame rates based on the products' frame rates. It checks if lower frame rates can be derived from higher ones.
-% 3. Saving Day-Relevant Data
-% Data Saving: Saves the collected input data (camera intrinsics, extraction frame rates, products, flight details, drone type, and time zone) in a .mat file for each processed day.
+% 	Asks user if test email received, otherwise fix email SMTP server settings
+% 2. Day-specific Data
+%	    - check in input data already determined - and load in file if it exists.
+% 	    - determine drone type, e.g. DJI or other - will help define video name
+% 	    - determine timezone that the video was recorded in - assuming video metadata % 	   in local timezone, otherwise pick UTM
+% 	    - choose intrinsics file for camera used on that day
+% 	        if none exists, will prompt CameraCalibrator app
+% 	    - choose Products to compute
+% 		    - select from .mat file
+% 		    - define in user_input_products.m
+% 	    - determine image extraction rates based on frame rates needed for products
+% 3. Flight-specific Data
+% 	- if non-DJI, prompt for video naming convention
+% 	- use exiftool to pull metadata from images and video
+% 		convert Lat/Long to Eastings/Northings
+% 	- extract first frame to do initial calibration on
+% 	- check that distortion is correctly accounted for
+% 	- use ground control points to obtain initial camera position and pose
+% 		- Option 1: Automated with LiDAR survey
+% 		- Option 2: Manual GCP selection from LiDAR or SfM survey
+% 		- Option 3: Manual GCP selection from GoogleEarth
+% 		- Option 4: Manual GCP selection from targets (QCIT)
+% 		- Option 5: No GCP - use camera metadata
+% 	   get CIRN extrinsics and MATLAB worldPose - if more points needed, user prompted
+% 	- specify if you want to use SCPs or Feature Matching for image stabilization
+%	    - if image stabilization via Feature Matching
+% 	    - Extract images every 30sec from all videos (using VideoReader)
+% 	    - Determine how much of image area should be useable for feature matching (how much beach) - improves code speed
+% 	    - Does 2D warping for relative movement between frames (depending on how much rotation is needed, decide between 2D or 3D)
+%     - if image stabilization via SCPs (QCIT)
+% 	    - Define SCPs (using same points as GCP targets) - define radius, bright/dark, and threshold - specify elevation
+%	    - plot rectified grid products and project xTransects and yTransects into oblique image and confirm that product locations/dimensions are correct
+% 	- send email with determined information
+% 		- origin coordinates
+% 		- initial extrinsics guess
+% 		- gcp-corrected extrinsics with method note
+% 		- MATLAB worldPose and image stabilization method (2D, 3D, SCP)
+% 		- frame rate of data 
+% 		- Products to produce
+% 		- images
 %
 %
 %
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+% REQUIRES: exiftool installation (https://exiftool.org/)
+% Code dependencies:
+% 	- user_input_products
+% 	- intg2012b
+% 	- ll_to_utm
+%	    - get_noaa_lidar
+%	    - get_local_survey
+%	    - select_image_gcp
+%	    - select_target_gcp
+% 	- select_survey_gcp
+% 	- CIRN2MATLAB
+% 	- get_coarse_pose_estimation
+%
+%
+% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Dec 2023
+% 
 
 %% ===========================testEmail=========================================
 %                  Confirm test email recieved
-%                   - TODO Change setting for SMTP surver
+%                   - TODO Change setting for SMTP server
 %  =====================================================================
 answer = questdlg('Did you get the test email?','Test email check', 'Yes / Don''t want it', 'No', 'Yes / Don''t want it');
     switch answer
@@ -58,6 +87,8 @@ answer = questdlg('Did you get the test email?','Test email check', 'Yes / Don''
 %% ===========================userInput=========================================
 %                          USER INPUT         
 %                           - Obtain day relevant data 
+%                               - drone type
+%                               - timezone
 %                               - camera intrinsics
 %                               - Products
 %                               - extraction frame rates
@@ -66,24 +97,34 @@ answer = questdlg('Did you get the test email?','Test email check', 'Yes / Don''
 %                               - extract initial frame (using ffmpeg)
 %                               - confirm distortion
 %                               - confirm inital drone position and pose from gcps
+%                               - specify if image stabilization done with Feature Matching or SCPs
+%                                   - with SCPs - define radius and thresholds
+%                                   - with Feature Matching - do coarse pose estimation (every 30sec 2D image warping)
 %                               - check products
 %  =====================================================================
 for dd = 1 : length(data_files)
 
     clearvars -except dd *_dir user_email data_files
     cd([data_files(dd).folder '/' data_files(dd).name])
-
-    disp('For CPG: ''input_data.mat'' in day files.')
-    input_answer = questdlg('Do you have a .mat input data file?','Input Data File', 'Yes', 'No', 'No');
-    switch input_answer
-        case 'Yes'
-            disp('Load in input file.')
-            disp('For CPG: ''input_data.mat'' in day files.')
-            [temp_file, temp_file_path] = uigetfile(global_dir, 'Input File');
-            load(fullfile(temp_file_path, temp_file)); clear temp_file*
-    end
+           %% ==========================inputData==========================================
+            %                                                    Load in input_data if already specified       
+            %  =====================================================================
+      
+        % Check if user already has input file with all general drone / products information
+        % 
+        disp('For CPG: ''input_data.mat'' in day files.')
+        input_answer = questdlg('Do you have a .mat input data file?','Input Data File', 'Yes', 'No', 'No');
+        switch input_answer
+            case 'Yes'
+                disp('Load in input file.')
+                disp('For CPG: ''input_data.mat'' in day files.')
+                [temp_file, temp_file_path] = uigetfile(global_dir, 'Input File');
+                load(fullfile(temp_file_path, temp_file)); clear temp_file*
+        end
 
            %% ==========================DroneType==========================================
+           %                                                    Choose drone system        
+           %  =====================================================================
            if ~exist('drone_type', 'var') || ~isstring(drone_type)
                 [ind_drone,tf] = listdlg('ListString',[{'DJI'}, {'Other'}], 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'What drone platform was used?'});
                 if ind_drone == 1
@@ -93,6 +134,8 @@ for dd = 1 : length(data_files)
                 end
            end
            %% ==========================TimeZone==========================================
+           %                                        Choose timezone of video recordings        
+           %  =====================================================================
            if ~exist('tz', 'var') || ~ischar(tz)
                 cont_areas = [{'Africa'}, {'America'}, {'Antarctica'}, {'Arctic'}, {'Asia'}, {'Atlantic'}, {'Australia'}, {'Europe'}, {'Indian'}, {'Pacific'}, {'All'}];
                 [ind_area,tf] = listdlg('ListString', cont_areas, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
@@ -102,7 +145,7 @@ for dd = 1 : length(data_files)
                 tz = char(geo_areas.Name(ind_area));
            end
            %% ==========================intrinsics==========================================
-            %                          Choose intrinsics file for each day of flight         
+            %                                   Choose intrinsics file for each day of flight         
             %  =====================================================================
             if  (~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var'))
                 if ~exist('cameraParams', 'var')
@@ -163,10 +206,10 @@ for dd = 1 : length(data_files)
                 end
             end
             clear hh info_Hz
-           %% ==========================saveDayData==========================================
+           %% ==========================saveDayData===========================================
             %                          SAVE DAY RELEVANT DATA       
-            %                           - Save camera intrinsics, extraction frame rates, products and flights for specific day
-            %  =====================================================================
+            %                           - Save camera intrinsics, extraction frame rates, products, flights for specific day, drone type and timezone
+            %  =============================================================================
             flights = dir(fullfile(data_files(dd).folder, data_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
            switch input_answer
                case 'No'
@@ -192,18 +235,14 @@ for dd = 1 : length(data_files)
         %                          INITIAL DRONE COORDINATES FROM METADATA        
         %                           - Use exiftool to pull metadata from images and video
         %                               - currently set for DJI name
-        %                               - only start at full 5:28min long video
-        %                                       to account for start and stopping of video at the beginning due to drastic movement changes
         %                               - mov_id indicates which movies to use in image extraction
         %                               - get inital camera position and pose from metadata
         %  =====================================================================
        if contains(drone_type, 'DJI')
            drone_file_name = 'DJI';
-           %drone_duration = duration(0,5,28);
        else
-            temp_name = string(inputdlg({'What is the file prefix?'}, {'What is the average video duration (HH:MM:SS)?'}));
+            temp_name = string(inputdlg({'What is the file prefix?'}));
             drone_file_name = temp_name(1);
-            %drone_duration = duration(temp_name(2)); clear temp_name
        end
 
        system(sprintf('/usr/local/bin/exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s_0* > %s', odir, drone_file_name, fullfile(odir, 'Processed_data', [oname '.csv'])));
@@ -214,11 +253,10 @@ for dd = 1 : length(data_files)
         % get indices of images and videos to extract from
         form = char(C.FileName);
         form = string(form(:,end-2:end));
-        mov_id = find(form == 'MOV' | form == 'MP4')
+        mov_id = find(form == 'MOV' | form == 'MP4');
         jpg_id = find(form == 'JPG');
         
-        % required: starting on full video 5:28 for DJI
-        %i_temp = find(C.Duration(mov_id) == drone_duration); mov_id(1:i_temp(1)-1)=[];
+        % remove any weird videos
         i_temp = find(isnan(C.Duration(mov_id))); mov_id(i_temp)=[];
     
         % if image taken at beginning & end of flight - use beginning image
@@ -227,7 +265,7 @@ for dd = 1 : length(data_files)
         if isempty(jpg_id); jpg_id = mov_id(1); end
 
         % pull RTK-GPS coordinates from image and change to Eastings/Northings
-        % requires intg2012b and ll_to_utm codes (in basi
+        % requires intg2012b and ll_to_utm codes (in basic_codes)
         lat = char(C.GPSLatitude(jpg_id));
         lat = str2double(lat(1:10));
         long = char(C.GPSLongitude(jpg_id));
@@ -262,6 +300,7 @@ for dd = 1 : length(data_files)
         %                           - Save intrinsics fille in suitable format
         %  =====================================================================
         I = imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
+        % if both a distorted and undistorted version of the codes exists
         if exist('cameraParams_distorted', 'var') & exist('cameraParams_undistorted', 'var') 
             J1 = undistortImage(I, cameraParams_distorted);
             J2 = undistortImage(I, cameraParams_undistorted);
@@ -284,6 +323,8 @@ for dd = 1 : length(data_files)
                 disp('Please recalibrate camera or check that correct intrinsics file is used.')
                 return
             end
+
+        % if only 1 cameraParams version exists
         else
             J1 = undistortImage(I, cameraParams);
             hFig = figure(1);clf
@@ -301,6 +342,7 @@ for dd = 1 : length(data_files)
 
         end
 
+        % saving in CIRN format
         intrinsics(1) = cameraParams.ImageSize(2);            % Number of pixel columns
         intrinsics(2) = cameraParams.ImageSize(1);            % Number of pixel rows
         intrinsics(3) = cameraParams.PrincipalPoint(1);         % U component of principal point  
@@ -332,12 +374,14 @@ for dd = 1 : length(data_files)
         %        DONE                   - Option 2: Manual from hand selection from LiDAR or SfM (airborne or local)
         %                           - Option 3: Manual from hand selection from GoogleEarth
         %        DONE                   - Option 4: Manual from GCP targets
+        %                           - Option 5: Use camera metadata
         %  =====================================================================
         % whichever method generates image_gcp (N x 2) and world_gcp (N x 3)
 
          [ind_gcp_option,tf] = listdlg('ListString',[{'Automated from Airborne LiDAR'}, {'Select points from LiDAR/SfM'}, {'Select points from GoogleEarth'}, {'Select GCP targets'}, {'Use Metadata'}],...
                                                      'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Initial GCP Method'});
-          if ind_gcp_option == 1 % automated from LiDAR
+          
+         if ind_gcp_option == 1 % automated from LiDAR
               gcp_method = 'auto_LiDAR';
                 [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR'}, {'Local LiDAR survey'}],...
                                                      'SelectionMode','single', 'InitialValue',1, 'PromptString', {'LiDAR survey'});
@@ -346,7 +390,7 @@ for dd = 1 : length(data_files)
                 elseif ind_lidar_option == 2 % local LiDAR survey
                         get_local_survey
                 end
-                %get_lidar_gcp %% TODO XXX
+                % XXX SOMETHING HERE XXX
 
           elseif ind_gcp_option == 2 % manual selection from LiDAR
                 [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR'}, {'Local LiDAR/SfM survey'}],...
@@ -366,13 +410,14 @@ for dd = 1 : length(data_files)
                 
           elseif ind_gcp_option == 3 % manual selection from GoogleEarth
               gcp_method = 'manual_GoogleEarth';
-              % Discuss with Rafael and Erwin
+              % XXX Discuss with Rafael and Erwin XXX
 
           elseif ind_gcp_option == 4 % manual selection of GCP targets (QCIT Toolbox)
                gcp_method = 'manual_targets';
                select_image_gcp
                select_target_gcp
                world_gcp = target_gcp;
+
           elseif ind_gcp_option == 5 % using metadata
               [worldPose] = CIRN2MATLAB(extrinsics);
               % check azimuthal, pitch and roll from image - Brittany
@@ -381,11 +426,13 @@ for dd = 1 : length(data_files)
 
           end
 
+        % Getting CIRN extrinsics
+        extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
+        [extrinsics extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag, intrinsics_CIRN, image_gcp, world_gcp);
         % TODO add in reprojectionError
         % TODO check that grid size all consistent
-        extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
-        [extrinsics extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess,extrinsicsKnownsFlag,intrinsics_CIRN,image_gcp, world_gcp);
         
+        % Getting MATLAB worldPose
         try % get worldPose
             worldPose = estworldpose(image_gcp,world_gcp, intrinsics);
         catch % get more points
@@ -420,18 +467,18 @@ for dd = 1 : length(data_files)
                    select_target_gcp
                    world_gcp = target_gcp;
     
-            end % if ind_gcp_option2 == 2
+            end % if ind_gcp_option2 == 1
 
-                image_gcp = [iGCP; image_gcp];
-                world_gcp = [wGCP; world_gcp];
-                try
-                    worldPose = estworldpose(image_gcp,world_gcp, intrinsics);
-                catch
-                    worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
-                    if exist('user_email', 'var')
-                        sendmail(user_email{2}, [oname '- World Pose not found'])
-                    end
-                end % try
+            image_gcp = [iGCP; image_gcp];
+            world_gcp = [wGCP; world_gcp];
+            try
+                worldPose = estworldpose(image_gcp,world_gcp, intrinsics);
+            catch
+                worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
+                if exist('user_email', 'var')
+                    sendmail(user_email{2}, [oname '- World Pose not found'])
+                end
+            end % try
 
         end % try 
 
@@ -456,12 +503,12 @@ for dd = 1 : length(data_files)
 
         close all
  
-        %%  ========extrinsicsMethod=============================================================
+        %% ========================extrinsicsMethod=======================================
          [ind_scp_method,tf] = listdlg('ListString',[{'Feature Matching'}, {'Using SCPs.'}],...
                                                      'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Extrinsics Method'});
          save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
         
-      %% ========================coarsePoseEstimation======================================
+        %% ========================coarsePoseEstimation======================================
         %                          - Extract images at every 30sec for a coarse pose estimation
         %                          - Assuming little azimuthal rotation - get 2D rotation
         %                          - If rotation angle > 5deg, prompt user if they want 3D transformation or 2D rotation
@@ -659,6 +706,7 @@ for dd = 1 : length(data_files)
                 end
             else
                 disp('Ground control targets are required to use stability control points.')
+                % XXX TODO SOMETHING HERE XXX
             end % if strcmpi(gcp_method, 'manual_targets')
 end % if ind_scp_method == 4
 
@@ -713,8 +761,7 @@ end % if ind_scp_method == 4
                 
                 subplot(2,2,[2 4])
                 title('Local Coordinates')
-                print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))
-        
+                
                 answer = questdlg('Happy with grid projection?', ...
                      'Grid projection',...
                      'Yes', 'No', 'Yes');
@@ -737,7 +784,7 @@ end % if ind_scp_method == 4
                                          'Southern Alongshore extent (m from Origin)', 'Northern Alongshore extent (m from Origin)',...
                                          'dx', 'dy', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'})));
                             info = abs(info); % making everything +meters from origin
-                        end
+                        end % if find(isnan(info)) ~= 8
                         
                         if info(1) > 30
                             disp('Maximum frame rate is 30Hz - Please choose a different frame rate.')
@@ -750,16 +797,17 @@ end % if ind_scp_method == 4
                             Products(pp).ylim = [-info(5) info(4)]; % -north +south
                         elseif Products(pp).angle > 180 % West Coast
                             Products(pp).ylim = [-info(4) info(5)]; % -south +north
-                        end
+                        end % if Products(pp).angle < 180
                         Products(pp).dx = info(6);
                         Products(pp).dy = info(7);
                         if ~isnan(info(8))
                             Products(pp).z = info(8);
                         else
                             % PULL IN DEM
-                        end
+                        end % if ~isnan(info(8))
                 end % check answer
             end % check gridCheckIndex
+            print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))
         end % for pp = 1:length(ids_grid)
 
         clearvars ids_grid info gridChangeIndex answer localIr Ir pp x2 y2 localExtrinsics ixlim iylim iX iY iz iZ X Y Z localX localY localZ
@@ -837,7 +885,7 @@ end % if ind_scp_method == 4
                         info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
                                      'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]',...
                                      'dx', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'}, Product1.type)));
-                    end
+                    end % if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
                 
                     info_num = abs(double(string(info([1 2 3 5 6])))); % making everything +meters from origin
             
@@ -857,7 +905,7 @@ end % if ind_scp_method == 4
                     else
                         disp('Please input in the correct format (comma-separated list or [ylim1:dy:ylim2])')
                         yy = string(inputdlg({'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]'}));
-                    end
+                    end %  if contains(yy, ',')
                 
                     if ~isnan(info_num(5))
                         Product1.z = info_num(5);
@@ -875,13 +923,7 @@ end % if ind_scp_method == 4
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_xTransects.png' ]))
             
         end % if ~isempty(ids_xtransect)
-
-
-
-
-
-
-        
+  
          clearvars ids_xtransect pp jj x2 y2 ixlim iy X Y Z xyz UVd le answer gridChangeIndex
        
         %% ========================yTransects============================================
@@ -934,20 +976,19 @@ end % if ind_scp_method == 4
                 case 'No'
                    disp('Please change new transect numbers.')
                    define_product_type
-            end
+            end % switch answer
             print(gcf,'-dpng',fullfile(odir, 'Processed_data', [oname '_yTransects.png' ]))
-        end
+        end % if ~isempty(ids_ytransect)
         
         clearvars pp jj x2 y2 iylim ix X Y Z xyz UVd le answer gridChangeIndex
        
         %% ========================email============================================
         %                         SEND EMAIL WITH INPUT DATA  
-        %                           - Inital Camera Position
         %                           - Origin of Coordinate System
-        %                           - Initial and corrected extrinsics
+        %                           - Initial and corrected Camera Position
+        %                           - worldPose and image stabilization method (2D, 3D, SCP)
         %                           - Data extraction frame rates
         %                           - Products
-        %                           - If unhappy, can reinput grid data
         %  =====================================================================
         clear grid_text grid_plot
         load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']))
@@ -963,11 +1004,12 @@ end % if ind_scp_method == 4
                     grid_text{5} = sprintf('Coarse Pose Estimation: Large Azimuthal Change - do 2D transformation and stop when rotation angle > 5deg.')
                 elseif contains(R.rot_answer, '3D')
                     grid_text{5} = sprintf('Coarse Pose Estimation: Large Azimuthal Change - do 3D transformation - noisier')
-                end
-            end
+                end % if contains(R.rot_answer, '2D')
+            end % if all(abs([R.MinuteRate_OGFrame.RotationAngle]) < 5)
         elseif ind_scp_method == 2
             grid_text{5} = sprintf('Using SCPs.')
-        end
+        end % if ind_scp_method == 1
+
         grid_text{6} = sprintf('Extract data at %i Hz. ', extract_Hz)
         grid_text{7} = sprintf('Products to produce:')
         

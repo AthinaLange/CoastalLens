@@ -1,5 +1,16 @@
 function [R, answer] = get_coarse_pose_estimation(images, intrinsics, cutoff)
 % GET COARSE POSE ESTIMATION - ASSUMING LITTLE AZIMUTHAL ROTATION
+%
+% within region of interest (bottom cutoff %) detect SURF features
+% extract features in first frame
+% for all subsequent images: 
+%   - detect SURF features
+%   - find matching features between current frame and first frame
+%   - estimate 2D image transformation between matching features
+% return: 2D transformation for every frame, and recommendation for 2D or 3D transformation
+%
+% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Nov 2023
+%%
 
 viewId = 1
 prevI = undistortImage(im2gray(readimage(images, 1)), intrinsics); 
@@ -19,7 +30,7 @@ ogFeatures = prevFeatures;
 
 % Remaining Frames
 % DO FOR ALL IMAGES WRT OG FRAME
-for viewId =1:length(images.Files)
+for viewId = 2:length(images.Files)
     viewId
    
     % Read and display the next image
@@ -73,7 +84,7 @@ function [currPoints, currFeatures, indexPairs] = helperDetectAndMatchFeatures(p
     indexPairs = matchFeatures(prevFeatures, currFeatures, 'Unique', true, 'MaxRatio', 0.9);
 end
 
-function [tform, inlierIdx, scaleRecovered, thetaRecovered] = helperEstimateRotation(matchedPoints1, matchedPoints2)
+function [tform, inlierIdx] = helperEstimateRotation(matchedPoints1, matchedPoints2)
 
     if ~isnumeric(matchedPoints1)
         matchedPoints1 = matchedPoints1.Location;
@@ -87,18 +98,5 @@ function [tform, inlierIdx, scaleRecovered, thetaRecovered] = helperEstimateRota
     [tform, inlierIdx] = estgeotform2d(matchedPoints2, matchedPoints1,'rigid');
     
   
-    invTform = invert(tform);
-    Ainv = invTform.A;
-    
-    ss = Ainv(1,2);
-    sc = Ainv(1,1);
-    scaleRecovered = hypot(ss,sc);
-    %disp(['Recovered scale: ', num2str(scaleRecovered)])
-    
-    % Recover the rotation in which a positive value represents a rotation in
-    % the clockwise direction.
-    thetaRecovered = atan2d(-ss,sc);
-    %disp(['Recovered theta: ', num2str(thetaRecovered)])
-    
 end
 

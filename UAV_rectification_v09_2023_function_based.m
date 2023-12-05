@@ -125,6 +125,24 @@ if ~exist(fullfile(code_dir, 'helperFunctions'), 'dir')
     disp('Please download helperFunctions codes from GitHub.')
 end
 
+% Check that ffmpeg is installed.
+system(['ffmpeg -version'])
+ffmpeg_answer = questdlg('Is ffmpeg installed?','ffmpeg Installation', 'Yes', 'No', 'Yes');
+switch ffmpeg_answer
+    case 'No'
+        disp('Please go to https://ffmpeg.org/ and install ffmpeg before proceeding.')
+        system(['ffmpeg -version'])
+        ffmpeg_answer = questdlg('Is ffmpeg installed now?','ffmpeg Installation', 'Yes', 'No', 'Yes');
+end
+
+% Check that exiftool is installed.
+exiftool_answer = questdlg('Is exiftool installed?','exiftool Installation', 'Yes', 'No', 'Yes');
+switch exiftool_answer
+    case 'No'
+        disp('Please go to https://exiftool.org and install exiftool before proceeding.')
+        ffmpeg_answer = questdlg('Is exiftool installed now?','exiftool Installation', 'Yes', 'No', 'Yes');
+end
+
 addpath(genpath(code_dir))
 
 %% =============== Select days to process.  =====================================================================

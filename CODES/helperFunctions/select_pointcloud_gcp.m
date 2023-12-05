@@ -1,4 +1,14 @@
-% select_pointcloud_gcp
+%% select_pointcloud_gcp
+% 
+% use get_noaa_lidar or get_local_survey to get pointCloud
+% cut pointcloud to approximate dimensions of image
+% downsample points and plot pointCloud. Move box over relevant area for a given GCP
+% In zoomed in pointCloud, click on GCP, and hit Enter. Confirm if you like
+% the point, or reclick.
+% Repeat for all GCPs to be found
+%
+% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%%
 Points = pc.Location;
 if ~isempty(pc.Color)
     cPoints = pc.Color;

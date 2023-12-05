@@ -1,5 +1,5 @@
 %% extract_images
-%
+% This script extracts images from video files at specified frame rates.
 % Repeat for each day + flight
 %
 %   For each extraction frame rate:
@@ -9,6 +9,7 @@
 %
 %  Send email that image extraction complete
 %
+% REQUIRES: ffmpeg installation (https://ffmpeg.org/)
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
 
@@ -18,7 +19,7 @@ for dd = length(data_files)
     clearvars -except dd *_dir user_email data_files
     cd(fullfile(data_files(dd).folder, data_files(dd).name))
 
-    load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'))
+    load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'), 'extract_Hz', 'flights')
 
     % repeat for each flight
     for ff = 1: length(flights)
@@ -35,19 +36,22 @@ for dd = length(data_files)
                 load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C')
     
                 % repeat for each video
+                % extract images at extract_Hz rate wtih ffmpeg
                 for ii = 1 : length(mov_id)
                     mkdir(fullfile(imageDirectory, char(string(ii))))
                     system(['ffmpeg -i ' char(string(C.FileName(mov_id(ii)))) ' -qscale:v 2 -r ' char(string(extract_Hz(hh))) ' ' fullfile(imageDirectory, char(string(ii)), 'Frame_%05d.jpg')])
                 end
+
                 % Combine images and rename into sequential
                 for ii = 1:length(mov_id)
-                    L = dir(imageDirectory); L([L.isdir] == 1) = []; if ~isempty(L); L = string(extractfield(L, 'name')');end;  if ~isempty(L); L(L=='.DS_Store')=[];end
-                    Lfull = length(L);
-                    L = dir(fullfile(imageDirectory, char(string(ii)))); L([L.isdir] == 1) = []; L = string(extractfield(L, 'name')');  if ~isempty(L); L(L=='.DS_Store')=[];end
+                    L = imageDatastore(imageDirectory);
+                    Lfull = length(L.Files);
+                    L = imageDatastore(fullfile(imageDirectory, char(string(ii))));
     
                     if ii == 1
                         movefile(fullfile(imageDirectory, char(string(ii)), 'Frame_*'), imageDirectory)
                     else
+                        % rename files to be sequential based on total image frames
                         for ll = 1: length(L)
                             if ll < 10
                                 id = ['0000' char(string(ll))];

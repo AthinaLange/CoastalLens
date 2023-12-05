@@ -2,6 +2,10 @@
 %
 % Repeat for each day + flight
 %
+%   
+%   - If using Stability Control Points (like in the CIRN QCIT), you will
+%   have to select the search radius area and bright (dark) threshold prior
+%   to retriving the extrinsics. 
 %
 %
 %
@@ -196,11 +200,8 @@
                     t=(dts./24./3600).*([1:length(L)]-1)+ to;
                     
                     In=imread(fullfile(imageDirectory,L(1)));
-                    f1=figure('Name', 'Image Viewer', 'Position', [100, 100, 1200, 800]);
-                    handles.pauseButton = uicontrol('Style', 'pushbutton', 'String', 'Pause', 'Position', [20, 20, 60, 30]);
-                    handles.imageAxis = axes('Parent', f1, 'Position', [0.1, 0.1, 0.8, 0.8]);
-
-                    imshow(In, 'Parent', handles.imageAxis)
+                    f1=figure;
+                    imshow(In)
                     hold on
                     for k=1:length(scp)
                         plot(scp(k).UVdo(1),scp(k).UVdo(2),'ro','linewidth',2,'markersize',10)
@@ -225,7 +226,6 @@
 
                     for k=2:length(L)
                         
-                        
                         % Assign last Known Extrinsics and SCP UVd coords
                         extrinsics_old=squeeze(extrinsicsVariable(k-1,:));
                         scpUVd_old=squeeze(scpUVdn_full(k-1,:,:));
@@ -234,8 +234,7 @@
                         %  Load the New Image
                         In=imread(fullfile(imageDirectory,L(k)));
                         [m,n,~]=size(In);
-                      
-                       
+                        
                         % Find the new UVd coordinate for each SCPs
                         for j=1:length(scp)
                             [Udn, Vdn, i, udi,vdi] = thresholdCenter(In, scpUVd_old(1,j), scpUVd_old(2,j), scp(j).R, scp(j).T, scp(j).brightFlag);
@@ -249,7 +248,7 @@
 
                                 % Check if you've clicked last 5 pts:
                                 clicks(j, k) = 1;
-                                if k > 10 && sum(clicks(j, k-9:k))>=5
+                                if k > 5 && sum(clicks(j, k-4:k))==5
                                     disp('Change SCP')
                                     scp(j) = redo_SCP(scp(j), In, scpUVd_old(:,j));
                                 end
@@ -301,12 +300,7 @@
                         title(['Frame: ' tt(7:11)])
                         
                         legend('SCP Threshold','SCP Reprojected')
-                        pause(.15)
-                        set(handles.pauseButton, 'Callback', @(src, event) pauseLoop(src, event));
-                        % Check if the pause button is pressed
-                        while ishandle(handles.pauseButton) && strcmp(get(handles.pauseButton, 'UserData'), 'pause')
-                            pause(0.1);
-                        end
+                        pause(.05)
                         %saveas(gcf, sprintf('people_on_dot/Frame_%i.jpg', k))
                         % 
                     end % for k = 2:length(L)
@@ -384,8 +378,6 @@
             end % for hh = 1 : length(extract_Hz)
 
         end % if ind_scp_method == 1
-
-
         if exist('user_email', 'var')
             sendmail(user_email{2}, [oname '- Extrinsics through time DONE'])
         end
@@ -489,7 +481,7 @@ function [scp] = redo_SCP(scp, In, scpUVd_old)
         scatter(scpUVd_old(1), scpUVd_old(2), 50, 'y', 'LineWidth', 3)
         
         xlim([scpUVd_old(1)-50 scpUVd_old(1)+50])
-        ylim([scpUVd_old(2)-50 scpUVd_old(2)+50])
+        ylim([scpUVd_old(2)-50 scpUVd_old(1)-50])
     
                         prev_radius = scp.R;
                         h=rectangle('position',[scpUVd_old(1)-prev_radius, scpUVd_old(2)-prev_radius, 2*prev_radius, 2*prev_radius],'EdgeColor','r','linewidth',1);
@@ -519,7 +511,7 @@ function [scp] = redo_SCP(scp, In, scpUVd_old)
                         answer = questdlg('Bright or dark threshold', ...
                                          'Threshold direction',...
                                          'bright', 'dark', 'bright');
-                        scp.brightFlag = answer;    
+                        scp(gg).brightFlag = answer;    
                         subplot(122)
                         
                         prev_threshold = 100;
@@ -571,15 +563,4 @@ function [scp] = redo_SCP(scp, In, scpUVd_old)
                         close(hGCP)
 
 
-end
-
-
-% Callback function for the pause button
-
-function pauseLoop(src, ~)
-    if strcmp(get(src, 'UserData'), 'pause')
-        set(src, 'UserData', 'resume', 'String', 'Pause');
-    else
-        set(src, 'UserData', 'pause', 'String', 'Resume');
-    end
 end

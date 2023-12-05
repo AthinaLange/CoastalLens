@@ -4,7 +4,6 @@
 % - Define origin of grid
 % - Define products - grid, xTransect, yTransect
 %
-% TODO add in additional product options
 % TODO incorporate DEM into grid
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023

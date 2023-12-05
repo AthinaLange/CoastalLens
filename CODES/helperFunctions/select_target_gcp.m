@@ -1,5 +1,12 @@
 %% select_target_gcp
 % add check that gps_northings in correct format
+%
+% Select corresponding coordinates for the targets that were chosen in select_image_gcp
+% Assumes target coordinates in world coordinates (UTM)
+%
+% Requires: must be run after select_image_gcp
+%
+% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
 %% Get target world coordinates from file
 
         disp('Load in target GCP coordinates file.')
@@ -9,10 +16,6 @@
    
          % assuming that gps_northings in world coordinates and not in local grid system
 
-         % [y2,x2, ~] = ll_to_utm(origin_grid(1), origin_grid(2));
-         % gps_northings(:,2) = x2 - gps_northings(:,2);
-         % gps_northings(:,3) = -(y2 - gps_northings(:,3));
-         % 
         [ind_gcp,tf] = listdlg('ListString', arrayfun(@num2str, [1:size(gps_northings,1)], 'UniformOutput', false), 'SelectionMode','multiple', 'InitialValue',[1], 'PromptString', {'What ground control points' 'did you use? (command + for multiple)'});
         target_gcp = gps_northings(ind_gcp, 2:4);
 

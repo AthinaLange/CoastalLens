@@ -1,7 +1,11 @@
 %% select_survey_gcp
-
-% there has to be a more efficient and accurate way to do this - pull
-% points from LiDAR
+%
+% Choose GCP Locations in LiDAR/SfM survey and image
+% If Image first: click as many GCP as you want. In pointCloud, will find the same amount
+% If LiDAR/SfM first: set number of GCPs you want to find. 
+%
+% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%%
 
 answer = questdlg('Do you want to select from LiDAR/SfM or image first?', 'GCP locations', 'Image', 'LiDAR/SfM', 'Image');
 switch answer
