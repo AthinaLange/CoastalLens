@@ -14,6 +14,10 @@ Toolbox to rectify UAV video in coastal oceanography
  - include grid dimensions check
  - add documentation for gcp methods
 
+## Additional comments
+- if same day/location, but using different cameras/drone, please name folders differently
+- only have relevant videos to be processed in the folder
+
 #### Testing:
 This toolbox is currently in testing phase on the following systems:
 - MacBook Pro M1 2020 (OS 12.6), Matlab 2022b
@@ -62,10 +66,16 @@ UAV_rectification_v09_2023_function_based.m (will then run user_input_data.m and
 - Save: directory paths, data_folders to process and user email
 
 ### User Input:
-- confirm that you get test email
+requires [ffmpeg](https://ffmpeg.org/) install
+requires [exiftool](https://exiftool.org/) install
+requires: data_files, global_dir (and user_email)
+- confirm that you get test email - if email SMTP server not correctly configured, can make changes in code here. 
 - for every hover day folder repeat process:
-    - specify drone system, e.g. DJI or other. Will help define name and duration of videos to be used.
+    - check with user if they have already saved an input_data.mat file with the general drone / products information
+    - specify drone system, e.g. DJI or other. Will help define the video naming convention to be used.
+    - specify video timezone - assuming video metadata in local timezone, otherwise pick UTM
     - find MATLAB camera calibration file for UAV (cameraParameters) - otherwise go do that and come back - should have a distortion and undistorted version of camera calibration (cameraParams_distorted and cameraParams_undistorted) - if only a single calibration (cameraParams)
+        - if none exists, will prompt the MATLAB cameraCalibrator app
     - define your data products to be created (do you want to load in a Products .mat file or define them here?)
         - load in .mat file of origin data grid = (Lat, Lon, shorenormal angle) OR define in pop-up window - lat has to be +-90deg, lon +-180 and shorenormal angle within 360deg defined CC from North (see CDIP MOP angle definitions for examples)
         - for every data product that you want to define - select from Grid (cBathy), xTransect (Timestack) or yTransect (there is the option to self define but that still needs to be expanded on)
@@ -96,24 +106,35 @@ UAV_rectification_v09_2023_function_based.m (will then run user_input_data.m and
           
     - find the minimum number of frames needed to be extracted (2Hz data can be pulled from 10Hz images, but 3Hz cannot. Code will then extract frames at 3Hz and 10Hz)
     
-    - Save cameraParameters, extraction frame rate, Products data, number of flights on given day, grid origin, and drone type
+    - Save cameraParameters, extraction frame rate (extract_Hz), Products, number of flights on given day (flights), timezone (tz) and drone type (drone_type) as input_data.mat
  
     - for every flight repeat process:
-        - extract meta data from images and videos (REQUIRES EXIFTOOL) - to account for false-start videos, only starting at first full length video (DJI: 5:28min) and going to end - INPUT FOR OTHER SYSTEMS/USES REQUIRED
-        - making initial extrinsics guess based on meta data [GPSLatitude, GPSLongitude, RelativeAltitude - zgeoid_offset, CameraYaw + 360, CameraPitch+90, CameraRoll]
+        - extract meta data from images and videos (REQUIRES EXIFTOOL) - Assuming that all videos in the folder need to be processed - INPUT FOR OTHER SYSTEMS/USES REQUIRED
+        - making initial extrinsics guess based on meta data (converted to UTM Coodinates [GPSEasting, GPSNorthing, AbsoluteAltitude - zgeoid_offset, CameraYaw + 360, CameraPitch+90, CameraRoll]
         - Extract 1st frame of video to do initial extrinsics calibration on
         - Confirm whether correct cameraParameters are used - assuming a distorted and undistorted camera calibration has been done, confirm which distortion model to use - Default for our flights is distortion correction ON, so cameraParams_undistorted would be used. 
         - use ground control points to obtain initial camera position and pose (extrinsics) - select method to use
           (see Wiki for more info on various options).
             - Option 1: Automated with LiDAR survey
-            - Option 2: Manual gcp selection from LiDAR or SfM survey
+            - Option 2: Manual gcp selection from LiDAR or SfM survey (DONE)
             - Option 3: Manual gcp selection from GoogleEarth
-            - Option 4: Manual gcp selection from targets (QCIT Toolbox)
+            - Option 4: Manual gcp selection from targets (QCIT Toolbox) (DONE)
+            - Option 5: No gcp - use camera metadata
+          get CIRN extrinsics and MATLAB worldPose - if more points are needed, user prompted to select more from Options 2-4
+        - specify if you want to use SCPs or Feature Matching for image stabilization
+        - if image stabilization via Feature Matching
+            - Extract images every 30sec from all videos (using VideoReader)
+            - Determine how much of image area should be useable for feature matching (how much beach) - improves code speed
+            - Does 2D warping for relative movement between frames (depending on how much rotation is needed, decide between 2D or 3D)
+        - if image stabilization via SCPs (QCIT)
+            - Define SCPs (using same points as GCP targets)
+              define radius, bright/dark, and threshold - specify elevation
         - check that grid dimensions for cBathy data and timestacks is appropriate. If not, follow prompt until you are happy (currently requires input, changed grid cannot be a file).
         - send email with provided information:
             - Origin coordinates
             - initial extrinsics guess
             - gcp-corrected extrinsics with method note
+            - MATLAB worldPose and image stabilization method (2D, 3D, SCP)
             - frame rate of data to be extracted
             - Products to produce with type, frame rate and dimensions
             - Distortion-corrected image, GCP image,  Rectified grid, and timestacks on oblique image
@@ -121,6 +142,7 @@ UAV_rectification_v09_2023_function_based.m (will then run user_input_data.m and
 
 ### Extract Images
 requires [ffmpeg](https://ffmpeg.org/) install
+requires data_files (and user_email)
 
 - for each day and flight:
     - for each extraction frame rate:
@@ -130,5 +152,35 @@ requires [ffmpeg](https://ffmpeg.org/) install
     - send email that image extraction complete
 
 
+### Image Stabilization
+Tracks image stabilization through UAV flight
+requires data_files (and user_email)
+
+- for each day and flight:
+    - for each extraction frame rate:
+        - if using feature matching (monocular visual odometry)
+            - within user-specified region of interest (bottom % of image) detect SURF feature and extract features in first frame
+            - for all subsequent frames:
+               - detect SURF features in current frame
+               - find matching features between current and first frame (to avoid camera drift)
+               - if using 2D rotation
+                  - estimate 2D image transformation - (x,y) shift and rotation angle
+               - if using 3D transformation
+                  - estimate essential matrix
+                  - estimate relative pose
+                    if multiple relative poses found:
+                     - get coordinates of origin (or any known point within the field of view)
+                     - project coordinates into image according to 3D transformations
+                     - if projected point is outside image dimensions - pose is incorrect
+                     - if multiple poses satisfy this - take smallest Euclidian distance between projected points in current frame and projected origin in previous frame
+                  - get worldPose for each frame from worldPose.A * relPose.A
+        - if using SCP (based on QCIT [F_variableExtrinsicsSolution](https://github.com/Coastal-Imaging-Research-Network/CIRN-Quantitative-Coastal-Imaging-Toolbox/wiki/3.-Script-Descriptions:-F_variableExtrinsicSolution))
+            - within radius of previous location of SCPs, find mean location of pixels above/below specified threshold. This becomes the new location of the SCP.
+            - Find the new extrinsics based on new SCP locations.
+           if no points above/below threshold, then user prompt to click the location of the point
+          if same point is clicked 5 times in the last 10 frames, then redo radius and threshold
+          if person/thing walks across point, user can pause code and click on points until object is gone (still TBD).
 
   
+### Create Products
+Generate rectified grids and transects based on image stabilization
