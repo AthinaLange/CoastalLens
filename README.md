@@ -120,6 +120,7 @@ UAV_rectification_v09_2023_function_based.m (will then run user_input_data.m and
 
 
 ### Extract Images
+requires [ffmpeg](https://ffmpeg.org/) install
 
 - for each day and flight:
     - for each extraction frame rate:
