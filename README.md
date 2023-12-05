@@ -1,6 +1,8 @@
 # UAV_automated_rectification
 Toolbox to rectify UAV video in coastal oceanography
 
+# STILL IN PROGRESS -- NOT TO BE USED YET
+
 ## Still TODO
  - SMTP Server stuff
  - DEM option
