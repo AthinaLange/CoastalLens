@@ -69,10 +69,11 @@
 %                   - Drone metadata
 %                   - Feature detection
 %
-%
+% Get Products
 %
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+
 %% ====================================================================
 %                          Housekeeping         
 %                           - confirm CODES path
@@ -182,19 +183,20 @@ answer = questdlg('Recieve update emails?', 'Confirmation Emails?', 'Yes', 'No',
     end
 
 %% ====================================================================
-%                          USER INPUT         
+%                          USER INPUT (DAY AND FLIGHT SPECIFIC DATA)        
 %                           - Choose camera intrinsics file (all flights for a given day must be used with the same drone)
 %                           - Grid & transect coordinates - can be input or from file
 %                           - Local or world coordinates?
 %                           - dx
 %  =====================================================================
 user_input_data
+% change to day_flight_input_data
 %% ====================================================================
 %                           EXTRACT IMAGES       
 %                           - requires data_files and user_email (if emails wanted)
 %                           - requires ffmpeg to extract images
 %  =====================================================================
-extract_images
+extract_images(data_files, user_email)
 
 %% ====================================================================
 %                           EXTRINSICS THROUGH TIME       

@@ -1,18 +1,34 @@
 %% run_extrinsics
-%
-% Repeat for each day + flight
-%
-%
-%
-%
-%
-%
-%
-%
-%  Send email that image extraction complete
-%
-%
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+% 
+% Tracks the image stabilization through flight
+% 
+% If using Feature Detection (Monocular Visual Odometry)
+%   - within region of interest (bottom cutoff %) detect SURF features
+%   - extract features in first frame
+%   - for all subsequent images:
+% 	    - detect SURF features
+% 	    - find matching features between current frame and first frame
+%   - if using 2D rotation
+% 	    - estimate 2D image transformation between matching features
+%   - if using 3D rotation
+% 	    - estimate essential matrix
+% 	    - estimate relative pose based on essential matrix and matching features
+% 	    - if multiple relative poses found
+% 		    - get coordinates of origin (needs to be in the frame)
+% 		    - project coordinates into image according to 3D transformations
+% 		    - if projected point is outside image dimensions - pose is incorrect
+% 		    - if multiple poses satisfy this - take smallest Euclidian distance between projected points in current frame and previous frame
+% 	    - get worldPose for each frame from worldPose.A * relPose.A
+% 
+% 
+% If using SCPs (similar to QCIT F_variableExtrinsicsSolution)
+%   - Within radius of previous location of SCPs, find mean location of pixels above/below specified threshold. This becomes the new location of the SCP. Find new extrinsics based on new SCP locations.
+%       - If no points above/below threshold, then user prompt to click the location of the point.
+%       - If same point is clicked 5 times in the last 10 frames, then reasses radius and thresholds.
+%       - If person walks across points, user can pause code and click on points until object gone. (STILL TBD)
+% 
+% 
+% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Nov 2023
 
 %% Do check 
  for dd = 1:length(data_files)
@@ -35,7 +51,6 @@
                 %  ===================================================================================
                 load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'worldPose', 'R', 'intrinsics')
       
-                %% ====================================================================
                 for hh = 1 : length(extract_Hz)
                     imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
                     mkdir(sprintf('warped_images_%iHz', extract_Hz(hh)));
@@ -44,7 +59,6 @@
                     
                     viewId = 1
                     prevI = undistortImage(im2gray(readimage(images, 1)), intrinsics); 
-                    
                     
                     % Detect features. 
                     prevPoints = detectSURFFeatures(prevI(R.cutoff:end,:), MetricThreshold=500); prevPoints.Location(:,2)=prevPoints.Location(:,2)+R.cutoff;
@@ -113,6 +127,7 @@
                                 [relPose, validPointFraction] = estrelpose(E, intrinsics, ogPoints(indexPairs(:,1)), currPoints(indexPairs(:, 2)));
                             end
     
+                            % if multiple relative Poses are obtained
                             if length(relPose) ~= 1
                                 % Do first check if image projection is very wrong - origin of grid should be within image frame
                                 [UTMNorthing, UTMEasting, UTMZone] = ll_to_utm(Products(1).lat, Products(1).lon);
@@ -121,13 +136,14 @@
                                     aa = worldPose.A *  relPose(rr).A;
                                     absPose = rigidtform3d(aa(1:3,1:3), aa(1:3,4));
                                     iP = world2img(coords, pose2extr(absPose), intrinsics);
+                                    % if origin of grid is projected outside of image -> problem
                                     if any(any(iP(:)> max(intrinsics.ImageSize))) || any(any(iP(:)< 0))
                                         relPose(rr) = [];
                                     end % if any(any(iP(:)> max(intrinsics.ImageSize))) || any(any(iP(:)< 0))
                                 end % for rr = length(relPose):-1:1
                     
                                 if length(relPose) ~= 1
-                                    % find projection point that is closest Euclidian distance to previous origin point
+                                    % find projection point that is closest Euclidian distance to previous frame origin point
                                     previP = world2img(coords, pose2extr(R.FullRate_Adjusted(viewId-1)), intrinsics);
                                     clear dist
                                     for rr = 1:length(relPose)
@@ -170,6 +186,7 @@
                 end % for hh = 1 : length(extract_Hz)
       
             elseif ind_scp_method == 2 % CIRN QCIT F
+                %% ========================CIRN_QCIT_F============================================
                 if exist('user_email', 'var')
                     sendmail(user_email{2}, [oname '- Please start extrinsics through time with SCPs.'])
                 end
@@ -177,7 +194,6 @@
                      'SCPs begin',...
                      'Yes', 'Yes');
         
-                %% ========================CIRN_QCIT_F============================================
                 for hh = 1 : length(extract_Hz)
                 
                     imageDirectory = fullfile(odir, ['images_' char(string(extract_Hz(hh))) 'Hz']);
@@ -186,16 +202,16 @@
                     load(fullfile(odir, 'Processed_data',  [oname '_scpUVdInitial_' char(string(extract_Hz(hh))) 'Hz']), 'scp')
                     load(fullfile(odir, 'Processed_data',  [oname '_IOEOInitial']), 'extrinsics', 'intrinsics_CIRN')
                  
-                    L = dir(imageDirectory); L([L.isdir] == 1) = []; if ~isempty(L); L = string(extractfield(L, 'name')');end;  if ~isempty(L); L(L=='.DS_Store')=[];end
-      
+                    images = imageDatastore(imageDirectory);
+                   
                     load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'C', 'mov_id')
                     dts = 1/extract_Hz(hh);
                     to = datetime(string(C.CreateDate(mov_id(1))), 'InputFormat', 'yyyy:MM:dd HH:mm:ss', 'TimeZone', tz);
                     to.TimeZone = 'UTC';
                     to = datenum(to);
-                    t=(dts./24./3600).*([1:length(L)]-1)+ to;
+                    t=(dts./24./3600).*([1:length(images.Files)]-1)+ to;
                     
-                    In=imread(fullfile(imageDirectory,L(1)));
+                    In=readimage(images, 1);
                     f1=figure('Name', 'Image Viewer', 'Position', [100, 100, 1200, 800]);
                     handles.pauseButton = uicontrol('Style', 'pushbutton', 'String', 'Pause', 'Position', [20, 20, 60, 30]);
                     handles.imageAxis = axes('Parent', f1, 'Position', [0.1, 0.1, 0.8, 0.8]);
@@ -207,7 +223,7 @@
                     end
                 
                     % Initiate Extrinsics Matrix and First Frame Imagery
-                    extrinsicsVariable=nan(length(L),6);
+                    extrinsicsVariable=nan(length(images.Files),6);
                     extrinsicsVariable(1,:)=extrinsics; % First Value is first frame extrinsics.
                    % extrinsicsUncert(1,:)=initialCamSolutionMeta.extrinsicsUncert;
     
@@ -218,12 +234,12 @@
                     scpUVdn_full(1,:,:) = reshape([scp.UVdo],2,[]);
                     imCount=1;
                     click_counter = 0;
-                    clicks = zeros(length(scp), length(L));
+                    clicks = zeros(length(scp), length(images.Files));
                 %% ========================SCPthroughTime============================================
                     %                           - Determine search area around bright or dark target. 
                     %  =====================================================================
 
-                    for k=2:length(L)
+                    for k=2:length(images.Files)
                         
                         
                         % Assign last Known Extrinsics and SCP UVd coords
@@ -232,7 +248,7 @@
                         clear extrinsics_new scpUVd_new
     
                         %  Load the New Image
-                        In=imread(fullfile(imageDirectory,L(k)));
+                        In=readimage(images, k);
                         [m,n,~]=size(In);
                       
                        
@@ -297,7 +313,7 @@
                         uvchk = reshape(UVd,[],2);
                         plot(uvchk(:,1),uvchk(:,2),'yo','linewidth',2,'markersize',10)
     
-                        tt = char(L(k));
+                        tt = char(images.Files(k));
                         title(['Frame: ' tt(7:11)])
                         
                         legend('SCP Threshold','SCP Reprojected')
@@ -314,7 +330,7 @@
                     
                     %  Saving Extrinsics and corresponding image names
                     extrinsics=extrinsicsVariable;
-                    imageNames=L;
+                    imageNames=images;
                     
                     % Saving MetaData
                     variableCamSolutionMeta.scpPath=fullfile(odir, 'Processed_data',  [oname '_scpUVdInitial_' char(string(extract_Hz(hh))) 'Hz']);
@@ -330,7 +346,7 @@
                     
                     %  Display
                     disp(' ')
-                    disp(['Extrinsics for ' num2str(length(L)) ' frames calculated.'])
+                    disp(['Extrinsics for ' num2str(length(images.Files)) ' frames calculated.'])
                     disp(' ')
                     disp(['X Standard Dev: ' num2str(variableCamSolutionMeta.solutionSTD(1))])
                     disp(['Y Standard Dev: ' num2str(variableCamSolutionMeta.solutionSTD(2))])

@@ -1,3 +1,4 @@
+function [survey_gcp, image_gcp] = select_survey_gcp(pc, I, varargin) 
 %% select_survey_gcp
 %
 % Choose GCP Locations in LiDAR/SfM survey and image
@@ -6,18 +7,29 @@
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
 %%
+%%
+if length(nargin) ~= 0
+    intrinsics_CIRN = varargin{1};
+    extrinsicsInitialGuess = varargin{2};
+end
+%%
 
 answer = questdlg('Do you want to select from LiDAR/SfM or image first?', 'GCP locations', 'Image', 'LiDAR/SfM', 'Image');
 switch answer
     case 'Image'
         %% Choose GCP Coordinates on Image
         figure
-       select_image_gcp
-       gcp_num = length(h);
+        
+       
+        [image_gcp] = select_image_gcp(I);
+       gcp_num = length(image_gcp);
         %% Find corresponding points on LiDAR
         figure
-        select_pointcloud_gcp
-        survey_gcp = selectedPoints;
+        if length(nargin) ~= 0
+            [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, intrinsics_CIRN, extrinsicsInitialGuess);
+        else
+            [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num);
+        end
     case 'LiDAR/SfM'
         %% Get LiDAR GCPs
 
@@ -25,7 +37,7 @@ switch answer
         switch answer2
             case 'Yes'
                 disp('Load in LiDAR/SfM gcp template.')
-                [temp_file, temp_file_path] = uigetfile(global_dir, 'LiDAR/SfM GCP template');
+                [temp_file, temp_file_path] = uigetfile(pwd, 'LiDAR/SfM GCP template');
                 load(fullfile(temp_file_path, temp_file)); clear temp_file*
 
                 [ind_survey_pts,tf] = listdlg('ListString', arrayfun(@num2str, [1:size(survey_gcp,1)], 'UniformOutput', false), 'SelectionMode','multiple', 'InitialValue',[1], 'PromptString', {'What survey points' 'did you use? (command + for multiple)'});
@@ -35,14 +47,20 @@ switch answer
                     disp('LiDAR/SfM GCPs not correct.')
                     disp('Select LiDAR/SfM GCPs.')
                     gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find?'}));
-                    select_pointcloud_gcp
-                    survey_gcp = selectedPoints;
+                     if length(nargin) ~= 0
+                        [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, intrinsics_CIRN, extrinsicsInitialGuess);
+                    else
+                        [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num);
+                    end
                 end
             case 'No'
                 disp('Select LiDAR/SfM GCPs.')
-                gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find?'}));
-                select_pointcloud_gcp
-                survey_gcp = selectedPoints;
+                gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find?'})); 
+                if length(nargin) ~= 0
+                    [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, intrinsics_CIRN, extrinsicsInitialGuess);
+                else
+                    [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num);
+                end
         end
 
         % plot LiDAR/SfM gcps
@@ -65,18 +83,11 @@ switch answer
 
         %% Choose GCP Coordinates on Image
         figure
-        select_image_gcp
+        
+        [image_gcp] = select_image_gcp(I);
 end
 
-        %% Allow for last minute changes to happen
-        answer2 = questdlg('Are you happy with image GCP locations?', 'Image GCP locations', 'Yes', 'Yes');
-        switch answer2
-            case 'Yes'
-                for ii = 1:length(h)
-                    image_gcp(ii,:) = h(ii).Position;
-                end
-        end
-
+      
         figure(3);clf
         subplot(122)
         imshow(I)
@@ -86,7 +97,9 @@ end
             text(image_gcp(ii,1)+50, image_gcp(ii,2)-50, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
         end
         subplot(121)
-        scatter3(Points(:,1), Points(:,2), Points(:,3), 20, cPoints, 'filled')
+
+        Points = pc.Location;
+        scatter3(Points(:,1), Points(:,2), Points(:,3), 20, 'filled')
         colorbar
         caxis([0 20])
         zlim([0 20])

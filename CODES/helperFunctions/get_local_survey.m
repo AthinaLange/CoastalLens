@@ -1,3 +1,4 @@
+function [pc] = get_local_survey
 %% get_local_survey
 % Pulls in local lidar or SfM survey (can be Airborne or Mobile)
 % Find .las file

@@ -1,3 +1,4 @@
+function [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, varargin)
 %% select_pointcloud_gcp
 % 
 % use get_noaa_lidar or get_local_survey to get pointCloud
@@ -7,7 +8,15 @@
 % the point, or reclick.
 % Repeat for all GCPs to be found
 %
+% include intrinsics_CIRN and extrinsicsInitialGuess if you want to crop pointcloud
+%
+%
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%%
+if length(nargin) ~= 0
+    intrinsics_CIRN = varargin{1};
+    extrinsicsInitialGuess = varargin{2};
+end
 %%
 Points = pc.Location;
 if ~isempty(pc.Color)
@@ -19,21 +28,21 @@ if ~isempty(pc.Color)
     cPoints = Points(:,3);
 end
 %% Cut pointcloud to approximate projection of image
-I = imread(fullfile(odir, 'Processed_data', 'undistortImage.png'));
-load(fullfile(odir, 'Processed_data', [oname '_IO']), 'intrinsics_CIRN', 'extrinsicsInitialGuess')
-    
-[m,n,c] = size(I); % image dimensions for edge coordinates
-i_bounds = [0 .1*m; n .1*m; n m; 0 m];
-
-[w_bounds] = distUV2XYZ(intrinsics_CIRN, extrinsicsInitialGuess, i_bounds', 'z', zeros(1, size(i_bounds,1)));
-w_bounds([1 4],2) = w_bounds([1 4],2) -100;
-w_bounds([2 3],2) = w_bounds([2 3],2) +100;
-w_bounds([3 4],1) = w_bounds([3 4],1) +100;
-% % 
-[in,on] = inpolygon(Points(:,1), Points(:,2),[w_bounds(1:4,1); w_bounds(1,1)], [w_bounds(1:4,2); w_bounds(1,2)]);
-
-
-pc_new = select(pc, in);
+    if length(nargin) ~= 0
+        [m,n,c] = size(I); % image dimensions for edge coordinates
+        i_bounds = [0 .1*m; n .1*m; n m; 0 m];
+        
+        [w_bounds] = distUV2XYZ(intrinsics_CIRN, extrinsicsInitialGuess, i_bounds', 'z', zeros(1, size(i_bounds,1)));
+        w_bounds([1 4],2) = w_bounds([1 4],2) -100;
+        w_bounds([2 3],2) = w_bounds([2 3],2) +100;
+        w_bounds([3 4],1) = w_bounds([3 4],1) +100;
+        % % 
+        [in,on] = inpolygon(Points(:,1), Points(:,2),[w_bounds(1:4,1); w_bounds(1,1)], [w_bounds(1:4,2); w_bounds(1,2)]);
+        
+        pc_new = select(pc, in);
+    else
+        pc_new = pc;
+    end
 %% Select points from pointcloud
 
 ptCloudOut = pcdownsample(pc_new, 'random', round(100000/pc_new.Count,2));
@@ -69,13 +78,13 @@ for ii = 1:gcp_num
     selectedPoints(size(selectedPoints,1)+1,:)=selectedPoint;
     uiresume(main_fig)
 end
-
+%%
 figure(2);clf
 ax=pcshow(ptCloudOut);
 hold on
 scatter3(selectedPoints(:,1), selectedPoints(:,2), selectedPoints(:,3), 100, 'r', 'filled')
 
-
+survey_gcp = selectedPoints;
 
 answer = questdlg('Do you want to save these survey points for future use?','Save points as template', 'Yes', 'No', 'Yes');
 switch answer
@@ -83,48 +92,9 @@ switch answer
         save_dir = uigetdir('.', 'Saving location for survey points');
         disp('Find location to save survey points as template.')
         survey_save_name = string(inputdlg({'Save name for survey points.'}));
-        survey_gcp = selectedPoints;
         save(fullfile(save_dir, survey_save_name), 'survey_gcp')
 end % switch answer
         
 
 %%
-function [selectedPoint,zoom_fig] = select_pcshow_point(pc)
-    Points = pc.Location;
-    zoom_fig=figure(3);clf
-    pcshow(pc)
-    hold on
-    pause
-
-    disp('Zoom in and click on GCP point and press ''Enter''.')
-    
-    point = get(gca, 'CurrentPoint'); % mouse click position
-    camPos = get(gca, 'CameraPosition'); % camera position
-    camTgt = get(gca, 'CameraTarget'); % where the camera is pointing to
-    
-    camDir = camPos - camTgt; % camera direction
-    camUpVect = get(gca, 'CameraUpVector'); % camera 'up' vector
-            
-    % build an orthonormal frame based on the viewing direction and the 
-    % up vector (the "view frame")
-    zAxis = camDir/norm(camDir);    
-    upAxis = camUpVect/norm(camUpVect); 
-    xAxis = cross(upAxis, zAxis);
-    yAxis = cross(zAxis, xAxis);
-    
-    rot = [xAxis; yAxis; zAxis]; % view rotation 
-    
-    % the point cloud represented in the view frame
-    rotatedPointCloud = rot * Points'; 
-    
-    % the clicked point represented in the view frame
-    rotatedPointFront = rot * point' ;
-    
-    % find the nearest neighbour to the clicked point 
-    pointCloudIndex = dsearchn(rotatedPointCloud(1:2,:)', ... 
-        rotatedPointFront(1:2));
-    
-    selectedPoint = Points(pointCloudIndex,:)';
-    fprintf('you clicked on point number %d\n', pointCloudIndex);
-
 end

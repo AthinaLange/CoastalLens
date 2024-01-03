@@ -102,14 +102,14 @@ answer = questdlg('Did you get the test email?','Test email check', 'Yes / Don''
 %                                   - with Feature Matching - do coarse pose estimation (every 30sec 2D image warping)
 %                               - check products
 %  =====================================================================
-for dd = 1 : length(data_files)
+for dd = 2% : length(data_files)
 
     clearvars -except dd *_dir user_email data_files
     cd([data_files(dd).folder '/' data_files(dd).name])
            %% ==========================inputData==========================================
-            %                                                    Load in input_data if already specified       
-            %  =====================================================================
-      
+        %                                                    Load in input_data if already specified       
+        %  =====================================================================
+  
         % Check if user already has input file with all general drone / products information
         % 
         disp('For CPG: ''input_data.mat'' in day files.')
@@ -137,12 +137,7 @@ for dd = 1 : length(data_files)
            %                                        Choose timezone of video recordings        
            %  =====================================================================
            if ~exist('tz', 'var') || ~ischar(tz)
-                cont_areas = [{'Africa'}, {'America'}, {'Antarctica'}, {'Arctic'}, {'Asia'}, {'Atlantic'}, {'Australia'}, {'Europe'}, {'Indian'}, {'Pacific'}, {'All'}];
-                [ind_area,tf] = listdlg('ListString', cont_areas, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
-                
-                geo_areas = timezones(char(cont_areas(ind_area)));
-                [ind_area,tf] = listdlg('ListString', geo_areas.Name, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
-                tz = char(geo_areas.Name(ind_area));
+                [tz] = define_timezone;
            end
            %% ==========================intrinsics==========================================
             %                                   Choose intrinsics file for each day of flight         
@@ -182,6 +177,8 @@ for dd = 1 : length(data_files)
                         
                         if ~exist('Products', 'var')
                             disp('Please create Products file.')
+                            disp('For CPG: construct DEM for appropriate day')
+                            construct_MOPS_DEM %% XXX
                             user_input_products
                         end
                     case 'No'
@@ -221,7 +218,7 @@ for dd = 1 : length(data_files)
     %                          PROCESS EACH FLIGHT
     %  =====================================================================
     for ff = 1:length(flights)
-        clearvars -except dd ff *_dir user_email data_files
+        clearvars -except dd ff *_dir user_email data_files flights
         load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'))
         
         odir = fullfile(flights(ff).folder, flights(ff).name);
@@ -257,12 +254,16 @@ for dd = 1 : length(data_files)
         jpg_id = find(form == 'JPG');
         
         % remove any weird videos
-        i_temp = find(isnan(C.Duration(mov_id))); mov_id(i_temp)=[];
+       % i_temp = find(isnan(C.Duration(mov_id))); mov_id(i_temp)=[];
     
         % if image taken at beginning & end of flight - use beginning image
         if length(jpg_id) > 1; jpg_id = jpg_id(1); end
         % if no image taken, use mov_id
         if isempty(jpg_id); jpg_id = mov_id(1); end
+
+        % CONFIRM VIDEOS TO PROCESS
+         [id, ~] = listdlg('ListString', append(string(C.FileName(mov_id)), ' - ',  string(C.Duration(mov_id))), 'SelectionMode','multiple', 'InitialValue',[1:length(mov_id)], 'PromptString', {'What movies do you want' 'to use? (command + for multiple)'});
+        mov_id = mov_id(id);
 
         % pull RTK-GPS coordinates from image and change to Eastings/Northings
         % requires intg2012b and ll_to_utm codes (in basic_codes)
@@ -339,31 +340,28 @@ for dd = 1 : length(data_files)
                 cameraCalibrator
                 return
             end
-
         end
-
         % saving in CIRN format
-        intrinsics(1) = cameraParams.ImageSize(2);            % Number of pixel columns
-        intrinsics(2) = cameraParams.ImageSize(1);            % Number of pixel rows
-        intrinsics(3) = cameraParams.PrincipalPoint(1);         % U component of principal point  
-        intrinsics(4) = cameraParams.PrincipalPoint(2);          % V component of principal point
-        intrinsics(5) = cameraParams.FocalLength(1);         % U components of focal lengths (in pixels)
-        intrinsics(6) = cameraParams.FocalLength(2);         % V components of focal lengths (in pixels)
-        intrinsics(7) = cameraParams.RadialDistortion(1);         % Radial distortion coefficient
-        intrinsics(8) = cameraParams.RadialDistortion(2);         % Radial distortion coefficient
+        intrinsics_CIRN(1) = cameraParams.ImageSize(2);            % Number of pixel columns
+        intrinsics_CIRN(2) = cameraParams.ImageSize(1);            % Number of pixel rows
+        intrinsics_CIRN(3) = cameraParams.PrincipalPoint(1);         % U component of principal point  
+        intrinsics_CIRN(4) = cameraParams.PrincipalPoint(2);          % V component of principal point
+        intrinsics_CIRN(5) = cameraParams.FocalLength(1);         % U components of focal lengths (in pixels)
+        intrinsics_CIRN(6) = cameraParams.FocalLength(2);         % V components of focal lengths (in pixels)
+        intrinsics_CIRN(7) = cameraParams.RadialDistortion(1);         % Radial distortion coefficient
+        intrinsics_CIRN(8) = cameraParams.RadialDistortion(2);         % Radial distortion coefficient
         if length(cameraParams.RadialDistortion) == 3
-            intrinsics(9) = cameraParams.RadialDistortion(3);         % Radial distortion coefficient
+            intrinsics_CIRN(9) = cameraParams.RadialDistortion(3);         % Radial distortion coefficient
         else
-            intrinsics(9) = 0;         % Radial distortion coefficient
+            intrinsics_CIRN(9) = 0;         % Radial distortion coefficient
         end
-        intrinsics(10) = cameraParams.TangentialDistortion(1);        % Tangential distortion coefficients
-        intrinsics(11) = cameraParams.TangentialDistortion(2);        % Tangential distortion coefficients
+        intrinsics_CIRN(10) = cameraParams.TangentialDistortion(1);        % Tangential distortion coefficients
+        intrinsics_CIRN(11) = cameraParams.TangentialDistortion(2);        % Tangential distortion coefficients
         
         if (exist('cameraParams_distorted', 'var') & exist('cameraParams_undistorted', 'var') ) && ind_distortion == 2 
-            intrinsics(7:11) = 0; % no distortion (if distortion correction on)
+            intrinsics_CIRN(7:11) = 0; % no distortion (if distortion correction on)
         end
 
-        intrinsics_CIRN = intrinsics;
         intrinsics = cameraParams.Intrinsics; 
         save(fullfile(odir, 'Processed_data', [oname '_IO']), 'intrinsics_CIRN', 'intrinsics', 'cameraParams', 'extrinsicsInitialGuess')
         clearvars I J1 J2 tf ind_distortion hFig cameraParams_*
@@ -377,6 +375,8 @@ for dd = 1 : length(data_files)
         %                           - Option 5: Use camera metadata
         %  =====================================================================
         % whichever method generates image_gcp (N x 2) and world_gcp (N x 3)
+        % use process_ig8_output_athina to get gps_northings.txt 
+        I = imread( fullfile(odir, 'Processed_data', 'undistortImage.png'));
 
          [ind_gcp_option,tf] = listdlg('ListString',[{'Automated from Airborne LiDAR'}, {'Select points from LiDAR/SfM'}, {'Select points from GoogleEarth'}, {'Select GCP targets'}, {'Use Metadata'}],...
                                                      'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Initial GCP Method'});
@@ -388,7 +388,7 @@ for dd = 1 : length(data_files)
                 if ind_lidar_option == 1 % airborne LiDAR
                         get_noaa_lidar %% TODO XXX
                 elseif ind_lidar_option == 2 % local LiDAR survey
-                        get_local_survey
+                       [pc] = get_local_survey;
                 end
                 % XXX SOMETHING HERE XXX
 
@@ -398,10 +398,9 @@ for dd = 1 : length(data_files)
                 if ind_lidar_option == 1 % airborne LiDAR
                         get_noaa_lidar %% TODO XXX
                 elseif ind_lidar_option == 2 % local LiDAR survey
-                        get_local_survey
+                        [pc] = get_local_survey;
                 end
-                select_survey_gcp % includes select_image_gcp
-                world_gcp = survey_gcp;
+                [world_gcp, image_gcp] = select_survey_gcp(pc, I, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
                 if ~isempty(pc.Color)
                     gcp_method = 'manual_SfM';
                 else
@@ -414,9 +413,8 @@ for dd = 1 : length(data_files)
 
           elseif ind_gcp_option == 4 % manual selection of GCP targets (QCIT Toolbox)
                gcp_method = 'manual_targets';
-               select_image_gcp
-               select_target_gcp
-               world_gcp = target_gcp;
+               [image_gcp] = select_image_gcp(I);
+               [world_gcp] = select_target_gcp;
 
           elseif ind_gcp_option == 5 % using metadata
               [worldPose] = CIRN2MATLAB(extrinsics);
@@ -447,11 +445,10 @@ for dd = 1 : length(data_files)
                 if ind_lidar_option == 1 % airborne LiDAR
                         get_noaa_lidar %% TODO XXX
                 elseif ind_lidar_option == 2 % local LiDAR survey
-                        get_local_survey
+                        [pc] = get_local_survey;
                 end
-                select_survey_gcp % includes select_image_gcp
-                world_gcp = survey_gcp;
-                if ~isempty(pc.Color)
+                [world_gcp, image_gcp] = select_survey_gcp(pc, I, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
+                 if ~isempty(pc.Color)
                     gcp_method = 'manual_SfM';
                 else
                     gcp_method = 'manual_LiDAR';
@@ -463,16 +460,16 @@ for dd = 1 : length(data_files)
     
               elseif ind_gcp_option2 == 3 % manual selection of GCP targets (QCIT Toolbox)
                    gcp_method = 'manual_targets';
-                   select_image_gcp
-                   select_target_gcp
-                   world_gcp = target_gcp;
+                   [image_gcp] = select_image_gcp(I);
+                   [world_gcp] = select_target_gcp;
+
     
             end % if ind_gcp_option2 == 1
 
             image_gcp = [iGCP; image_gcp];
             world_gcp = [wGCP; world_gcp];
             try
-                worldPose = estworldpose(image_gcp,world_gcp, intrinsics);
+                worldPose = estworldpose(image_gcp,world_gcp, intrinsics)
             catch
                 worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
                 if exist('user_email', 'var')
@@ -520,6 +517,7 @@ for dd = 1 : length(data_files)
         imageDirectory = 'temp_images';
         load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C')
         jj=0;
+        disp('Extracting images every 30sec for coarse pose estimation.')
         % repeat for each video
         for ii = 1 : length(mov_id)
             v = VideoReader(string(C.FileName(mov_id(ii))));
@@ -551,6 +549,7 @@ for dd = 1 : length(data_files)
         yline(round(size(I,1)*(1/2)), 'LineWidth', 3, 'Color', 'r')
         title('Example Cutoffs')
     
+        % Define cutoff region for feature matching
         cutoff_fraction = string(inputdlg({'Bottom fraction of image to use for feature matching (e.g., 3/4 or 0.75 or 75)'}));
         if contains(cutoff_fraction, '.')
             cutoff_fraction = str2double(cutoff_fraction);
@@ -560,6 +559,8 @@ for dd = 1 : length(data_files)
             cutoff_fraction = str2double(cutoff_fraction); cutoff_fraction = cutoff_fraction/100;
         end
         cutoff = round(size(I,1)*(cutoff_fraction));
+
+        % get coarse pose estimation
         [R, rot_answer] = get_coarse_pose_estimation(images, intrinsics, cutoff);
         R.rot_answer = rot_answer;
         R.cutoff = cutoff;
@@ -577,134 +578,11 @@ for dd = 1 : length(data_files)
             if strcmpi(gcp_method, 'manual_targets')
                 % repeat for each extracted frame rate
                 for hh = 1 : length(extract_Hz)
-            
                     I=imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
-                    hFig = figure(1);clf
-                    imshow(I)
-                    hold on
-                    scatter(image_gcp(:,1), image_gcp(:,2), 50, 'y', 'LineWidth', 3)
-                    for ii = 1:length(image_gcp)
-                        text(image_gcp(ii,1)+50, image_gcp(ii,2)-50, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
-                    end
-                    answer_z = questdlg('Are elevation values in GCP coordinates file?', ...
-                                                      'SCP Elevation',...
-                                                      'Yes', 'No', 'Yes');
-                    switch answer_z
-                            case 'Yes'
-                                disp('Load in target GCP coordinates file.')
-                                disp('For CPG: Should be under the individual day. gps_northings.txt')
-                                 [temp_file, temp_file_path] = uigetfile({'*.txt'}, 'GCP Targets');
-                                 load(fullfile(temp_file_path, temp_file)); clear temp_file*
-                                 for gg = 1:length(gps_northings)
-                                    gcp_options(gg,:) = sprintf('%i - %.2fm', gg, gps_northings(gg,4));
-                                 end
-                      end
-                    
-                    for gg = 1:length(image_gcp)
-                        %% ========================radius============================================
-                            %                           - Determine search area around bright or dark target. 
-                            %  =====================================================================
-                        hFig   
-                        scp(gg).UVdo = image_gcp(gg,:);
-                        scp(gg).num = gg;
-                    
-                        xlim([image_gcp(gg,1)-intrinsics_CIRN(1)/10 image_gcp(gg,1)+intrinsics_CIRN(1)/10])
-                        ylim([image_gcp(gg,2)-intrinsics_CIRN(2)/10 image_gcp(gg,2)+intrinsics_CIRN(2)/10])
-                    
-                        prev_radius = 50;
-                        h=rectangle('position',[image_gcp(gg,1)-prev_radius,image_gcp(gg,2)-prev_radius,2*prev_radius,2*prev_radius],'EdgeColor','r','linewidth',1);
-                        
-                        while true
-                            new_radius = double(string(inputdlg({'Area of Interest Size'}, 'Click Enter with previous radius to finish.',1, {num2str(prev_radius)})));
-                            if new_radius ~= prev_radius
-                                delete(h)
-                                h=rectangle('position',[image_gcp(gg,1)-new_radius,image_gcp(gg,2)-new_radius,2*new_radius,2*new_radius],'EdgeColor','r','linewidth',1);
-                                prev_radius = new_radius;
-                            else
-                                break;
-                            end % if new_radius ~= prev_radius
-                        end % while true
-                        scp(gg).R = prev_radius;
-                    
-                        %% ========================threshold============================================
-                            %                           - Determine threshold value for bright (dark) point - used for tracking through images
-                            %  =====================================================================
-                         
-                        I_gcp = I(round(scp(gg).UVdo(2)-scp(gg).R):round(scp(gg).UVdo(2)+scp(gg).R), round(scp(gg).UVdo(1)-scp(gg).R):round(scp(gg).UVdo(1)+scp(gg).R), :);
-                        hIN = figure(2);clf
-                        hIN.Position(3)=3*hIN.Position(4);
-                        subplot(121)
-                        imshow(rgb2gray(I_gcp))
-                        colormap jet
-                        hold on
-                        cb = colorbar; caxis([0 256]);
-                        answer = questdlg('Bright or dark threshold', ...
-                                         'Threshold direction',...
-                                         'bright', 'dark', 'bright');
-                        scp(gg).brightFlag = answer;    
-                        subplot(122)
-                        
-                        prev_threshold = 100;
-                        switch answer
-                            case 'bright'
-                                mask = rgb2gray(I_gcp) > prev_threshold;
-                            case 'dark'
-                                mask = rgb2gray(I_gcp) < prev_threshold;
-                        end
-                        [rows, cols] = size(mask);
-                        [y, x] = ndgrid(1:rows, 1:cols);
-                        centroid = mean([x(mask), y(mask)]);
-                        imshow(mask)
-                        colormap jet
-                        hold on
-                        plot(centroid(1), centroid(2), 'w+', 'MarkerSize', 10);
-                    
-                        while true
-                            new_threshold = double(string(inputdlg({'Threshold'}, 'Click Enter with previous threshold to finish.',1, {num2str(prev_threshold)})));
-                            if new_threshold ~= prev_threshold
-                                cla
-                                switch answer
-                                    case 'bright'
-                                        mask = rgb2gray(I_gcp) > new_threshold;
-                                    case 'dark'
-                                        mask = rgb2gray(I_gcp) < new_threshold;
-                                end
-                                if length(x(mask)) == 1
-                                    centroid(1)=x(mask);
-                                else
-                                    centroid(1) = mean(x(mask));
-                                end
-                                if length(y(mask)) == 1
-                                    centroid(2)=y(mask);
-                                else
-                                    centroid(2) = mean(y(mask));
-                                end
-                                imshow(mask)
-                                colormap jet
-                                hold on
-                                plot(centroid(1), centroid(2), 'w+', 'MarkerSize', 10);
-                                prev_threshold = new_threshold;
-                            else
-                                break;
-                            end % if new_threshold ~= prev_threshold
-                        end % while true
-                        scp(gg).T = prev_threshold;
-                        close(hIN)
-                        %% ========================elevation============================================
-                            %                           - Pull corresponding elevation value
-                            %  =====================================================================
-                        switch answer_z
-                            case 'Yes'
-                                [ind_gcp,tf] = listdlg('ListString', gcp_options, 'SelectionMode','single', 'InitialValue',[gg], 'PromptString', {'What ground control points' 'did you use?'});
-                                scp(gg).z = gps_northings(ind_gcp, 4);
-                            case 'No'
-                                scp(gg).z = double(string(inputdlg({'Elevation'})));
-                        end
-            
-                    end % for gg = 1:length(image_gcp)
+                    [scp] = define_SCP(I, image_gcp, intrinsics_CIRN);
                     save(fullfile(odir, 'Processed_data',  [oname '_scpUVdInitial_' char(string(extract_Hz(hh))) 'Hz']), 'scp')
                 end
-            else
+             else
                 disp('Ground control targets are required to use stability control points.')
                 % XXX TODO SOMETHING HERE XXX
             end % if strcmpi(gcp_method, 'manual_targets')
@@ -719,11 +597,7 @@ end % if ind_scp_method == 4
         load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsics','intrinsics_CIRN')
         load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'), 'Products')
         I=imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
-    
-        ids_grid = find(contains(extractfield(Products, 'type'), 'Grid'));
-        ids_xtransect = find(contains(extractfield(Products, 'type'), 'xTransect'));
-        ids_ytransect = find(contains(extractfield(Products, 'type'), 'yTransect'));
-
+   
         %% ========================grid============================================
         %                          GRID       
         %                           - Projects grid onto inital frame
@@ -733,35 +607,7 @@ end % if ind_scp_method == 4
         for pp = ids_grid % repeat for all grids
         gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
-                localExtrinsics = localTransformExtrinsics([x2 y2], Products(pp).angle-270, 1, extrinsics);
-                
-                if Products(pp).xlim(1) < 0; Products(pp).xlim(1) = -Products(pp).xlim(1); end
-                ixlim = x2 - Products(pp).xlim;
-                
-                if Products(pp).ylim(1) > 0; Products(pp).ylim(1) = -Products(pp).ylim(1); end
-                if Products(pp).ylim(2) < 0; Products(pp).ylim(2) = -Products(pp).ylim(2); end
-                iylim = y2 + Products(pp).ylim;
-        
-                [iX, iY]=meshgrid(ixlim(1):Products(pp).dx:ixlim(2),iylim(1):Products(pp).dy:iylim(2));
-                
-                % DEM stuff
-                if isempty(Products(pp).z); iz=0; else; iz = Products(pp).z; end
-                iZ=iX*0+iz;
-                
-                X=iX; Y=iY; Z=iZ; 
-                [localX, localY]=localTransformEquiGrid([x2 y2], Products(pp).angle-270,1,iX,iY); 
-                localZ=localX.*0+iz; 
-                
-                [Ir]= imageRectifier(I,intrinsics_CIRN,extrinsics,X,Y,Z,1);
-                subplot(2,2,[2 4])
-                title('World Coordinates')
-                
-                [localIr]= imageRectifier(I,intrinsics_CIRN,localExtrinsics,localX,localY,localZ,1);
-                
-                subplot(2,2,[2 4])
-                title('Local Coordinates')
-                
+                plot_grid(Products(pp), I, intrinsics_CIRN, extrinsics)
                 answer = questdlg('Happy with grid projection?', ...
                      'Grid projection',...
                      'Yes', 'No', 'Yes');
@@ -771,99 +617,28 @@ end % if ind_scp_method == 4
                         gridChangeIndex = 1;
                     case 'No'
                        disp('Please change grid.')
-                       info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
-                                     'Southern Alongshore extent (m from Origin)', 'Northern Alongshore extent (m from Origin)',...
-                                     'dx', 'dy', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'})));
-                        
-                       info = abs(info); % making everything +meters from origin
-                    
-                        % check that there's a value in all the required fields
-                        if find(isnan(info)) ~= 8
-                            disp('Please fill out all boxes (except z elevation if necessary)')
-                            info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
-                                         'Southern Alongshore extent (m from Origin)', 'Northern Alongshore extent (m from Origin)',...
-                                         'dx', 'dy', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'})));
-                            info = abs(info); % making everything +meters from origin
-                        end % if find(isnan(info)) ~= 8
-                        
-                        if info(1) > 30
-                            disp('Maximum frame rate is 30Hz - Please choose a different frame rate.')
-                            info(1) = double(string(inputdlg({'Frame Rate (Hz)'})));
-                        end
-                        Products(pp).frameRate = info(1);
-            
-                        Products(pp).xlim = [info(2) -info(3)]; % offshore limit is negative meters
-                        if Products(pp).angle < 180 % East Coast
-                            Products(pp).ylim = [-info(5) info(4)]; % -north +south
-                        elseif Products(pp).angle > 180 % West Coast
-                            Products(pp).ylim = [-info(4) info(5)]; % -south +north
-                        end % if Products(pp).angle < 180
-                        Products(pp).dx = info(6);
-                        Products(pp).dy = info(7);
-                        if ~isnan(info(8))
-                            Products(pp).z = info(8);
-                        else
-                            % PULL IN DEM
-                        end % if ~isnan(info(8))
+                       origin_grid = [Products(pp).lat Products(pp).lon, Products(pp).angle]
+                       [Product1] = define_grid(origin_grid);
+                       
+                       Products(pp) = Product1;
+                       
                 end % check answer
             end % check gridCheckIndex
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))
         end % for pp = 1:length(ids_grid)
 
-        clearvars ids_grid info gridChangeIndex answer localIr Ir pp x2 y2 localExtrinsics ixlim iylim iX iY iz iZ X Y Z localX localY localZ
+    clearvars ids_grid info Product1 gridChangeIndex answer localIr Ir pp x2 y2 localExtrinsics ixlim iylim iX iY iz iZ X Y Z localX localY localZ
         
         %% ========================xTransects============================================
         %                          xTransects       
         %                           - Projects all xTransects onto inital frame
-        %                           - If unhappy, can reinput grid data
+        %                           - If unhappy, can reinput transect data
         %  =====================================================================
-        ids_xtransect = find(contains(extractfield(Products, 'type'), 'xTransect'));
-        
-        if ~isempty(ids_xtransect)
             
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                figure(5);clf
-                hold on
-                imshow(I)
-                hold on
-                title('Timestack')
-                jj=0;
-                for pp = ids_xtransect % repeat for all xtransects
-                    jj=jj+1;
-            
-                    [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
-                    localExtrinsics = localTransformExtrinsics([x2 y2], Products(pp).angle-270, 1, extrinsics(1,:));
-                    
-                    if Products(pp).xlim(1) < 0; Products(pp).xlim(1) = -Products(pp).xlim(1); end
-                    if Products(pp).xlim(2) > 0; Products(pp).xlim(2) = -Products(pp).xlim(2); end
-                    ixlim = x2 - Products(pp).xlim;
-                    iX = [ixlim(1):Products(pp).dx:ixlim(2)];
-                    
-                    iY = y2 + Products(pp).y;
-            
-                    % DEM stuff
-                    if isempty(Products(pp).z); iz=0; else; iz = Products(pp).z; end
-                    iZ=iX*0+iz;
-                    
-                    X=iX; Y=iY; Z=iZ; 
-                    [localX, localY]=localTransformPoints([x2 y2], Products(pp).angle-270,1,iX,iY); 
-                    localZ=localX.*0+iz; 
-                    xyz = cat(2,localX(:), localY(:), localZ(:));
-
-                    [UVd] = xyz2DistUV(intrinsics_CIRN, localExtrinsics,xyz);
-                    
-                    UVd = reshape(UVd,[],2);
-                    plot(UVd(:,1),UVd(:,2),'*')
-                    xlim([0 intrinsics_CIRN(1)])
-                    ylim([0  intrinsics_CIRN(2)])
-                
-                    le{jj}= [Products(pp).type ' - y = ' char(string(Products(pp).y)) 'm'];
-                   
-                end % for pp = 1:length(ids_xtransect)
-                legend(le)
-
-             answer = questdlg('Happy with transect projection?', ...
+                plot_xtransects(Products, I, intrinsics_CIRN, extrinsics)  
+                answer = questdlg('Happy with transect projection?', ...
                      'Transect Projection',...
                      'Yes', 'No', 'Yes');
         
@@ -872,113 +647,47 @@ end % if ind_scp_method == 4
                         gridChangeIndex = 1;
                     case 'No'
                        disp('Please change transects.')
+                       origin_grid = [Products(ids_xtransect(1)).lat Products(ids_xtransect(1)).lon, Products(ids_xtransect(1)).angle]
                        Products(ids_xtransect) = [];
                        productCounter = length(Products);
 
-                       info = inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
-                         'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]',...
-                         'dx', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'}, Product1.type);
-          
-                     % check that there's a value in all the required fields
-                    if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
-                        disp('Please fill out all boxes (except z elevation if necessary)')
-                        info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
-                                     'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]',...
-                                     'dx', 'z elevation (tide level in relevant datum - leave blank if you want to use a DEM)'}, Product1.type)));
-                    end % if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
-                
-                    info_num = abs(double(string(info([1 2 3 5 6])))); % making everything +meters from origin
-            
-                    if info_num(1) > 30
-                        disp('Maximum frame rate is 30Hz - Please choose a different frame rate.')
-                        info_num(1) = double(string(inputdlg({'Frame Rate (Hz)'})));
-                    end
-                    Product1.frameRate = info_num(1);
-                    Product1.xlim = [-info_num(2) info_num(3)]; % offshore limit is negative meters
-                    Product1.dx = info_num(4);
-                
-                    yy = string(info(4));
-                    if contains(yy, ',')
-                        yy = double(split(yy, ','));
-                    elseif contains(yy, ':')
-                        eval(['yy= ' char(yy)]);
-                    else
-                        disp('Please input in the correct format (comma-separated list or [ylim1:dy:ylim2])')
-                        yy = string(inputdlg({'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]'}));
-                    end %  if contains(yy, ',')
-                
-                    if ~isnan(info_num(5))
-                        Product1.z = info_num(5);
-                    else
-                        % PULL IN DEM
-                    end  
-
-                    for ii = 1:length(yy)
-                        Product1.y = yy(ii);
-                        Products(productCounter + ii) = Product1;
-                    end
-
+                        [Product1] = define_xtransect(origin_grid);
+                        Products(productCounter:productCounter+length(Product1))=Product1;
+       
                 end % check answer
             end % check gridCheckIndex
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_xTransects.png' ]))
-            
-        end % if ~isempty(ids_xtransect)
   
          clearvars ids_xtransect pp jj x2 y2 ixlim iy X Y Z xyz UVd le answer gridChangeIndex
        
         %% ========================yTransects============================================
         %                         yTransects       
         %                           - Projects all yTransects onto inital frame
-        %                           - If unhappy, can reinput grid data
+        %                           - If unhappy, can reinput transect data
         %  =====================================================================
-        if ~isempty(ids_ytransect)
-            figure
-            hold on
-            imshow(I)
-            hold on
-            title('yTransect')
-            jj=0
-            for pp = ids_ytransect
-                jj=jj+1;
-                [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
-                localExtrinsics = localTransformExtrinsics([x2 y2], Products(pp).angle-270, 1, extrinsics);
-                
-                if Products(pp).ylim(1) > 0; Products(pp).ylim(1) = -Products(pp).ylim(1); end
-                if Products(pp).ylim(2) < 0; Products(pp).ylim(2) = -Products(pp).ylim(2); end
-                iylim = y2 + Products(pp).ylim;
-            
-                ix = x2 + Products(pp).x;
-            
-                Y = [iylim(1):Products(pp).dy:iylim(2)]';
-                X = Y.*0+ix;
-                if isempty(Products(pp).z); iz=0; else; iz = Products(pp).z; end
-                Z = Y.*0 + iz;
-                [ Xout Yout]= localTransformPoints([x2 y2], Products(pp).angle-270,1,X,Y);
-                xyz = cat(2,Xout(:), Yout(:), Z(:));
-            
-                [UVd] = xyz2DistUV(intrinsics_CIRN, localExtrinsics,xyz);
-                    
-                UVd = reshape(UVd,[],2);
-                plot(UVd(:,1),UVd(:,2),'*')
-                xlim([0 intrinsics_CIRN(1)])
-                ylim([0  intrinsics_CIRN(2)])
-            
-                le{jj}= [Products(pp).type ' - x = ' char(string(Products(pp).x)) 'm'];
-               
-            end % for pp = 1:length(ids_xtransect)
-            legend(le)
-            answer = questdlg('Happy with rough transect numbers?', ...
+         gridChangeIndex = 0; % check grid
+            while gridChangeIndex == 0
+
+                plot_ytransects(Products, I, intrinsics_CIRN, extrinsics)  
+                answer = questdlg('Happy with rough transect numbers?', ...
                          'Transect Numbers',...
                          'Yes', 'No', 'Yes');
             switch answer
                 case 'Yes'
                     gridChangeIndex = 1;
-                case 'No'
-                   disp('Please change new transect numbers.')
-                   define_product_type
+                    case 'No'
+                       disp('Please change transects.')
+                        origin_grid = [Products(ids_ytransect(1)).lat Products(ids_ytransect(1)).lon, Products(ids_ytransect(1)).angle]
+                       Products(ids_ytransect) = [];
+                       productCounter = length(Products);
+
+                        [Product1] = define_ytransect(origin_grid);
+                        Products(productCounter:productCounter+length(Product1))=Product1;
+       
+
             end % switch answer
+            end % check gridCheckIndex
             print(gcf,'-dpng',fullfile(odir, 'Processed_data', [oname '_yTransects.png' ]))
-        end % if ~isempty(ids_ytransect)
         
         clearvars pp jj x2 y2 iylim ix X Y Z xyz UVd le answer gridChangeIndex
        

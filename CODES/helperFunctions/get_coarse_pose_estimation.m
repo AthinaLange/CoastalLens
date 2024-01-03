@@ -43,8 +43,9 @@ for viewId = 2:length(images.Files)
     [currPoints, currFeatures, indexPairs] = helperDetectAndMatchFeatures(ogFeatures, I, cutoff, numPoints, 'On');
 
     % Eliminate outliers from feature matches.
-    [rotation, inlierIdx, scaleRecovered, thetaRecovered] = helperEstimateRotation(ogPoints(indexPairs(:,1)), currPoints(indexPairs(:, 2)));
-    R.MinuteRate_OGFrame(viewId) = rotation;
+    %[rotation, inlierIdx, scaleRecovered, thetaRecovered] = helperEstimateRotation(ogPoints(indexPairs(:,1)), currPoints(indexPairs(:, 2)));
+    [tform, inlierIdx] = helperEstimateRotation(ogPoints(indexPairs(:,1)), currPoints(indexPairs(:, 2)));
+    R.MinuteRate_OGFrame(viewId) = tform;
 
 end % for viewId =1:length(images.Files)
 
@@ -70,8 +71,10 @@ else
 end % if all(abs([R.MinuteRate_OGFrame.RotationAngle]) < 5)
 
 
-end
 
+   
+end
+%%
 function [currPoints, currFeatures, indexPairs] = helperDetectAndMatchFeatures(prevFeatures, I, cutoff, numPoints, UniformTag)
     % Detect and extract features from the current image.
     currPoints   = detectSURFFeatures(I(cutoff:end,:), 'MetricThreshold', 500);currPoints.Location(:,2)=currPoints.Location(:,2)+cutoff;
@@ -95,7 +98,7 @@ function [tform, inlierIdx] = helperEstimateRotation(matchedPoints1, matchedPoin
     end
     
 
-    [tform, inlierIdx] = estgeotform2d(matchedPoints2, matchedPoints1,'rigid');
+    [tform, inlierIdx] = estgeotform2d(matchedPoints2, matchedPoints1,'similarity');
     
   
 end

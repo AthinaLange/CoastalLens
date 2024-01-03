@@ -38,42 +38,42 @@
                             I_corrected = imwarp(I, correction, OutputView=imref2d(size(I)));
                             for pp = 1:length(Products)
                                 if rem(extract_Hz(hh),Products(pp).frameRate) == 0 % check if at correct extraction rate 
-                                    if extract_Hz(hh) ~= Products(pp).frameRate
-                                    
-
-                                    if worldPose.Translation ~= [0 0 0] % can do this - otherwise use CIRN extrinsics
-                                        [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics);
-                                        Products(pp).localX = Xout;
-                                        Products(pp).localY = Yout;
-                                        Products(pp).localZ = Z;
-                                        iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
-                                   
-                                        clear Irgb_temp
-                                        for ii = 1:length(xyz)
-                                            if any(iP(ii,:) <= 0) || any(iP(ii,[2 1]) >= intrinsics.ImageSize)
-                                                Irgb_temp(ii, :) = uint8([0 0 0]);
-                                            else
-                                                Irgb_temp(ii, :) = I_corrected(iP(ii,2), iP(ii,1),:);
+                                    if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
+                                        if worldPose.Translation ~= [0 0 0] % can do this - otherwise use CIRN extrinsics
+                                            [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics);
+                                            Products(pp).localX = Xout;
+                                            Products(pp).localY = Yout;
+                                            Products(pp).localZ = Z;
+                                            iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
+                                       
+                                            clear Irgb_temp
+                                            for ii = 1:length(xyz)
+                                                if any(iP(ii,:) <= 0) || any(iP(ii,[2 1]) >= intrinsics.ImageSize)
+                                                    Irgb_temp(ii, :) = uint8([0 0 0]);
+                                                else
+                                                    Irgb_temp(ii, :) = I_corrected(iP(ii,2), iP(ii,1),:);
+                                                end
                                             end
-                                        end
-    
-                                         if contains(Products(pp).type, 'Grid')
-                                            Products(pp).Irgb(viewId, :,:,:) = reshape(Irgb_temp, size(Xout,1), size(Xout,2), 3);
-                                         else
-                                             Products(pp).Irgb(viewId, :,:) = Irgb_temp;
-                                        end
-                                    else % use CIRN extrinsics
-                                        [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics, intrinsics_CIRN, I_corrected);
-                                        Products(pp).localX = Xout;
-                                        Products(pp).localY = Yout;
-                                        Products(pp).localZ = Z;
-                                        if contains(Products(pp).type, 'Grid')
-                                            Products(pp).Irgb(viewId, :,:,:) = IrIndv;
-                                        else
-                                            Products(pp).Irgb(viewId, :,:) = permute(IrIndv,[2 1 3]);
-                                        end
-                                    end % if worldPose.Translation ~= [0 0 0]
+        
+                                             if contains(Products(pp).type, 'Grid')
+                                                Products(pp).Irgb(viewId, :,:,:) = reshape(Irgb_temp, size(Xout,1), size(Xout,2), 3);
+                                             else
+                                                 Products(pp).Irgb(viewId, :,:) = Irgb_temp;
+                                            end
+                                        else % use CIRN extrinsics
+                                            [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics, intrinsics_CIRN, I_corrected);
+                                            Products(pp).localX = Xout;
+                                            Products(pp).localY = Yout;
+                                            Products(pp).localZ = Z;
+                                            if contains(Products(pp).type, 'Grid')
+                                                Products(pp).Irgb(viewId, :,:,:) = IrIndv;
+                                            else
+                                                Products(pp).Irgb(viewId, :,:) = permute(IrIndv,[2 1 3]);
+                                            end
+                                        end % if worldPose.Translation ~= [0 0 0]
+                                    end % if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
                                 end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0 
+
                             end % for pp = 1:length(Products)
                         end % for viewId = 1:length(images.Files)
 
@@ -84,51 +84,60 @@
                                 I = undistortImage(readimage(images, viewId), intrinsics);
                                 for pp = 1:length(Products)
                                     if rem(extract_Hz(hh),Products(pp).frameRate) == 0 
-                                        if worldPose.Translation ~= [0 0 0] % can do this - otherwise use CIRN extrinsics
-                                            [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics);
-                                            
-                                            Products(pp).localX = Xout;
-                                            Products(pp).localY = Yout;
-                                            Products(pp).localZ = Z;
-                                            iP = round(world2img(xyz, pose2extr(R.FullRate_OGFrame(viewId)), intrinsics));
-                                           
-                                            clear Irgb_temp
-                                            for ii = 1:length(xyz)
-                                                if any(iP(ii,:) <= 0) || any(iP(ii,[2 1]) >= intrinsics.ImageSize)
-                                                    Irgb_temp(ii, :) = uint8([0 0 0]);
-                                                else
-                                                    Irgb_temp(ii, :) = I(iP(ii,2), iP(ii,1),:);
+                                        if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
+                                    
+                                            if worldPose.Translation ~= [0 0 0] % can do this - otherwise use CIRN extrinsics
+                                                [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics);
+                                                
+                                                Products(pp).localX = Xout;
+                                                Products(pp).localY = Yout;
+                                                Products(pp).localZ = Z;
+                                                iP = round(world2img(xyz, pose2extr(R.FullRate_OGFrame(viewId)), intrinsics));
+                                               
+                                                clear Irgb_temp
+                                                for ii = 1:length(xyz)
+                                                    if any(iP(ii,:) <= 0) || any(iP(ii,[2 1]) >= intrinsics.ImageSize)
+                                                        Irgb_temp(ii, :) = uint8([0 0 0]);
+                                                    else
+                                                        Irgb_temp(ii, :) = I(iP(ii,2), iP(ii,1),:);
+                                                    end
                                                 end
-                                            end
-        
-                                             if contains(Products(pp).type, 'Grid')
-                                                Products(pp).Irgb(viewId, :,:,:) = reshape(Irgb_temp, size(Xout,1), size(Xout,2), 3);
-                                             else
-                                                 Products(pp).Irgb(viewId, :,:) = Irgb_temp;
-                                            end
-                                    else % use CIRN extrinsics
-                                        disp('REQUIRES WORLDPOSE')
-                                    end % if worldPose.Translation ~= [0 0 0]
+            
+                                                 if contains(Products(pp).type, 'Grid')
+                                                    Products(pp).Irgb(viewId, :,:,:) = reshape(Irgb_temp, size(Xout,1), size(Xout,2), 3);
+                                                 else
+                                                     Products(pp).Irgb(viewId, :,:) = Irgb_temp;
+                                                end
+                                        else % use CIRN extrinsics
+                                            disp('REQUIRES WORLDPOSE')
+                                        end % if worldPose.Translation ~= [0 0 0]
+                                    end % if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
                                 end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0 
                             end % for pp = 1:length(Products)
                         end % for viewId = 1:length(images.Files)
                     end % if contains(R.rot_answer, '2D')
 
                 elseif ind_scp_method == 2 % SCPs
+%% =========================== SCPs ==================================
                     load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_SCP_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics','intrinsics_CIRN')
                     for viewId = 1:length(images.Files)
                             viewId
                             I = readimage(images, viewId);
                             for pp = 1:length(Products)
-                                        [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics(viewId,:), intrinsics_CIRN, I);
-                                        Products(pp).localX = Xout;
-                                        Products(pp).localY = Yout;
-                                        Products(pp).localZ = Z;
-                                        if contains(Products(pp).type, 'Grid')
-                                            Products(pp).Irgb(viewId, :,:,:) = IrIndv;
-                                        else
-                                            Products(pp).Irgb(viewId, :,:) = permute(IrIndv,[2 1 3]);
-                                        end
+                                 if rem(extract_Hz(hh),Products(pp).frameRate) == 0 
+                                        if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
+                                    
+                                            [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics(viewId,:), intrinsics_CIRN, I);
+                                            Products(pp).localX = Xout;
+                                            Products(pp).localY = Yout;
+                                            Products(pp).localZ = Z;
+                                            if contains(Products(pp).type, 'Grid')
+                                                Products(pp).Irgb(viewId, :,:,:) = IrIndv;
+                                            else
+                                                Products(pp).Irgb(viewId, :,:) = permute(IrIndv,[2 1 3]);
+                                            end
+                                    end % if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
+                                end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0 
                             end % for pp = 1:length(Products)
                     end %  for viewId = 1:length(images.Files)
 
@@ -250,8 +259,6 @@ function [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics, intrinsic
     IrIndv=uint8(ir);
 
 end
-
-
 
 
 function [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics)
