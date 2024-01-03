@@ -8,6 +8,7 @@ function [target_gcp] = select_target_gcp
 % Requires: must be run after select_image_gcp
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+
 %% Get target world coordinates from file
 
         disp('Load in target GCP coordinates file.')
