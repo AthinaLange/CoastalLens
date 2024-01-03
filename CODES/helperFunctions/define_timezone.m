@@ -1,6 +1,6 @@
 function [TimeZone] = define_timezone
-%
 % Define timezone
+% Returns string of selected timezone. Can be used in datetime construction.
 %
     cont_areas = [{'Africa'}, {'America'}, {'Antarctica'}, {'Arctic'}, {'Asia'}, {'Atlantic'}, {'Australia'}, {'Europe'}, {'Indian'}, {'Pacific'}, {'All'}];
     [ind_area,tf] = listdlg('ListString', cont_areas, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
