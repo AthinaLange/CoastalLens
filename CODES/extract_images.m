@@ -1,5 +1,10 @@
 function extract_images(data_files, varargin)
-%% extract_images
+%% EXTRACT_IMAGES Extract images from given data files at specified frame rate
+%     extract_images(data_files) Structure of data files - requires data_files.folder and data_files.name
+%     extract_images(data_files, user_email) Sends email to user_email that all images extracted
+%
+%
+
 % This script extracts images from video files at specified frame rates.
 % Repeat for each day + flight
 %
