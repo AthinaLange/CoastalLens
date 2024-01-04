@@ -1,7 +1,7 @@
 # Coastal UAV rectification software
 
 ## Installation
-Requires exiftool and ffmpeg.\\
+Requires exiftool and ffmpeg.
 Requires XXX MATLAB toolboxes.
 
 ### Testing
