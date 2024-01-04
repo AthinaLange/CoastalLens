@@ -29,7 +29,7 @@ for ii = 1:length(MOP)
     DEM(ii).y = MOP(ii).y;
     id = find(min(abs(MOP(ii).time - date)) == abs(MOP(ii).time - date));
    
-    if length(id) > 1 & contains(MOP(ii).Source(id), 'Gps')
+    if length(id) > 1 && contains(MOP(ii).Source(id), 'Gps')
         id = id(contains(MOP(ii).Source(id), 'Gps'));
     else
         id = id(1);

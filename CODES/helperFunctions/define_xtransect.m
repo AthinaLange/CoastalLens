@@ -48,7 +48,7 @@ function [Products] = define_xtransect(origin_grid)
             Z = repmat(info_num(5), length(yy),1);
         case 'Yes'
         X_line = -[Product.xlim(1):Product.dx:Product.xlim(2)];
-        Y_line = [yy];
+        Y_line = yy;
         [X,Y] = meshgrid(X_line,Y_line);
                 
         disp('Load in DEM file')

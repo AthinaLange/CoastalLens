@@ -29,7 +29,7 @@ if ~isempty(pc.Color)
 end
 %% Cut pointcloud to approximate projection of image
     if length(nargin) ~= 0
-        [m,n,c] = size(I); % image dimensions for edge coordinates
+        [m,n,~] = size(I); % image dimensions for edge coordinates
         i_bounds = [0 .1*m; n .1*m; n m; 0 m];
         
         [w_bounds] = distUV2XYZ(intrinsics_CIRN, extrinsicsInitialGuess, i_bounds', 'z', zeros(1, size(i_bounds,1)));
@@ -37,7 +37,7 @@ end
         w_bounds([2 3],2) = w_bounds([2 3],2) +100;
         w_bounds([3 4],1) = w_bounds([3 4],1) +100;
         % % 
-        [in,on] = inpolygon(Points(:,1), Points(:,2),[w_bounds(1:4,1); w_bounds(1,1)], [w_bounds(1:4,2); w_bounds(1,2)]);
+        [in,~] = inpolygon(Points(:,1), Points(:,2),[w_bounds(1:4,1); w_bounds(1,1)], [w_bounds(1:4,2); w_bounds(1,2)]);
         
         pc_new = select(pc, in);
     else

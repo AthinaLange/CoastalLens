@@ -40,7 +40,7 @@ switch answer
                 [temp_file, temp_file_path] = uigetfile(pwd, 'LiDAR/SfM GCP template');
                 load(fullfile(temp_file_path, temp_file)); clear temp_file*
 
-                [ind_survey_pts,tf] = listdlg('ListString', arrayfun(@num2str, [1:size(survey_gcp,1)], 'UniformOutput', false), 'SelectionMode','multiple', 'InitialValue',[1], 'PromptString', {'What survey points' 'did you use? (command + for multiple)'});
+                [ind_survey_pts,~] = listdlg('ListString', arrayfun(@num2str, [1:size(survey_gcp,1)], 'UniformOutput', false), 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'What survey points' 'did you use? (command + for multiple)'});
                 survey_gcp = survey_gcp(ind_survey_pts,:);
 
                 if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
@@ -65,12 +65,12 @@ switch answer
 
         % plot LiDAR/SfM gcps
         hLid = figure(2);clf
-        ptCloudOut = pcdownsample(pc, 'random', round(100000/pc.Count,2))
+        ptCloudOut = pcdownsample(pc, 'random', round(100000/pc.Count,2));
        
-        ax=pcshow(ptCloudOut)
+        ax=pcshow(ptCloudOut);
         hold on
        colorbar
-        caxis([0 20])
+        clim([0 20])
         zlim([0 20])
         xlim([min(survey_gcp(:,1))-50 max(survey_gcp(:,1))+50])
         ylim([min(survey_gcp(:,2))-50 max(survey_gcp(:,2))+50])
@@ -101,7 +101,7 @@ end
         Points = pc.Location;
         scatter3(Points(:,1), Points(:,2), Points(:,3), 20, 'filled')
         colorbar
-        caxis([0 20])
+        clim([0 20])
         zlim([0 20])
         xlim([min(survey_gcp(:,1))-50 max(survey_gcp(:,1))+50])
         ylim([min(survey_gcp(:,2))-50 max(survey_gcp(:,2))+50])

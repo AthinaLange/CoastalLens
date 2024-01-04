@@ -27,7 +27,7 @@ for dd = length(data_files)
     for ff = 1: length(flights)
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [data_files(dd).name '_' flights(ff).name];
-        cd(odir) 
+        cd(odir)
 
         load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C')
 
@@ -45,7 +45,7 @@ for dd = length(data_files)
 
                 % combine images extracted from video
                 combine_images(video_files, imageDirectory = imageDirectory)
-                
+
                 % replacing 1st image with image extracted as initial frame for gcp and scp accuracy
                 if ispc
                     system(['cp Processed_data\Initial_frame.jpg ' imageDirectory '\Frame_00001.jpg'])

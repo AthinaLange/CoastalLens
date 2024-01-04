@@ -100,6 +100,6 @@ function [LetterDesignator] = UTMLetterDesignator(Lat)
         else LetterDesignator = 'Z'; %%This is here as an error flag 
 				     %%to show that the Latitude is 
 				     %%outside the UTM limits
-	end; end; end; end; end; end; end; end; end; end;
-	end; end; end; end; end; end; end; end; end; end;
+	end; end; end; end; end; end; end; end; end; end
+	end; end; end; end; end; end; end; end; end; end
 return;

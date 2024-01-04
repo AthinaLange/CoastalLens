@@ -28,7 +28,7 @@ for pp = ids_ytransect % repeat for all xtransects
     X = Y.*0+ix;
     if isempty(Products(pp).z); iz=0; else; iz = Products(pp).z; end
     Z = Y.*0 + iz;
-    [ Xout Yout]= localTransformPoints([x2 y2], Products(pp).angle-270,1,X,Y);
+    [ Xout, Yout]= localTransformPoints([x2 y2], Products(pp).angle-270,1,X,Y);
     xyz = cat(2,Xout(:), Yout(:), Z(:));
 
     [UVd] = xyz2DistUV(intrinsics_CIRN, localExtrinsics,xyz);

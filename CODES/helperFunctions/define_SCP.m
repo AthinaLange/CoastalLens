@@ -61,7 +61,7 @@ function [scp] = define_SCP(I, image_gcp, intrinsics_CIRN)
         imshow(rgb2gray(I_gcp))
         colormap jet
         hold on
-        cb = colorbar; caxis([0 256]);
+        cb = colorbar; clim([0 256]);
         answer = questdlg('Bright or dark threshold', ...
                          'Threshold direction',...
                          'bright', 'dark', 'bright');
@@ -119,7 +119,7 @@ function [scp] = define_SCP(I, image_gcp, intrinsics_CIRN)
             %  =====================================================================
         switch answer_z
             case 'Yes'
-                [ind_gcp,tf] = listdlg('ListString', gcp_options, 'SelectionMode','single', 'InitialValue',[gg], 'PromptString', {'What ground control points' 'did you use?'});
+                [ind_gcp,~] = listdlg('ListString', gcp_options, 'SelectionMode','single', 'InitialValue',gg, 'PromptString', {'What ground control points' 'did you use?'});
                 scp(gg).z = gps_northings(ind_gcp, 4);
             case 'No'
                 scp(gg).z = double(string(inputdlg({'Elevation'})));

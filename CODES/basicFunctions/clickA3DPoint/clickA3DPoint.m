@@ -39,7 +39,7 @@ end
 % show the point cloud
 h = figure;
 scatter3(pointCloud(1,:), pointCloud(2,:), pointCloud(3,:), 30, pointCloud(3,:), 'filled'); 
-caxis([2 15])
+clim([2 15])
 cameratoolbar('Show'); % show the camera toolbar
 hold on; % so we can highlight clicked points without clearing the figure
 

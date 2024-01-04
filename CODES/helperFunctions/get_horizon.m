@@ -53,7 +53,7 @@ function [horizon_line] = get_horizon(I, sky, water)
     evalLineFcn = ...   % distance evaluation function
       @(model, points) sum((ws_line(:, 2) - polyval(model, ws_line(:,1))).^2,2);
     
-    [modelRANSAC, inlierIdx] = ransac(ws_line,fitLineFcn,evalLineFcn, ...
+    [modelRANSAC, ~] = ransac(ws_line,fitLineFcn,evalLineFcn, ...
       sampleSize,maxDistance);
     %modelInliers = polyfit(ws_line(inlierIdx,1),ws_line(inlierIdx,2),1);
    % inlierPts = ws_line(inlierIdx,:);
