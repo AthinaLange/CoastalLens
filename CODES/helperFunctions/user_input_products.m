@@ -9,7 +9,7 @@
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
 
 %% ====================================================================
-%                          ORIGIN FILE        
+%                          ORIGIN FILE
 %                           - Check if user already has origin file for given location
 %                           - Check that Lat / Lon / Angle correct order of magnitude - otherwise fill in again
 %  =====================================================================
@@ -41,7 +41,7 @@ else
     Product_base.lon = double(string(inputdlg('Longitude of Origin')));
 end
 % Check angle
-if origin_grid(3) < 360 && origin_grid(3) > 0 
+if origin_grid(3) < 360 && origin_grid(3) > 0
     Product_base.angle = origin_grid(3);
 else
     Product_base.angle = double(string(inputdlg('Angle (CC degrees from North)')));
@@ -52,7 +52,7 @@ productFlag = 0;
 productCounter = 0;
 
 %% ====================================================================
-%                         PRODUCT INFO        
+%                         PRODUCT INFO
 %                           - GRID (cBathy)
 %                                   - Frame Rate
 %                                   - Cross-shore extent (Offshore and Onshore in m from origin)
@@ -77,7 +77,7 @@ while productFlag == 0
     productCounter = productCounter + 1;
 
     [productType_ind,tf] = listdlg('ListString',{'Grid (cBathy)', 'xTransect (Timestack)', 'yTransect', 'Other (Not recommended)'}, 'SelectionMode','single', 'InitialValue',[1], 'Name', 'What product do you want to create?');
-    
+
     % ===========================================================================
     % ============================== GRID =======================================
     % ===========================================================================
@@ -85,37 +85,37 @@ while productFlag == 0
         [Product1] = define_grid(origin_grid);
 
         Products(productCounter) = Product1;
-       
-    % ===========================================================================
-    % ============================== xTransect ==================================
-    % ===========================================================================
+
+        % ===========================================================================
+        % ============================== xTransect ==================================
+        % ===========================================================================
     elseif productType_ind == 2
         [Product1] = define_xtransect(origin_grid);
-   
+
         for ii = 1:length(Product1)
             Products(productCounter+ii-1)=Product1(ii);
         end
-       
+
         productCounter = length(Products);
 
-    % ===========================================================================
-    % ============================== yTransect ==================================
-    % ===========================================================================
+        % ===========================================================================
+        % ============================== yTransect ==================================
+        % ===========================================================================
     elseif productType_ind == 3
         [Product1] = define_ytransect(origin_grid);
-    
+
         for ii = 1:length(Product1)
             Products(productCounter+ii-1)=Product1(ii);
         end
 
         productCounter = length(Products);
     end % productType
-   
+
     answer2 = questdlg('Define more products?', 'Do you want to create more products?', 'Yes', 'No', 'Yes');
     switch answer2
         case 'No'
             productFlag = 1;
-    end 
+    end
 end % while productFlag = 0
 
 
@@ -127,4 +127,3 @@ switch answer4
         temp_file_path = uigetdir(global_dir, 'Products file save location');
         save(fullfile(temp_file_path, [info{1} '.mat']), 'Products', 'origin_grid')
 end
-    

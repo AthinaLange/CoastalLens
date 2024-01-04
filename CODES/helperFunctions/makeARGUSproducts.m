@@ -12,21 +12,21 @@ for viewId = 1:length(R)
         iBright=uint8(Ir).*0;
     end
 
-     iTimex=iTimex+double(Ir);
-    
+    iTimex=iTimex+double(Ir);
+
     % Darkest: Compare New to Old value, save only the mimumum intensity as
     % iDark
     iDark=min(cat(4,iDark,Ir),[],4);
-    
+
     % Brightest: Compare New to Old value, save only the maximum intensity as
     % iBright
     iBright=max(cat(4,iBright,Ir),[],4);
-    
+
     % If Last Frame...finish the Timex Caculation
     if viewId == length(R)
         iTimex=uint8(iTimex./length(R));
     end
-    
+
 end
 
 %%

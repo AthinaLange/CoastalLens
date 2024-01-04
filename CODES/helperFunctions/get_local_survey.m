@@ -11,3 +11,4 @@ disp('For CPG SfM: CPG_data/20220817_00581_00590_NoWaves_TorreyCobble_P4RTK_epoc
 [temp_file, temp_file_path] = uigetfile({'*.las'}, 'Survey location');
 lasReader=lasFileReader(fullfile(temp_file_path, temp_file)); clear temp_file*
 pc = readPointCloud(lasReader);
+end
