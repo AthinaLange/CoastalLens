@@ -15,7 +15,7 @@
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
 
 %%
-
+% include data check
 % repeat for each day
 for dd = length(data_files)
     clearvars -except dd *_dir user_email data_files
