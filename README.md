@@ -5,6 +5,29 @@ Software to rectify and create CIRN products for coastal imagery UAV data.
 Requires exiftool and ffmpeg.
 Requires XXX MATLAB toolboxes.
 
+## Recommendations
+### Flight:
+- take pre- and post-video image for additional metadata, including RTK data
+- Toggle distortion correction on
+
+### General Folder Structure:
+```bash
+.
+├── CODES
+│ ├── CIRN
+│ ├── basicFunctions
+│ ├── helperFunctions
+│ ├── cBathy_2.0
+├── DATA
+│ └── YYYYMMDD_Location1
+│     ├── 01
+│     ├── 02
+│     ├── 03
+│ └── YYYYMMDD_Location2
+│     ├── 01
+│     ├── 02
+│     ├── 03
+```
 
 ### Testing
 This toolbox is currently in testing phase on the following systems:
