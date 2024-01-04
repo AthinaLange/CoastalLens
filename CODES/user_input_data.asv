@@ -101,7 +101,7 @@ answer = questdlg('Did you get the test email?','Test email check', 'Yes / Don''
 %                                   - with SCPs - define radius and thresholds
 %                                   - with Feature Matching - do coarse pose estimation (every 30sec 2D image warping)
 %                               - check products
-%  ===============================================================================
+%  =====================================================================
 for dd = 1 : length(data_files)
     %% ==========================Housekeeping======================================
     clearvars -except dd *_dir user_email data_files
@@ -214,9 +214,9 @@ end
                 'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
    end
 
-    %% =============================================================================
+    %% ====================================================================
     %                          PROCESS EACH FLIGHT
-    %  ==============================================================================
+    %  =====================================================================
     for ff = 1:length(flights)
         %% ========================Housekeeping=======================================
         clearvars -except dd ff *_dir user_email data_files flights
@@ -501,12 +501,12 @@ end
 
         close all
  
-        %% ========================extrinsicsMethod=====================================
+        %% ========================extrinsicsMethod=======================================
          [ind_scp_method,tf] = listdlg('ListString',[{'Feature Matching'}, {'Using SCPs.'}],...
                                                      'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Extrinsics Method'});
          save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
         
-        %% ========================coarsePoseEstimation=================================
+        %% ========================coarsePoseEstimation======================================
         %                          - Extract images at every 30sec for a coarse pose estimation
         %                          - Assuming little azimuthal rotation - get 2D rotation
         %                          - If rotation angle > 5deg, prompt user if they want 3D transformation or 2D rotation
@@ -589,7 +589,7 @@ end
             end % if strcmpi(gcp_method, 'manual_targets')
 end % if ind_scp_method == 4
 
-        %% ========================productsCheck=======================================
+        %% ========================productsCheck============================================
         %                          CHECK PRODUCTS ON INITIAL IMAGE       
         %                           - Load in all required data -
         %                             extrinsics inital guess, intrinsics, inital frame, input data, products
@@ -599,7 +599,7 @@ end % if ind_scp_method == 4
         load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'), 'Products')
         I=imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
    
-        %% ========================grid================================================
+        %% ========================grid============================================
         %                          GRID       
         %                           - Projects grid onto inital frame
         %                           - If unhappy, can reinput grid data
@@ -630,7 +630,7 @@ end % if ind_scp_method == 4
 
     clearvars ids_grid info Product1 gridChangeIndex answer localIr Ir pp x2 y2 localExtrinsics ixlim iylim iX iY iz iZ X Y Z localX localY localZ
         
-        %% ========================xTransects==========================================
+        %% ========================xTransects============================================
         %                          xTransects       
         %                           - Projects all xTransects onto inital frame
         %                           - If unhappy, can reinput transect data
@@ -661,7 +661,7 @@ end % if ind_scp_method == 4
   
          clearvars ids_xtransect pp jj x2 y2 ixlim iy X Y Z xyz UVd le answer gridChangeIndex
        
-        %% ========================yTransects==========================================
+        %% ========================yTransects============================================
         %                         yTransects       
         %                           - Projects all yTransects onto inital frame
         %                           - If unhappy, can reinput transect data
@@ -692,7 +692,7 @@ end % if ind_scp_method == 4
         
         clearvars pp jj x2 y2 iylim ix X Y Z xyz UVd le answer gridChangeIndex
        
-        %% ========================email===============================================
+        %% ========================email============================================
         %                         SEND EMAIL WITH INPUT DATA  
         %                           - Origin of Coordinate System
         %                           - Initial and corrected Camera Position

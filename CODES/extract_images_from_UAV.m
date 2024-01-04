@@ -1,10 +1,4 @@
-
-% EXTRACT_IMAGES  Extract images from given data files at specified frame rate
-%     extract_images(data_files) Structure of data files - requires data_files.folder and data_files.name
-%     extract_images(data_files, frameRate=2) Extract frames at 2Hz
-%     extract_images(data_files, frameRate=2, user_email) Sends email to user_email that all images extracted
-%
-%
+% extract_images_from_UAV
 
 % This script extracts images from video files at specified frame rates.
 % Repeat for each day + flight
@@ -21,7 +15,6 @@
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
 
 %%
-
 
 % repeat for each day
 for dd = length(data_files)
