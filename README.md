@@ -1,8 +1,10 @@
 # Coastal UAV rectification software
+Software to rectify and create CIRN products for coastal imagery UAV data.
 
 ## Installation
 Requires exiftool and ffmpeg.
 Requires XXX MATLAB toolboxes.
+
 
 ### Testing
 This toolbox is currently in testing phase on the following systems:
@@ -14,6 +16,7 @@ This toolbox is currently in testing phase on the following systems:
 UAV_rectification.m
 
 ## Contributing
+
 
 
 ## License
