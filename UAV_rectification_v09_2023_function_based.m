@@ -196,7 +196,7 @@ user_input_data
 %                           - requires data_files and user_email (if emails wanted)
 %                           - requires ffmpeg to extract images
 %  =====================================================================
-extract_images(data_files, user_email)
+extract_images_from_UAV
 
 %% ====================================================================
 %                           EXTRINSICS THROUGH TIME       
