@@ -1,4 +1,4 @@
-#Coastal UAV rectification software
+# Coastal UAV rectification software
 
 ## Installation
 Requires exiftool and ffmpeg.
