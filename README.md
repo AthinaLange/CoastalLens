@@ -6,7 +6,7 @@ Developed from the [CIRN Qualitative Coastal Imagining Toolbox](https://github.c
 Requires [exiftool](https://exiftool.org) and [ffmpeg](https://ffmpeg.org/download.html). <br />
 Requires XXX MATLAB toolboxes. <br />
 
-## Usage
+## Getting Started
 Run 'UAV_rectification.m' <br />
 Will run .m scripts in CODES/scripts/ <br />
 Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
