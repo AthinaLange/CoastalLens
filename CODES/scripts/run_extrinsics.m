@@ -30,7 +30,7 @@
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Nov 2023
 
-%% Data check
+%%  Input Data check
 if exist('data_files','var') && isstruct(data_files) && isfield(data_files, 'folder') && isfield(data_files, 'name')
     %
 else  % Load in all days that need to be processed.
@@ -48,7 +48,7 @@ else % select global directory
     cd(global_dir)
 end
 
-%% Previous data check
+%% Previous scripts data check
 for dd = 1 : length(data_files)
     for ff = 1 : length(flights)
 
@@ -140,7 +140,7 @@ for dd = 1 : length(data_files)
 end % dd
 
 
-%% Do check
+%% run_extrinsics
 for dd = 1:length(data_files)
     clearvars -except dd *_dir user_email data_files
     cd(fullfile(data_files(dd).folder, data_files(dd).name))
