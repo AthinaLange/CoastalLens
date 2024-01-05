@@ -30,12 +30,122 @@
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Nov 2023
 
-%% Do check
+%%  Input Data check
+if exist('data_files','var') && isstruct(data_files) && isfield(data_files, 'folder') && isfield(data_files, 'name')
+    %
+else  % Load in all days that need to be processed.
+    data_dir = uigetdir('.', 'DATA Folder');
+    disp('Please select the days to process:')
+    data_files = dir(data_dir); data_files([data_files.isdir]==0)=[]; data_files(contains({data_files.name}, '.'))=[];
+    [ind_datafiles,~] = listdlg('ListString',{data_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
+    data_files = data_files(ind_datafiles);
+end
+if exist('global_dir', 'var') && isstring(global_dir)
+    %
+else % select global directory
+    disp('Please select the global directory.')
+    global_dir = uigetdir('.', 'UAV Rectification');
+    cd(global_dir)
+end
+
+%% Previous scripts data check
+for dd = 1 : length(data_files)
+    for ff = 1 : length(flights)
+
+        % Input_data: Products, extract_Hz, and flights
+        if ~exist(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'), 'file')
+            disp('Please create an input_data.mat file with Products, extract_Hz, and flights.')
+            % flights
+            flights = dir(fullfile(data_files(dd).folder, data_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
+            
+            % Products
+            answer = questdlg('Do you have a .mat Products file?', 'Product file', 'Yes', 'No', 'Yes');
+            switch answer
+                case 'Yes'
+                    disp('Please select file of products you want to load in.')
+                    disp('For CPG: CPG_data/products_Torrey.mat') %% XXX
+                    [temp_file, temp_file_path] = uigetfile(global_dir, 'Product file');
+                    load(fullfile(temp_file_path, temp_file)); clear temp_file*
+    
+                    if ~exist('Products', 'var')
+                        disp('Please create Products file.')
+                        disp('For CPG: construct DEM for appropriate day')
+                        construct_MOPS_DEM %% XXX
+                        user_input_products
+                    end
+                case 'No'
+                    user_input_products
+            end
+            clear answer
+
+            % extract_Hz
+            info_Hz = unique([Products.frameRate]);
+            extract_Hz = max(info_Hz);
+            for hh = 1:length(info_Hz)
+                if rem(max(info_Hz), info_Hz(hh)) == 0
+                    sprintf('%i Hz data can be pulled from %i Hz data', info_Hz(hh), max(info_Hz))
+                else
+                    sprintf('%i Hz data CANNOT be pulled from %i Hz data', info_Hz(hh), max(info_Hz))
+                    extract_Hz = [extract_Hz info_Hz(hh)];
+                end
+            end
+            clear hh info_Hz
+            save(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'), 'extract_Hz', 'Products', 'flights', '-append')
+        end
+
+        % Initial_coordinates: C, mov_id
+        if ~exist(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Initial_coordinates.mat'), 'file')
+            disp('Please get a table of the metadata in C, and the id''s of the movie files (mov_id).')
+            temp_name = string(inputdlg({'What is the file prefix?'}));
+            drone_file_name = temp_name(1);
+            [C, jpg_id, mov_id] = get_metadata(fullfile(flights(ff).folder, flights(ff).name), [data_files(dd).name '_' flights(ff).name], drone_file_name);
+            save(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates'),  'jpg_id', 'mov_id', 'C', '-append')
+            sprintf('Store this variable in %s', 'Initial_coordinates.mat')
+        end
+
+        % IOEOVariable: ind_scp_method
+        if ~exist(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [data_files(dd).name '_' flights(ff).name '_IOEOVariable.mat']), 'file')
+            disp('Please define a SCP method in ind_scp_method variable.')
+            [ind_scp_method,tf] = listdlg('ListString',[{'Feature Matching'}, {'Using SCPs.'}],...
+            'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Extrinsics Method'});
+            save(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [data_files(dd).name '_' flights(ff).name '_IOEOVariable.mat']),'ind_scp_method')
+            sprintf('Store this variable in %s', [data_files(dd).name '_' flights(ff).name '_IOEOVariable.mat'])
+        end
+
+        % IOEOInitial: worldPose, R, intrinsics, extrinsics, intrinsics_CIRN
+        if ~exist(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [data_files(dd).name '_' flights(ff).name '_IOEOInitial.mat']), 'file')
+            disp('Depending on the SCP method, please include extrinsics and intrinsics information.')
+            disp('If using Feature Matching: worldPose, R and intrinsics.')
+            disp('If using SCPs: extrinsics and intrinsics_CIRN')
+            % TODO
+            sprintf('Store this variable in %s', [data_files(dd).name '_' flights(ff).name '_IOEOInitial.mat'])
+        end
+
+
+        % scpUVdInitial: scp (requires ind_scp_method and extract_Hz
+        load(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [data_files(dd).name '_' flights(ff).name '_IOEOVariable.mat']), 'ind_scp_method')
+        if ind_scp_method == 2 % SCP
+            extract_Hz_dir=dir(fullfile(flights(ff).folder, flights(ff).name));
+            extract_Hz_dir([extract_Hz_dir.isdir]==0)=[]; extract_Hz_dir(~contains({aa.name}, 'images_'))=[];
+            for hh = 1:length(extract_Hz_dir)
+                if ~exist(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [data_files(dd).name '_' flights(ff).name '_scpUVdInitial_' char(string(extract(extract_Hz_dir(hh).name,digitsPattern))) 'Hz.mat']), 'file')
+                    sprintf('For extract_Hz = %.1f Hz', char(string(extract(extract_Hz_dir(hh).name,digitsPattern))))
+                    disp('Please define SCPs.')
+                    % TODO
+                    sprintf('Store this variable in %s', [data_files(dd).name '_' flights(ff).name '_scpUVdInitial_' char(string(extract(extract_Hz_dir(hh).name,digitsPattern))) 'Hz.mat'])
+                end
+            end % hh
+        end % if ind_scp_method
+    end % ff
+end % dd
+
+
+%% run_extrinsics
 for dd = 1:length(data_files)
     clearvars -except dd *_dir user_email data_files
     cd(fullfile(data_files(dd).folder, data_files(dd).name))
 
-    load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'))
+    load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'), 'Products', 'extract_Hz', 'flights')
 
     % repeat for each flight
     for ff = 1 : length(flights)
@@ -49,7 +159,7 @@ for dd = 1:length(data_files)
             %           - SMALL CHANGE: in reference to initial image to reduce accumulating drift errors
             %           - LARGE CHANGE: in reference to previous image - correct for accumulated drift later
             %  ===================================================================================
-            load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'worldPose', 'R', 'intrinsics')
+            load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'worldPose', 'intrinsics')
 
             for hh = 1 : length(extract_Hz)
                 imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
@@ -73,7 +183,7 @@ for dd = 1:length(data_files)
                 ogFeatures = prevFeatures;
 
                 %% Subsequent Frames
-                if contains(R.rot_answer, '2D') || worldPose.Translation == [0 0 0] % do 2D rotation
+                if contains(R.rot_answer, '2D') | worldPose.Translation == [0 0 0] % do 2D rotation
                     for viewId = 2:length(images.Files)
                         % Read and display the next image
                         Irgb = readimage(images, (viewId));
@@ -407,12 +517,11 @@ for dd = 1:length(data_files)
         end
     end % for ff = 1 : length(flights)
 end % for dd = 1:length(data_files)
-
-
+clearvars -except *_dir user_email data_files
+cd(global_dir)
 
 
 %% Functions
-
 
 function [currPoints, currFeatures, indexPairs] = helperDetectAndMatchFeatures(prevFeatures, I, cutoff, numPoints, ~)
 % Detect and extract features from the current image.
@@ -522,7 +631,7 @@ while true
 end % while true
 scp.R = prev_radius;
 
-%% ========================threshold============================================
+% ========================threshold============================================
 
 I_gcp = In(round(scpUVd_old(2)-scp.R):round(scpUVd_old(2)+scp.R), round(scpUVd_old(1)-scp.R):round(scpUVd_old(1)+scp.R), :);
 hIN = figure(2);clf
@@ -531,7 +640,7 @@ subplot(121)
 imshow(rgb2gray(I_gcp))
 colormap jet
 hold on
-colorbar; clim([0 256]);
+colorbar; caxis([0 256]);
 answer = questdlg('Bright or dark threshold', ...
     'Threshold direction',...
     'bright', 'dark', 'bright');
@@ -586,9 +695,7 @@ scp.T = prev_threshold;
 close(hIN)
 close(hGCP)
 
-
 end
-
 
 % Callback function for the pause button
 
