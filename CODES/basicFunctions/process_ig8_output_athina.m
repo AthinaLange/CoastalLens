@@ -2,7 +2,7 @@ numfiles = input('Enter the number of GPS files to process: ');
 
 T = [];
 for i = 1:numfiles
-    display('Select GPS file: ')
+    disp('Select GPS file: ')
     [ifile,ipath] = uigetfile('*.txt'); 
     inputfile = [ipath,ifile];
 

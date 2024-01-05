@@ -1,23 +1,5 @@
 % GET PRODUCT DATA FROM R
 
-%% Data check
-if exist('data_files','var') && isstruct(data_files) && isfield(data_files, 'folder') && isfield(data_files, 'name')
-    %
-else  % Load in all days that need to be processed.
-    data_dir = uigetdir('.', 'DATA Folder');
-    disp('Please select the days to process:')
-    data_files = dir(data_dir); data_files([data_files.isdir]==0)=[]; data_files(contains({data_files.name}, '.'))=[];
-    [ind_datafiles,~] = listdlg('ListString',{data_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
-    data_files = data_files(ind_datafiles);
-end
-if exist('global_dir', 'var') && isstring(global_dir)
-    %
-else % select global directory
-    disp('Please select the global directory.')
-    global_dir = uigetdir('.', 'UAV Rectification');
-    cd(global_dir)
-end
-%%
 for dd = 1 : length(data_files)
     clearvars -except dd *_dir user_email data_files P
     cd(fullfile(data_files(dd).folder, data_files(dd).name))
@@ -166,9 +148,6 @@ for dd = 1 : length(data_files)
         end % for hh = 1 : length(extract_Hz)
     end % for ff = 1 : length(flights)
 end % for dd = 1 : length(data_files)
-clearvars -except *_dir user_email data_files
-cd(global_dir)
-
 %%
 %% FUNCTIONS
 function [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics, intrinsics_CIRN, I)
@@ -281,6 +260,7 @@ IrIndv=uint8(ir);
 
 end
 
+
 function [xyz, Xout, Yout, Z] = getCoords(Products, pp, extrinsics)
 
 [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
@@ -338,3 +318,5 @@ end
 xyz = xyz+[x2 y2 0];
 
 end
+
+

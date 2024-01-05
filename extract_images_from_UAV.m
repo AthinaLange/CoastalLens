@@ -1,21 +1,39 @@
 % extract_images_from_UAV
-
-% This script extracts images from video files at specified frame rates.
-% Repeat for each day + flight
+% This script extracts images from video files at specified frame rates for every day and flight.
+% 
+% Requires: 
+%       data_files - structure (dir) with days to process.
+%       global_dir - global directory string
 %
 %   For each extraction frame rate:
-%           - make Hz directory for images
+%           - make Hz directory for images (e.g. images_10Hz/)
 %           - for every movie to be extracted: extract images from video at extraction frame rate using ffmpeg (into seperate folder intially)
 %           - move images from movie folders into group folder and rename sequentially
-%
-%  Send email that image extraction complete
+%   Send email that image extraction complete
 %
 % REQUIRES: ffmpeg installation (https://ffmpeg.org/)
 %
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
 
-%%
-% include data check
+%% Data check
+if exist('data_files','var') && isstruct(data_files) && isfield(data_files, 'folder') && isfield(data_files, 'name')
+    %
+else  % Load in all days that need to be processed.
+    data_dir = uigetdir('.', 'DATA Folder');
+    disp('Please select the days to process:')
+    data_files = dir(data_dir); data_files([data_files.isdir]==0)=[]; data_files(contains({data_files.name}, '.'))=[];
+    [ind_datafiles,~] = listdlg('ListString',{data_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
+    data_files = data_files(ind_datafiles);
+end
+if exist('global_dir', 'var') && isstring(global_dir)
+    %
+else % select global directory
+    disp('Please select the global directory.')
+    global_dir = uigetdir('.', 'UAV Rectification');
+    cd(global_dir)
+end
+
+%% Extract images from UAV video
 % repeat for each day
 for dd = length(data_files)
     clearvars -except dd *_dir user_email data_files
@@ -60,3 +78,5 @@ for dd = length(data_files)
         end
     end % for ff = 1:length(flights)
 end % for dd = 1:length(data_files)
+clearvars -except *_dir user_email data_files
+cd(global_dir)

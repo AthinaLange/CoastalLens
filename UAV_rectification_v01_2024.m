@@ -1,7 +1,7 @@
 %% UAV_automated_rectification toolbox
 %
 %
-% 
+%
 %   1. Housekeeping
 %           Platform Detection: The script identifies the operating system (Mac, Linux, Windows).
 %           Global Directory Selection: Asks the user to choose the directory for UAV rectification.
@@ -34,10 +34,10 @@
 %
 %  Housekeeping
 %       - confirm DATA path - which day or multiple days are you processing
-%       - get user email 
+%       - get user email
 %
 %  User Input
-%       - Obtain day relevant data 
+%       - Obtain day relevant data
 %               - camera intrinsics
 %               - Products
 %               - extraction frame rates
@@ -64,7 +64,7 @@
 %           - Option for SCPs (adapted from CIRN QCIT F_variableExtrinsicSolutions.m)
 %           - Use information in least squares fitting approximation to
 %           determine camera pose from frame to frame
-%               - Options include: 
+%               - Options include:
 %                   - Horizon tracking
 %                   - Drone metadata
 %                   - Feature detection
@@ -75,26 +75,27 @@
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
 
 %% ====================================================================
-%                          Housekeeping         
+%                          Housekeeping
 %                           - confirm CODES path
 %                           - confirm DATA path - which day or multiple days are you processing
-%                           - get user email 
+%                           - get user email
 %  =====================================================================
 %% =============== Get global directory location. =====================================================================
 clearvars
 
 if ismac
     % Code to run on Mac platform
-    platform = 'mac'
+    platform = 'Currently running on a Mac OS.';
 elseif isunix
     % Code to run on Linux platform
-    platform = 'linux'
+    platform = 'Currently running on a Linux OS.';
 elseif ispc
     % Code to run on Windows platform
-    platform = 'windows'
+    platform = 'Currently running on a Windows OS.';
 else
-    disp('Platform not supported')
+    platform = 'Platform not supported';
 end
+disp(platform)
 
 if ismac || isunix
     disp('Choose UAV Rectification folder.')
@@ -162,44 +163,44 @@ data_files = data_files(ind_datafiles);
 %% =============== Confirm update emails and get email address. =====================================================================
 % Get user email
 answer = questdlg('Recieve update emails?', 'Confirmation Emails?', 'Yes', 'No', 'Yes');
-    switch answer
-        case 'Yes'
-            user_email = inputdlg({'Name', 'Email'});
+switch answer
+    case 'Yes'
+        user_email = inputdlg({'Name', 'Email'});
 
-            props = java.lang.System.getProperties;
-            props.setProperty('mail.smtp.port', '587');
-            props.setProperty('mail.smtp.auth','true');
-            props.setProperty('mail.smtp.starttls.enable','true');
-            
-            setpref('Internet','SMTP_Server','smtp.gmail.com');
-            setpref('Internet','SMTP_Username','athinalange1996');
-            setpref('Internet', 'SMTP_Password', 'baundwhnctgbsykb')
-            sendmail(user_email{2}, 'UAV Toolbox test email', [user_email{1} ' is processing UAV data from ' data_files.name '.'])
-            
-            save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'data_files', 'user_email')
-        case 'No'
-            save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'data_files')
+        props = java.lang.System.getProperties;
+        props.setProperty('mail.smtp.port', '587');
+        props.setProperty('mail.smtp.auth','true');
+        props.setProperty('mail.smtp.starttls.enable','true');
 
-    end
+        setpref('Internet','SMTP_Server','smtp.gmail.com');
+        setpref('Internet','SMTP_Username','athinalange1996');
+        setpref('Internet', 'SMTP_Password', 'baundwhnctgbsykb')
+        sendmail(user_email{2}, 'UAV Toolbox test email', [user_email{1} ' is processing UAV data from ' data_files.name '.'])
+
+        save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'data_files', 'user_email')
+    case 'No'
+        save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'data_files')
+
+end
 
 %% ====================================================================
-%                          USER INPUT (DAY AND FLIGHT SPECIFIC DATA)        
+%                          USER INPUT (DAY AND FLIGHT SPECIFIC DATA)
 %                           - Choose camera intrinsics file (all flights for a given day must be used with the same drone)
 %                           - Grid & transect coordinates - can be input or from file
 %                           - Local or world coordinates?
 %                           - dx
 %  =====================================================================
-user_input_data
-% change to day_flight_input_data
+input_day_flight_data
+
 %% ====================================================================
-%                           EXTRACT IMAGES       
+%                           EXTRACT IMAGES
 %                           - requires data_files and user_email (if emails wanted)
 %                           - requires ffmpeg to extract images
 %  =====================================================================
 extract_images_from_UAV
 
 %% ====================================================================
-%                           EXTRINSICS THROUGH TIME       
+%                           EXTRINSICS THROUGH TIME
 %                           - requires data_files and user_email (if emails wanted)
 %                           - requires XXX
 %  =====================================================================
@@ -211,4 +212,4 @@ run_extrinsics
 %                           - requires XXX
 %  =====================================================================
 get_products
-[iDark, iBright, iTimex] = makeARGUSproducts(images, R.FullRate_OGFrame, intrinsics)
+[iDark, iBright, iTimex] = makeARGUSproducts(images, R.FullRate_OGFrame, intrinsics);

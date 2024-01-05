@@ -3,7 +3,7 @@ function [R, answer] = get_coarse_pose_estimation(images, intrinsics, cutoff)
 %
 % within region of interest (bottom cutoff %) detect SURF features
 % extract features in first frame
-% for all subsequent images: 
+% for all subsequent images:
 %   - detect SURF features
 %   - find matching features between current frame and first frame
 %   - estimate 2D image transformation between matching features
@@ -13,15 +13,15 @@ function [R, answer] = get_coarse_pose_estimation(images, intrinsics, cutoff)
 %%
 
 viewId = 1
-prevI = undistortImage(im2gray(readimage(images, 1)), intrinsics); 
+prevI = undistortImage(im2gray(readimage(images, 1)), intrinsics);
 
 
-% Detect features. 
+% Detect features.
 prevPoints = detectSURFFeatures(prevI(cutoff:end,:), MetricThreshold=500); prevPoints.Location(:,2)=prevPoints.Location(:,2)+cutoff;
 numPoints = 500;
 prevPoints = selectUniform(prevPoints, numPoints, size(prevI));
 
-% Extract features. 
+% Extract features.
 prevFeatures = extractFeatures(prevI, prevPoints);
 
 ogI = prevI;
@@ -32,19 +32,19 @@ ogFeatures = prevFeatures;
 % DO FOR ALL IMAGES WRT OG FRAME
 for viewId = 2:length(images.Files)
     viewId
-   
+
     % Read and display the next image
     Irgb = readimage(images, (viewId));
-    
+
     % Convert to gray scale and undistort.
-     I = undistortImage(im2gray(Irgb), intrinsics);
-    
+    I = undistortImage(im2gray(Irgb), intrinsics);
+
     % WRT OG IMAGE
-    [currPoints, currFeatures, indexPairs] = helperDetectAndMatchFeatures(ogFeatures, I, cutoff, numPoints, 'On');
+    [currPoints, ~, indexPairs] = helperDetectAndMatchFeatures(ogFeatures, I, cutoff, numPoints, 'On');
 
     % Eliminate outliers from feature matches.
     %[rotation, inlierIdx, scaleRecovered, thetaRecovered] = helperEstimateRotation(ogPoints(indexPairs(:,1)), currPoints(indexPairs(:, 2)));
-    [tform, inlierIdx] = helperEstimateRotation(ogPoints(indexPairs(:,1)), currPoints(indexPairs(:, 2)));
+    [tform, ~] = helperEstimateRotation(ogPoints(indexPairs(:,1)), currPoints(indexPairs(:, 2)));
     R.MinuteRate_OGFrame(viewId) = tform;
 
 end % for viewId =1:length(images.Files)
@@ -61,7 +61,7 @@ yline(-5, 'LineStyle', '--', 'LineWidth', 1, 'Color', 'k')
 set(gca, 'FontSize', 16)
 title({'Coarse Pose Estimation (relative to 1st frame)', 'Recommended no larger than 5deg'})
 
- 
+
 if all(abs([R.MinuteRate_OGFrame.RotationAngle]) < 5)
     disp('SMALL AZIMUTHAL ROTATION')
     answer = '2D'
@@ -72,34 +72,34 @@ end % if all(abs([R.MinuteRate_OGFrame.RotationAngle]) < 5)
 
 
 
-   
+
 end
 %%
-function [currPoints, currFeatures, indexPairs] = helperDetectAndMatchFeatures(prevFeatures, I, cutoff, numPoints, UniformTag)
-    % Detect and extract features from the current image.
-    currPoints   = detectSURFFeatures(I(cutoff:end,:), 'MetricThreshold', 500);currPoints.Location(:,2)=currPoints.Location(:,2)+cutoff;
-    if contains('UniformTag', 'On')
-        currPoints   = selectUniform(currPoints, numPoints, size(I));
-    end
-    currFeatures = extractFeatures(I, currPoints);
-    
-    % Match features between the previous and current image.
-    indexPairs = matchFeatures(prevFeatures, currFeatures, 'Unique', true, 'MaxRatio', 0.9);
+function [currPoints, currFeatures, indexPairs] = helperDetectAndMatchFeatures(prevFeatures, I, cutoff, numPoints, ~)
+% Detect and extract features from the current image.
+currPoints   = detectSURFFeatures(I(cutoff:end,:), 'MetricThreshold', 500);currPoints.Location(:,2)=currPoints.Location(:,2)+cutoff;
+if contains('UniformTag', 'On')
+    currPoints   = selectUniform(currPoints, numPoints, size(I));
+end
+currFeatures = extractFeatures(I, currPoints);
+
+% Match features between the previous and current image.
+indexPairs = matchFeatures(prevFeatures, currFeatures, 'Unique', true, 'MaxRatio', 0.9);
 end
 
 function [tform, inlierIdx] = helperEstimateRotation(matchedPoints1, matchedPoints2)
 
-    if ~isnumeric(matchedPoints1)
-        matchedPoints1 = matchedPoints1.Location;
-    end
-    
-    if ~isnumeric(matchedPoints2)
-        matchedPoints2 = matchedPoints2.Location;
-    end
-    
+if ~isnumeric(matchedPoints1)
+    matchedPoints1 = matchedPoints1.Location;
+end
 
-    [tform, inlierIdx] = estgeotform2d(matchedPoints2, matchedPoints1,'similarity');
-    
-  
+if ~isnumeric(matchedPoints2)
+    matchedPoints2 = matchedPoints2.Location;
+end
+
+
+[tform, inlierIdx] = estgeotform2d(matchedPoints2, matchedPoints1,'similarity');
+
+
 end
 

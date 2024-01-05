@@ -1,4 +1,4 @@
-function [k] = which1_intg(xlat, xlon, nfiles, glamn, glamx, glomn, glomx, dla, dlo, nla, nlo, ios);
+function [k] = which1_intg(xlat, xlon, nfiles, glamn, glamx, glomn, glomx, dla, dlo, nla, nlo, ios)
 %%function [k] = which1_intg(xlat, xlon, nfiles, glamn, glamx, glomn, glomx, dla, dlo, nla, nlo, ios);
 %%%subroutine which1(xlat,xlon,nfiles,k, glamn, glamx, glomn, glomx, dla, dlo, nla, nlo, ios);
 
@@ -31,9 +31,9 @@ rank = zeros(1, nfiles);
 %% - If all files have rank=0, k is set to -1
 
 for i=1:nfiles
-	if (ios == 0),
+	if (ios == 0)
 
-         	if (xlat <= glamx(i) & xlat >= glamn(i) & xlon <= glomx(i) & xlon >= glomn(i) ),
+         	if (xlat <= glamx(i) & xlat >= glamn(i) & xlon <= glomx(i) & xlon >= glomn(i) )
 
 			%% - At this point, we're Inside a grid
 	
@@ -48,44 +48,44 @@ for i=1:nfiles
           		ee = 0;
 
 			%% - Near North edge?
-          		if (glamx(i) - xlat <= dla(i)/2),
+          		if (glamx(i) - xlat <= dla(i)/2)
             			ne = 1;
 
 			%% - Near South edge?
-          		elseif (xlat - glamn(i) <= dla(i)/2),
+          		elseif (xlat - glamn(i) <= dla(i)/2)
             			se = 1;
           		end
     
 			%% - Near East edge?
-          		if (glomx(i) - xlon <= dlo(i)/2),
+          		if (glomx(i) - xlon <= dlo(i)/2)
             			ee = 1;
 			%% - Near West edge?
-          		elseif (xlon - glomn(i) <= dlo(i)/2),
+          		elseif (xlon - glomn(i) <= dlo(i)/2)
             			we = 1;
-          		end;
+          		end
           
           		%%%if(.not.ne .and. .not.se .and. .not.we .and. .not.ee)then
-          		if (~ne & ~se & ~we & ~ee),
+          		if (~ne & ~se & ~we & ~ee)
             			k = i;
             			return;
-          		end;
+          		end
          
 			%% - Set the rank of this file, based on edge-logic
-          		if (ne & ~we & ~ee) rank(i) = 2; end;
-          		if (se & ~we & ~ee) rank(i) = 2; end;
-          		if (we & ~ne & ~se) rank(i) = 2; end;
-          		if (ee & ~ne & ~se) rank(i) = 2; end;
-          		if (ne & we) rank(i) = 1; end;
-          		if (se & we) rank(i) = 1; end;
-          		if (se & ee) rank(i) = 1; end;
-          		if (ne & ee) rank(i) = 1; end;
+          		if (ne & ~we & ~ee) rank(i) = 2; end
+          		if (se & ~we & ~ee) rank(i) = 2; end
+          		if (we & ~ne & ~se) rank(i) = 2; end
+          		if (ee & ~ne & ~se) rank(i) = 2; end
+          		if (ne & we) rank(i) = 1; end
+          		if (se & we) rank(i) = 1; end
+          		if (se & ee) rank(i) = 1; end
+          		if (ne & ee) rank(i) = 1; end
 
-        	end;
+        	end
 
 
-    	end;
+    	end
 
-end;
+end
 
 
 %% - If we reach this point, all possible files have
@@ -93,18 +93,18 @@ end;
 %% - had a rank of 3.  So now, see if we have any rank 2
 %% - or rank 1 files to use.
 for i=1:nfiles
-       	if (ios == 0 & rank(i) == 2),
+       	if (ios == 0 & rank(i) == 2)
           	k = i;
           	return;
-	end;
-end;
+	end
+end
 
 for i=1:nfiles
-       	if (ios == 0 & rank(i) == 1),
+       	if (ios == 0 & rank(i) == 1)
           	k = i;
           	return;
-        end;
-end;
+        end
+end
 
 
 %% - If we come here, no files are acceptable for the

@@ -18,11 +18,11 @@ for ll = 1:100%length(L)
         else
             sky = round(a.Position);
         end
-        drawpoint('Position', sky, 'Label', ['Sky Point']);
+        drawpoint('Position', sky, 'Label', 'Sky Point');
         
         b=drawpoint();
         water = round(b.Position);
-        drawpoint('Position', water, 'Label', ['Water Point']);
+        drawpoint('Position', water, 'Label', 'Water Point');
        
     end
     

@@ -1,4 +1,4 @@
-function [nfiles, lin, nff, ios] = files_intg(dirnam);
+function [nfiles, lin, nff, ios] = files_intg(dirnam)
 %%function [nfiles, lin, nff, ios] = files_intg(dirnam);
 %%%%      subroutine files(dirnam,nfiles,fnam,lin,nff, ios)
 
@@ -9,7 +9,7 @@ function [nfiles, lin, nff, ios] = files_intg(dirnam);
 %% - Use the one master file for CONUS
   fname = [dirnam 'g2012bu0.bin'];
   lin = fopen(fname, 'r', 'b');
-  if lin > 0, ios = 0; end;
+  if lin > 0, ios = 0; end
 
 
 %% - Check and see if at least ONE file was opened,
@@ -24,6 +24,6 @@ function [nfiles, lin, nff, ios] = files_intg(dirnam);
 		%fprintf(1, 'No files found.  bye.\n');
 	else
 		%fprintf(1, 'Files found = %d\n', nff);
-	end;
+	end
 
 return;
