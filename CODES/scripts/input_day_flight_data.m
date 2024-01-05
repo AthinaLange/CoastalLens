@@ -62,6 +62,23 @@
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Dec 2023
 %
 
+%% Data check
+if exist('data_files','var') && isstruct(data_files) && isfield(data_files, 'folder') && isfield(data_files, 'name')
+    %
+else  % Load in all days that need to be processed.
+    data_dir = uigetdir('.', 'DATA Folder');
+    disp('Please select the days to process:')
+    data_files = dir(data_dir); data_files([data_files.isdir]==0)=[]; data_files(contains({data_files.name}, '.'))=[];
+    [ind_datafiles,~] = listdlg('ListString',{data_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
+    data_files = data_files(ind_datafiles);
+end
+if exist('global_dir', 'var') && isstring(global_dir)
+    %
+else % select global directory
+    disp('Please select the global directory.')
+    global_dir = uigetdir('.', 'UAV Rectification');
+    cd(global_dir)
+end
 %% ===========================testEmail=========================================
 %                  Confirm test email recieved
 %                   - TODO Change setting for SMTP server
@@ -243,7 +260,28 @@ for dd = 1 : length(data_files)
             drone_file_name = temp_name(1);
         end
 
-        [C, jpg_id, mov_id] = get_metadata(odir, oname, drone_file_name);
+        system(sprintf('/usr/local/bin/exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s_0* > %s', odir, drone_file_name, fullfile(odir, 'Processed_data', [oname '.csv'])));
+
+        C = readtable(fullfile(odir, 'Processed_data', [oname '.csv']));
+
+        format long
+        % get indices of images and videos to extract from
+        form = char(C.FileName);
+        form = string(form(:,end-2:end));
+        mov_id = find(form == 'MOV' | form == 'MP4');
+        jpg_id = find(form == 'JPG');
+
+        % remove any weird videos
+        % i_temp = find(isnan(C.Duration(mov_id))); mov_id(i_temp)=[];
+
+        % if image taken at beginning & end of flight - use beginning image
+        if length(jpg_id) > 1; jpg_id = jpg_id(1); end
+        % if no image taken, use mov_id
+        if isempty(jpg_id); jpg_id = mov_id(1); end
+
+        % CONFIRM VIDEOS TO PROCESS
+        [id, ~] = listdlg('ListString', append(string(C.FileName(mov_id)), ' - ',  string(C.Duration(mov_id))), 'SelectionMode','multiple', 'InitialValue',[1:length(mov_id)], 'PromptString', {'What movies do you want' 'to use? (command + for multiple)'});
+        mov_id = mov_id(id);
 
         % pull RTK-GPS coordinates from image and change to Eastings/Northings
         % requires intg2012b and ll_to_utm codes (in basic_codes)
@@ -406,7 +444,7 @@ for dd = 1 : length(data_files)
 
         % Getting CIRN extrinsics
         extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
-        [extrinsics, extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag, intrinsics_CIRN, image_gcp, world_gcp);
+        [extrinsics extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag, intrinsics_CIRN, image_gcp, world_gcp);
         % TODO add in reprojectionError
         % TODO check that grid size all consistent
 
@@ -485,42 +523,13 @@ for dd = 1 : length(data_files)
             'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Extrinsics Method'});
         save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
 
-        %% ========================coarsePoseEstimation=================================
-        %                          - Define cutoff region
-        %  =================================================================================
+        %% ========================SCPs===============================================
+        %  If using SCPs for tracking pose through time, extra step is required - define intensity threshold
+        %  - Define search area radius - center of brightest (darkest) pixels in this region will be chosen as stability point from one frame to the next.
+        %  - Define intensity threshold of brightest or darkest pixels in search area
+        %  ============================================================================
 
-        if ind_scp_method == 1
-            I=imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
-            figure(1);clf
-            image(I)
-            xticks([])
-            yticks([size(I,1)*[0.05:0.05:1]])
-            yticklabels({'5%', '10%', '15%', '20%', '25%', '30%', '35%', '40%', '45%', '50%', '55%', '60%', '65%', '70%', '75%', '80%', '85%', '90%', '95%', '100%'})
-            yline(round(size(I,1)*(3/4)), 'LineWidth', 3, 'Color', 'r')
-            yline(round(size(I,1)*(1/2)), 'LineWidth', 3, 'Color', 'r')
-            title('Example Cutoffs')
-
-            % Define cutoff region for feature matching
-            cutoff_fraction = string(inputdlg({'Bottom fraction of image to use for feature matching (e.g., 3/4 or 0.75 or 75)'}));
-            if contains(cutoff_fraction, '.')
-                cutoff_fraction = str2double(cutoff_fraction);
-            elseif contains(cutoff_fraction, '/')
-                ab=sscanf(cutoff_fraction,'%d/%d'); cutoff_fraction = ab(1)/ab(2);
-            else
-                cutoff_fraction = str2double(cutoff_fraction); cutoff_fraction = cutoff_fraction/100;
-            end
-            cutoff = round(size(I,1)*(cutoff_fraction));
-            R.cutoff = cutoff;
-
-            save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'R', '-append')
-            close all
-            %% ========================SCPs===============================================
-            %  If using SCPs for tracking pose through time, extra step is required - define intensity threshold
-            %  - Define search area radius - center of brightest (darkest) pixels in this region will be chosen as stability point from one frame to the next.
-            %  - Define intensity threshold of brightest or darkest pixels in search area
-            %  ============================================================================
-
-        elseif ind_scp_method == 2 % Using SCPs (similar to CIRN QCIT)
+        if ind_scp_method == 2 % Using SCPs (similar to CIRN QCIT)
             if strcmpi(gcp_method, 'manual_targets')
                 % repeat for each extracted frame rate
                 for hh = 1 : length(extract_Hz)
