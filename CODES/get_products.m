@@ -33,28 +33,27 @@ for dd = 1 : length(day_files)
 
         for hh = 1 : length(extract_Hz)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
-            images = imageDatastore(imageDirectory);
+            images = imageDatastore(imageDirectory);images.Files = images.Files(1:60:end);
 
-            load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'worldPose', 'extrinsics')
+            load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'worldPose', 'extrinsics', 'intrinsics')
             load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
             if ind_scp_method == 1 % Using Feature Detection/Matching
                 extrinsicsInitial = extrinsics;
-                load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz(hh))) 'Hz' ]), 'extrinsics_transformation')
+                load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz(hh))) 'Hz' ]), 'extrinsics_transformations')
               
                 %% construct panorama box
-                imageSize(viewId,:) = size(readimage(images,1));
-                for i = 1:numel(extrinsics_transformation)
-                    [xlim(i,:), ylim(i,:)] = outputLimits(extrinsics_transformation(i), [1 imageSize(i,2)], [1 imageSize(i,1)]);
+                imageSize= size(readimage(images,1));
+                for i = 1:numel(extrinsics_transformations)
+               
+                    [xlim(i,:), ylim(i,:)] = outputLimits(extrinsics_transformations(i), [1 imageSize(2)], [1 imageSize(1)]);
                 end
-
-                maxImageSize = max(imageSize);
 
                 % Find the minimum and maximum output limits.
                 xMin = min([1; xlim(:)]);
-                xMax = max([maxImageSize(2); xlim(:)]);
+                xMax = max([imageSize(2); xlim(:)]);
 
                 yMin = min([1; ylim(:)]);
-                yMax = max([maxImageSize(1); ylim(:)]);
+                yMax = max([imageSize(1); ylim(:)]);
 
                 % Width and height of panorama.
                 width  = round(xMax - xMin);
@@ -69,16 +68,20 @@ for dd = 1 : length(day_files)
                     %% =========================== Feature Detection ==================================
                     for viewId = 1:length(images.Files)
                         viewId
-                        I = imwarp(undistortImage(readimage(images, viewId), intrinsics), extrinsics_transformation(viewId), 'OutputView', panoramaView);
+                        I = imwarp(undistortImage(readimage(images, viewId), intrinsics), extrinsics_transformations(viewId), 'OutputView', panoramaView);
                         for pp = 1:length(Products)
-                            if rem(extract_Hz(hh),Products(pp).frameRate) == 0 % check if at correct extraction rate
-                                if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
+                            %if rem(extract_Hz(hh),Products(pp).frameRate) == 0 % check if at correct extraction rate
+                            %    if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
                                     
                                         if viewId == 1
                                             [xyz, Xout, Yout, Z] = getCoords(Products(pp), extrinsicsInitial);
                                             Products(pp).localX = Xout;
                                             Products(pp).localY = Yout;
                                             Products(pp).localZ = Z;
+                                            %find orientation of original image in panoramaView
+                                            mask = imwarp(true(size(I,1),size(I,2)), extrinsics_transformations(viewId), 'OutputView', panoramaView);
+                                            BW = boundarymask(mask);
+                                            [row, col] = find(BW == 1, 1,'first');
 
                                             Products(pp).iP = round(world2img(xyz, pose2extr(worldPose), intrinsics))+[col row];
                                         end
@@ -98,8 +101,8 @@ for dd = 1 : length(day_files)
                                                 Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
                                             end
             
-                                end % if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
-                            end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0
+                            %    end % if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
+                          %  end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0
 
                         end % for pp = 1:length(Products)
                     end % for viewId = 1:length(images.Files)
@@ -138,26 +141,6 @@ for dd = 1 : length(day_files)
     end % for ff = 1 : length(flights)
 end % for dd = 1 : length(day_files)
 %%
-for viewId = 1:length(images.Files)
-viewId
-I = readimage(images, viewId);
-for pp = 1:length(Products)
-%     if rem(extract_Hz(hh),Products(pp).frameRate) == 0
-%       if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
-[IrIndv, Xout, Yout, Z] = getPixels(Products(pp), extrinsics(viewId,:), intrinsics_CIRN, I);
-Products(pp).localX = Xout;
-Products(pp).localY = Yout;
-Products(pp).localZ = Z;
-if contains(Products(pp).type, 'Grid')
-Products(pp).Irgb_scp(viewId, :,:,:) = IrIndv;
-else
-Products(pp).Irgb_scp(viewId, :,:) = permute(IrIndv,[2 1 3]);
-end
-%      end % if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
-%  end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0
-end % for pp = 1:length(Products)
-end %  for viewId = 1:length(images.Files)
-save(fullfile(odir, 'Processed_data', [oname '_Products_' char(string(extract_Hz(hh))) 'Hz' ]),'Products', '-v7.3')
 
 %% FUNCTIONS
 function [IrIndv, Xout, Yout, Z] = getPixels(Products, extrinsics, intrinsics_CIRN, I)

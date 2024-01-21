@@ -168,7 +168,7 @@ for dd = 1 : length(day_files)
                 %  ===================================================================================
 
                 [panorama, extrinsics_transformations] = get_extrinsics_fd(odir, oname, images);
-                save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics', 't')
+                save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics_transformations', 't')
 
             elseif ind_scp_method == 2 % CIRN QCIT F
                 %% ========================SCPs=====================================================
