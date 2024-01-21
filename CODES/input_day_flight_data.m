@@ -99,7 +99,6 @@ end
 %                               - confirm inital drone position and pose from gcps
 %                               - specify if image stabilization done with Feature Matching or SCPs
 %                                   - with SCPs - define radius and thresholds
-%                                   - with Feature Matching - do coarse pose estimation (every 30sec 2D image warping)
 %                               - check products
 %  ===============================================================================
 for dd = 1 : length(day_files)
@@ -177,7 +176,7 @@ for dd = 1 : length(day_files)
                 if ~exist('Products', 'var')
                     disp('Please create Products file.')
                     disp('For CPG: construct DEM for appropriate day')
-                    construct_MOPS_DEM %% XXX
+                    %construct_MOPS_DEM %% XXX
                     user_input_products
                 end
             case 'No'
@@ -231,7 +230,6 @@ for dd = 1 : length(day_files)
         %% ========================metadata===========================================
         %                          INITIAL DRONE COORDINATES FROM METADATA
         %                           - Use exiftool to pull metadata from images and video
-        %                               - currently set for DJI name
         %                               - mov_id indicates which movies to use in image extraction
         %                               - get inital camera position and pose from metadata
         %  ============================================================================
@@ -369,15 +367,15 @@ for dd = 1 : length(day_files)
         % use process_ig8_output_athina to get gps_northings.txt
         I = imread( fullfile(odir, 'Processed_data', 'undistortImage.png'));
 
-        [ind_gcp_option,~] = listdlg('ListString',[{'Automated from Airborne LiDAR'}, {'Select points from LiDAR/SfM'}, {'Select points from GoogleEarth'}, {'Select GCP targets'}, {'Use Metadata'}],...
+        [ind_gcp_option,~] = listdlg('ListString',[{'Automated from Airborne LiDAR (TBD)'}, {'Select points from LiDAR/SfM'}, {'Select points from GoogleEarth (TBD)'}, {'Select GCP targets'}, {'Use Metadata (TBD)'}],...
             'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Initial GCP Method'});
 
         if ind_gcp_option == 1 % automated from LiDAR
             gcp_method = 'auto_LiDAR';
-            [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR'}, {'Local LiDAR survey'}],...
+            [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR (TBD)'}, {'Local LiDAR survey'}],...
                 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'LiDAR survey'});
             if ind_lidar_option == 1 % airborne LiDAR
-                get_noaa_lidar %% TODO XXX
+                %get_noaa_lidar %% TODO XXX
             elseif ind_lidar_option == 2 % local LiDAR survey
                 disp('Find local LiDAR/SfM survey folder.')
                 disp('For CPG LiDAR: CPG_data/LiDAR/20230220_NAD83_UTM11N_NAVD88_TorreyLot.las')
@@ -388,10 +386,10 @@ for dd = 1 : length(day_files)
             % XXX SOMETHING HERE XXX
 
         elseif ind_gcp_option == 2 % manual selection from LiDAR
-            [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR'}, {'Local LiDAR/SfM survey'}],...
+            [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR (TBD)'}, {'Local LiDAR/SfM survey'}],...
                 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'LiDAR/SfM survey'});
             if ind_lidar_option == 1 % airborne LiDAR
-                get_noaa_lidar %% TODO XXX
+                %get_noaa_lidar %% TODO XXX
             elseif ind_lidar_option == 2 % local LiDAR survey
                 disp('Find local LiDAR/SfM survey folder.')
                 disp('For CPG LiDAR: CPG_data/LiDAR/20230220_NAD83_UTM11N_NAVD88_TorreyLot.las')
@@ -416,7 +414,7 @@ for dd = 1 : length(day_files)
             [world_gcp] = select_target_gcp;
 
         elseif ind_gcp_option == 5 % using metadata
-            [worldPose] = CIRN2MATLAB(extrinsics);
+           % [worldPose] = CIRN2MATLAB(extrinsics);
             % check azimuthal, pitch and roll from image - Brittany
             % method
             % XXX TBD XXX
@@ -435,14 +433,14 @@ for dd = 1 : length(day_files)
         catch % get more points
             iGCP = image_gcp; clear image_gcp
             wGCP = world_gcp; clear world_gcp
-            [ind_gcp_option2,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'Select points from GoogleEarth'}, {'Select GCP targets'}],...
+            [ind_gcp_option2,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'Select points from GoogleEarth (TBD)'}, {'Select GCP targets'}],...
                 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Requires more GCP points'});
 
             if ind_gcp_option2 == 1 % manual selection from LiDAR
-                [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR'}, {'Local LiDAR/SfM survey'}],...
+                [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR (TBD)'}, {'Local LiDAR/SfM survey'}],...
                     'SelectionMode','single', 'InitialValue',1, 'PromptString', {'LiDAR/SfM survey'});
                 if ind_lidar_option == 1 % airborne LiDAR
-                    get_noaa_lidar %% TODO XXX
+                    %get_noaa_lidar %% TODO XXX
                 elseif ind_lidar_option == 2 % local LiDAR survey
                     disp('Find local LiDAR/SfM survey folder.')
                     disp('For CPG LiDAR: CPG_data/LiDAR/20230220_NAD83_UTM11N_NAVD88_TorreyLot.las')
@@ -507,42 +505,13 @@ for dd = 1 : length(day_files)
             'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Extrinsics Method'});
         save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
 
-        %% ========================coarsePoseEstimation=================================
-        %                          - Define cutoff region
-        %  =================================================================================
-
-        if ind_scp_method == 1
-            % I=imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
-            % figure(1);clf
-            % image(I)
-            % xticks([])
-            % yticks([size(I,1)*[0.05:0.05:1]])
-            % yticklabels({'5%', '10%', '15%', '20%', '25%', '30%', '35%', '40%', '45%', '50%', '55%', '60%', '65%', '70%', '75%', '80%', '85%', '90%', '95%', '100%'})
-            % yline(round(size(I,1)*(3/4)), 'LineWidth', 3, 'Color', 'r')
-            % yline(round(size(I,1)*(1/2)), 'LineWidth', 3, 'Color', 'r')
-            % title('Example Cutoffs')
-            % 
-            % % Define cutoff region for feature matching
-            % cutoff_fraction = string(inputdlg({'Bottom fraction of image to use for feature matching (e.g., 3/4 or 0.75 or 75)'}));
-            % if contains(cutoff_fraction, '.')
-            %     cutoff_fraction = str2double(cutoff_fraction);
-            % elseif contains(cutoff_fraction, '/')
-            %     ab=sscanf(cutoff_fraction,'%d/%d'); cutoff_fraction = ab(1)/ab(2);
-            % else
-            %     cutoff_fraction = str2double(cutoff_fraction); cutoff_fraction = cutoff_fraction/100;
-            % end
-            % cutoff = round(size(I,1)*(cutoff_fraction));
-            % R.cutoff = cutoff;
-            % 
-            % save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'R', '-append')
-            % close all
             %% ========================SCPs===============================================
             %  If using SCPs for tracking pose through time, extra step is required - define intensity threshold
             %  - Define search area radius - center of brightest (darkest) pixels in this region will be chosen as stability point from one frame to the next.
             %  - Define intensity threshold of brightest or darkest pixels in search area
             %  ============================================================================
 
-        elseif ind_scp_method == 2 % Using SCPs (similar to CIRN QCIT)
+        if ind_scp_method == 2 % Using SCPs (similar to CIRN QCIT)
             if strcmpi(gcp_method, 'manual_targets')
                 % repeat for each extracted frame rate
                 for hh = 1 : length(extract_Hz)

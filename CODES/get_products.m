@@ -1,4 +1,16 @@
-% GET PRODUCT DATA FROM R
+%% get_products
+%
+% Extracts image pixel for coordinates of products
+%
+% If using Feature Detection (Monocular Visual Odometry)
+%   - use 2D projective transformation to warp image, and extract pixel value from full panorama image
+%
+% If using SCPs (similar to QCIT F_variableExtrinsicsSolution)
+%  - project coordinates into image according to [x y z azimuth tilt roll] and extract pixel
+%
+%
+% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Nov 2023
+
 close all
 for dd = 1 : length(day_files)
     clearvars -except dd *_dir user_email day_files P

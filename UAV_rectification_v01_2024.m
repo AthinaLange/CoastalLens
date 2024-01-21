@@ -84,13 +84,10 @@
 clearvars
 
 if ismac
-    % Code to run on Mac platform
     platform = 'Currently running on a Mac OS.';
 elseif isunix
-    % Code to run on Linux platform
     platform = 'Currently running on a Linux OS.';
 elseif ispc
-    % Code to run on Windows platform
     platform = 'Currently running on a Windows OS.';
 else
     platform = 'Platform not supported';
@@ -106,7 +103,6 @@ cd(global_dir)
 setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
 
 %% =============== Check that all necessary codes are loaded. =====================================================================
-% Check for CODES folder dependencies
 code_dir = fullfile(global_dir, 'UAV_automated_rectification', 'CODES');
 
 % Check that required rectification codes are downloaded.
@@ -121,7 +117,6 @@ end
 if ~exist(fullfile(code_dir, 'basicFunctions'), 'dir')
     disp('Please download basicFunctions codes from GitHub.')
 end
-
 % Check that helper Functions are downloaded.
 if ~exist(fullfile(code_dir, 'helperFunctions'), 'dir')
     disp('Please download helperFunctions codes from GitHub.')
@@ -186,9 +181,10 @@ end
 %% ====================================================================
 %                          USER INPUT (DAY AND FLIGHT SPECIFIC DATA)
 %                           - Choose camera intrinsics file (all flights for a given day must be used with the same drone)
-%                           - Grid & transect coordinates - can be input or from file
-%                           - Local or world coordinates?
-%                           - dx
+%                           - Grid & transect coordinates for products- can be input or from file
+%                           - GCP for initial camera pose
+%                           - define SCP (if necessary)
+%                           - requries exiftool for metadata
 %  =====================================================================
 input_day_flight_data
 
@@ -202,14 +198,15 @@ extract_images_from_UAV
 %% ====================================================================
 %                           EXTRINSICS THROUGH TIME
 %                           - requires day_files and user_email (if emails wanted)
-%                           - requires XXX
+%                           - Option 1: Feature Detection (Monocular Visual
+%                           Odometry) - 2D projective transformation
+%                           - Option 2: Stability Control Points (requires bright/dark points)
 %  =====================================================================
 run_extrinsics
 
 %% ====================================================================
 %                           EXTRACT PRODUCTS
 %                           - requires day_files and user_email (if emails wanted)
-%                           - requires XXX
 %  =====================================================================
 get_products
-[iDark, iBright, iTimex] = makeARGUSproducts(images, R.FullRate_OGFrame, intrinsics);
+%[iDark, iBright, iTimex] = makeARGUSproducts(images, R.FullRate_OGFrame, intrinsics);

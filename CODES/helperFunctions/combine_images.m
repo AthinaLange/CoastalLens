@@ -2,18 +2,25 @@ function combine_images(data_files, varargin)
 %   Combine image sequence from multiple folders
 %
 %% Syntax
-%           combine_images(data_files)
-%           combine_images(data_files, imageDirectory = pwd)
+% 
+% combine_images(data_files)
+% combine_images(data_files, imageDirectory = pwd)
 %
-%% Description
+%% Description 
+% 
 %   Args:
 %           data_files (structure) : Data files to extract images - requires data_files.folder and data_files.name
-%           frameRate (double): ImageDirectory where files should be saved to
+%           varargin :
+%                       imageDirectory (string): ImageDirectory where files should be saved to (default : pwd)
 %
 %   Returns:
 %               
-% 
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+ 
+
 %% Options
 options.imageDirectory = fullfile(data_files(1).folder); % imageDirectory where files should be saved
 options = parseOptions( options , varargin );

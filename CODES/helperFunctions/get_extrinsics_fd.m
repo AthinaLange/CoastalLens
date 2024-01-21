@@ -1,15 +1,34 @@
-function [panorama, extrinsics] = get_extrinsics_fd(odir, oname, images, t, varargin)
-
-
+function [panorama, extrinsics] = get_extrinsics_fd(odir, oname, images, varargin)
+%
 % get camera extrinsics using feature detection
+%
 %% Syntax
+% 
+%  [panorama, extrinsics] = get_extrinsics_fd(odir, oname, images, varargin)
+%
+%% Description 
+% 
+%   Args:
+%           odir (string) : location of day/flight folder to load and save data
+%           oname (string) : prefix name for current day/flight to load and save data
+%           images (imageDatastore) : Stores file name of m images to process
+%           varargin :
+%                       Method (string) : Feature type (default : 'SIFT')
+%
+%   Returns:
+%          panorama (uint8) : constructed panorama image to show full field of view captured during flight
+%          extrinsics (array) : 2D projective transformation between subsequent frames
+%               
 %
 %
-%% Description
+%% Example 1
 %
-%
-%
-options.Method = 'SIFT'; % imageDirectory where files should be saved
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Jan 2024; Last revision: XXX
+
+
+options.Method = 'SIFT'; % Feature type
 options = parseOptions( options , varargin );
 
 

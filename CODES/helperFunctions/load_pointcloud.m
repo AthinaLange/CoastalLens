@@ -1,9 +1,10 @@
 function [pc] = load_pointcloud
 %   Load in user-selected pointcloud (from .las file).
 %
-%   Examples:
+%% Syntax
 %           [pc] = load_pointcloud
 %
+%% Description
 %   Args:
 %           
 %
@@ -11,7 +12,12 @@ function [pc] = load_pointcloud
 %           pc (pointcloud) : Loaded in pointcloud
 %               
 % 
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%% Example 1
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
 %%
 [temp_file, temp_file_path] = uigetfile({'*.las'}, 'Pointcloud location');
 lasReader=lasFileReader(fullfile(temp_file_path, temp_file)); clear temp_file*

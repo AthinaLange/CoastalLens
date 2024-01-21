@@ -1,17 +1,38 @@
 function [survey_gcp, image_gcp] = select_survey_gcp(pc, I, varargin)
-%% select_survey_gcp
 %
-% Choose GCP Locations in LiDAR/SfM survey and image
-% If Image first: click as many GCP as you want. In pointCloud, will find the same amount
-% If LiDAR/SfM first: set number of GCPs you want to find.
+%   Choose GCP Locations in LiDAR/SfM survey and image
 %
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%% Syntax
+%           [survey_gcp, image_gcp] = select_survey_gcp(pc, I)
+%           [survey_gcp, image_gcp] = select_survey_gcp(pc, I, intrinsics_CIRN = intrinsics, extrinsicsInitialGuess = extrinsics)
+%% Description
+%   Args:
+%           pc (PointCloud) : PointCloud to pull gcp points from
+%           I (uint8) : Image to select gcp points in
+%           varargin :
+%                       intrinsics_CIRN : [1 x 11 array] intrinsics array as defined by CIRN 
+%                       extrinsicsInitialGuess : [1 x 6 array] extrinsics array as defined by CIRN
+%
+%   Returns:
+%          survey_gcp (array) : [3 x n] gcp coordinates for n points in pointcloud coordinate system
+%          image_gcp (array) : [2 x n] gcp coordinates for n points in image
+%
+%   varargin's crops the Pointcloud to avoid slowing your computer
+%  If Image first: click as many GCP as you want. In pointCloud, will find the same amount
+%  If LiDAR/SfM first: set number of GCPs you want to find.
+%
+%
+%% Example 1
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
 %%
-%%
-if length(nargin) ~= 0
-    intrinsics_CIRN = varargin{1};
-    extrinsicsInitialGuess = varargin{2};
-end
+options.intrinsics_CIRN = []; % file extension to search for
+options.extrinsicsInitialGuess = [];
+options = parseOptions(options , varargin);
+
 %%
 
 answer = questdlg('Do you want to select from LiDAR/SfM or image first?', 'GCP locations', 'Image', 'LiDAR/SfM', 'Image');
@@ -25,8 +46,8 @@ switch answer
         gcp_num = length(image_gcp);
         %% Find corresponding points on LiDAR
         figure
-        if length(nargin) ~= 0
-            [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, intrinsics_CIRN, extrinsicsInitialGuess);
+        if isempty(options.intrinsics_CIRN) || isempty(options.extrinsicsInitialGuess)
+            [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, options.intrinsics_CIRN, options.extrinsicsInitialGuess);
         else
             [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num);
         end
@@ -47,8 +68,8 @@ switch answer
                     disp('LiDAR/SfM GCPs not correct.')
                     disp('Select LiDAR/SfM GCPs.')
                     gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find?'}));
-                    if length(nargin) ~= 0
-                        [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, intrinsics_CIRN, extrinsicsInitialGuess);
+                    if isempty(options.intrinsics_CIRN) || isempty(options.extrinsicsInitialGuess)
+                        [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, options.intrinsics_CIRN, options.extrinsicsInitialGuess);
                     else
                         [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num);
                     end
@@ -56,8 +77,8 @@ switch answer
             case 'No'
                 disp('Select LiDAR/SfM GCPs.')
                 gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find?'}));
-                if length(nargin) ~= 0
-                    [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, intrinsics_CIRN, extrinsicsInitialGuess);
+                if isempty(options.intrinsics_CIRN) || isempty(options.extrinsicsInitialGuess)
+                    [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, options.intrinsics_CIRN, options.extrinsicsInitialGuess);
                 else
                     [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num);
                 end

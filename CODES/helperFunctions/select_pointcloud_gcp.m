@@ -1,22 +1,42 @@
 function [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, varargin)
-%% select_pointcloud_gcp
+%   Choose GCP Locations in LiDAR/SfM survey
 %
-% use get_noaa_lidar or get_local_survey to get pointCloud
-% cut pointcloud to approximate dimensions of image
-% downsample points and plot pointCloud. Move box over relevant area for a given GCP
-% In zoomed in pointCloud, click on GCP, and hit Enter. Confirm if you like
-% the point, or reclick.
-% Repeat for all GCPs to be found
+%% Syntax
+%          [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, varargin)
+%          [survey_gcp] = select_pointcloud_gcp(pc, I, 4, intrinsics_CIRN = intrinsics, extrinsicsInitialGuess = extrinsics)
 %
-% include intrinsics_CIRN and extrinsicsInitialGuess if you want to crop pointcloud
+%% Description
+%   Args:
+%           pc (PointCloud) : PointCloud to pull gcp points from
+%           I (uint8) : Image to select gcp points in
+%           gcp_num (double) : number of gcp's to select in pointcloud
+%           varargin :
+%                       intrinsics_CIRN : [1 x 11 array] intrinsics array as defined by CIRN 
+%                       extrinsicsInitialGuess : [1 x 6 array] extrinsics array as defined by CIRN
+%
+%   Returns:
+%          survey_gcp (array) : [3 x n] gcp coordinates for n points in pointcloud coordinate system
+%
+%  varargin's crops the Pointcloud to avoid slowing your computer
+%  cut pointcloud to approximate dimensions of image
+%  downsample points and plot pointCloud. Move box over relevant area for a given GCP
+%  In zoomed in pointCloud, click on GCP, and hit Enter. Confirm if you like the point, or reclick.
+%  Repeat for all GCPs to be found
 %
 %
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%
+%% Example 1
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
+
 %%
-if length(nargin) ~= 0
-    intrinsics_CIRN = varargin{1};
-    extrinsicsInitialGuess = varargin{2};
-end
+options.intrinsics_CIRN = []; % file extension to search for
+options.extrinsicsInitialGuess = [];
+options = parseOptions(options , varargin);
+
 %%
 Points = pc.Location;
 if ~isempty(pc.Color)
@@ -28,11 +48,11 @@ else
     cPoints = Points(:,3);
 end
 %% Cut pointcloud to approximate projection of image
-if length(nargin) ~= 0
+if isempty(options.intrinsics_CIRN) || isempty(options.extrinsicsInitialGuess)
     [m,n,~] = size(I); % image dimensions for edge coordinates
     i_bounds = [0 .1*m; n .1*m; n m; 0 m];
 
-    [w_bounds] = distUV2XYZ(intrinsics_CIRN, extrinsicsInitialGuess, i_bounds', 'z', zeros(1, size(i_bounds,1)));
+    [w_bounds] = distUV2XYZ(options.intrinsics_CIRN, options.extrinsicsInitialGuess, i_bounds', 'z', zeros(1, size(i_bounds,1)));
     w_bounds([1 4],2) = w_bounds([1 4],2) -100;
     w_bounds([2 3],2) = w_bounds([2 3],2) +100;
     w_bounds([3 4],1) = w_bounds([3 4],1) +100;

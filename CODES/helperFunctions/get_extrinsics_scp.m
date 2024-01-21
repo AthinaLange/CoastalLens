@@ -1,13 +1,37 @@
 function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, extrinsics, intrinsics, t)
-% get camera extrinsics using stability control points
+%
+%  get camera extrinsics using stability control points (following CIRN F)
+%
 %% Syntax
+% 
+%  [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz, images, scp, extrinsics, intrinsics, t)
+%
+%% Description 
+% 
+%   Args:
+%           odir (string) : location of day/flight folder to load and save data
+%           oname (string) : prefix name for current day/flight to load and save data
+%           extract_Hz (double) : extraction frame rate (in Hz) to load and save data
+%           images (imageDatastore) : Stores file name of m images to process
+%           scp (structure) : scp location, radius and threshold (from define_SCP.m)
+%           extrinsics (array) : [1 x 6] extrinsics as defined by CIRN
+%           intrinsics (array) : [1 x 11] intrinsics as defined by CIRN
+%           t (array) : [m x 1] datenum array of time for m images (for plotting)
+%
+%   Returns:
+%          extrinsics (array) : [m x 6] extrinsics corresponding to m images
+%               
+%
+%  computes change in [x y z azimuth tilt and roll] for every image based
+%  on least-squares optimization of scp location shifts between frames. 
 %
 %
-%% Description
+%% Example 1
 %
-%
-%
-%%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
 
                 In=readimage(images, 1);
                 f1=figure('Name', 'Image Viewer', 'Position', [100, 100, 1200, 800]);

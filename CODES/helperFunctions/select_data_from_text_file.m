@@ -1,19 +1,21 @@
 function [selected_data] = select_data_from_text_file
-%   Choose ids from data and
+%
+%   Choose ids from data list
 %
 %% Syntax
-%           [selected_data] = select_data_from_text_file
-%
+%          [selected_data] = select_data_from_text_file
 %% Description
 %   Args:
-%           
 %
 %   Returns:
-%               selected_data (array of data) : selected data from file
-%               
-% 
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
-%%
+%         selected_data (array) : list of selected points from text file
+%
+%
+%% Example 1
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
 
 [temp_file, temp_file_path] = uigetfile({'*.txt'}, 'Data File');
 data = load(fullfile(temp_file_path, temp_file)); clear temp_file_path

@@ -3,23 +3,11 @@
 % Tracks the image stabilization through flight
 %
 % If using Feature Detection (Monocular Visual Odometry)
-%   - within region of interest (bottom cutoff %) detect SURF features
 %   - extract features in first frame
 %   - for all subsequent images:
-% 	    - detect SURF features
-% 	    - find matching features between current frame and first frame
-%   - if using 2D rotation
-% 	    - estimate 2D image transformation between matching features
-%   - if using 3D rotation
-% 	    - estimate essential matrix
-% 	    - estimate relative pose based on essential matrix and matching features
-% 	    - if multiple relative poses found
-% 		    - get coordinates of origin (needs to be in the frame)
-% 		    - project coordinates into image according to 3D transformations
-% 		    - if projected point is outside image dimensions - pose is incorrect
-% 		    - if multiple poses satisfy this - take smallest Euclidian distance between projected points in current frame and previous frame
-% 	    - get worldPose for each frame from worldPose.A * relPose.A
-%
+% 	    - detect SIFT features
+% 	    - find matching features between current frame and previous frame
+% 	    - find projective 2D transformation of current frame
 %
 % If using SCPs (similar to QCIT F_variableExtrinsicsSolution)
 %   - Within radius of previous location of SCPs, find mean location of pixels above/below specified threshold. This becomes the new location of the SCP. Find new extrinsics based on new SCP locations.
@@ -75,7 +63,7 @@ for dd = 1 : length(day_files)
                     if ~exist('Products', 'var')
                         disp('Please create Products file.')
                         disp('For CPG: construct DEM for appropriate day')
-                        construct_MOPS_DEM %% XXX
+                       % construct_MOPS_DEM %% XXX
                         user_input_products
                     end
                 case 'No'

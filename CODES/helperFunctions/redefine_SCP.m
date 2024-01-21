@@ -1,6 +1,36 @@
-function [scp] = redefine_SCP(scp, In, scpUVd_old)
+function [scp] = redefine_SCP(scp, I, scpUVd_old)
+%
+%   Redefine SCP radius and threshold parameters for image gcps.
+%
+%% Syntax
+%           [scp] = redefine_SCP(scp, I, scpUVd_old)
+%% Description
+%   Args:
+%           scp (structure) : scp location, radius and threshold (from define_SCP.m)
+%           I (uint8) : Image to select gcp points in
+%           scpUVd_old : [row col] coordinates of scp in current image I
+%
+%
+%   Returns:
+%          scp (structure) : 
+%                               - UVdo : [row col] coordinates of point in image (pixels)
+%                               - num : index of scp
+%                               - R : radius to look around (pixels)
+%                               - brightFlag : (bright/dark) bright or dark mask
+%                               - T : Threshold for pixel mask (0 - 255)
+%                               - z : elevation of scp point (NAVD88 m)
+%
+% 
+% Used to redefine scp parameters when hidden for too long. 
+%
+%% Example 1
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
 hGCP=figure(100);clf
-imshow(In)
+imshow(I)
 hold on
 scatter(scpUVd_old(1), scpUVd_old(2), 50, 'y', 'LineWidth', 3)
 
@@ -24,7 +54,7 @@ scp.R = prev_radius;
 
 % ========================threshold============================================
 
-I_gcp = In(round(scpUVd_old(2)-scp.R):round(scpUVd_old(2)+scp.R), round(scpUVd_old(1)-scp.R):round(scpUVd_old(1)+scp.R), :);
+I_gcp = I(round(scpUVd_old(2)-scp.R):round(scpUVd_old(2)+scp.R), round(scpUVd_old(1)-scp.R):round(scpUVd_old(1)+scp.R), :);
 hIN = figure(2);clf
 hIN.Position(3)=3*hIN.Position(4);
 subplot(121, 'Parent', hIN)

@@ -1,4 +1,37 @@
 function [Products] = define_ytransect(origin_grid)
+%   define along-shore transect
+%
+%% Syntax
+% 
+% [Product] = define_ytransect([lat lon angle])
+%
+%% Description 
+% 
+%   Args:
+%           origin_grid (double) : [1 x 3 array] origin_grid definition [Latitude, Longitude, Angle]
+%
+%   Returns:
+%           Products (structure) : 
+%                               - productType : 'yTransect'
+%                               - type : 'yTransect'
+%                               - frameRate : frame rate to process data (Hz)
+%                               - lat : latitude of origin grid
+%                               - lon: longitude of origin grid
+%                               - angle: shorenormal angle of origid grid
+%                               - ylim : along-shore limits of grid (pos is to the right of the origin looking offshore) (m)
+%                               - dy : Along-shore resolution (m)
+%                               - x : Cross-shore distance from origin (pos is offshore of origin) (m)
+%                               - z : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%               
+% Angle: Shorenormal angle of the locally defined grid (CW from North)
+%
+%% Example 1
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
+
 Product = struct('productType',[], 'type',[],  'frameRate',[],  'lat', [], 'lon',[],  'angle',[], 'xlim',[],  'ylim',[],  'dx',[],  'dy', [], 'x', [], 'y',[],  'z',[]);
 
 Product.productType = 'yTransect';

@@ -1,13 +1,25 @@
 function [image_gcp] = select_image_gcp(I)
-%% select_image_gcp
-% Choose GCP Coordinates on Image
+%   Choose GCP Coordinates on Image
+%
+%% Syntax
+%           [image_gcp] = select_image_gcp(I)
+%% Description
+%   Args:
+%           I (uint8) : Image to select gcp points in
+%
+%   Returns:
+%          image_gcp (array) : [2 x n] gcp coordinates for n points in image
 %
 % Click on however many GCP you would like to use
 % To exit, click outside image
 %
-% Requires: odir
 %
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%% Example 1
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
 %%
 % Load in initial frame
 hFig = figure(1);clf

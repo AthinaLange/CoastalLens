@@ -1,10 +1,10 @@
 function [id] = find_file_format_id(C, varargin)
 %   Returns table of metadata from images and videos.
 %
-%   Examples:
+%% Syntax
 %           [id] = find_file_format_id(C, file_format = 'JPG')
 %           [id] = find_file_format_id(C, file_format = {'MOV', 'MP4'})
-%
+%% Description
 %   Args:
 %           C (table) : Table of image/video metadata
 %           varargin :
@@ -14,8 +14,12 @@ function [id] = find_file_format_id(C, varargin)
 %   Returns:
 %           id (array) : list of ids that match file_format
 %
+%% Example 1
 %
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
 %% Options
 options.file_format = {'JPG'}; % file extension to search for
 options = parseOptions(options , varargin);

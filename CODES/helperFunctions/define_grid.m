@@ -1,9 +1,37 @@
 function [Product] = define_grid(origin_grid)
+%   define cBathy-type grid
 %
-%   define cBathy type grid
-% REQUIRES: origin_angle = shorenormal angle of locally defined grid
-% put explanantion about angles and distance
+%% Syntax
+% 
+% [Product] = define_grid([lat lon angle])
 %
+%% Description 
+% 
+%   Args:
+%           origin_grid (double) : [1 x 3 array] origin_grid definition [Latitude, Longitude, Angle]
+%
+%   Returns:
+%           Products (structure) : 
+%                               - productType : 'cBathy'
+%                               - type : 'Grid'
+%                               - frameRate : frame rate to process data (Hz)
+%                               - lat : latitude of origin grid
+%                               - lon: longitude of origin grid
+%                               - angle: shorenormal angle of origid grid
+%                               - xlim : cross-shore limits of grid (pos is offshore of origin) (m)
+%                               - ylim : along-shore limits of grid (pos is to the right of origin looking offshore) (m)
+%                               - dx : Cross-shore resolution (m)
+%                               - dy : Along-shore resolution (m)
+%                               - z : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%               
+% Angle: Shorenormal angle of the locally defined grid (CW from North)
+%
+%% Example 1
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
 Product = struct('productType',[], 'type',[],  'frameRate',[],  'lat', [], 'lon',[],  'angle',[], 'xlim',[],  'ylim',[],  'dx',[],  'dy', [], 'x', [], 'y',[],  'z',[]);
 
 Product.productType = 'cBathy';

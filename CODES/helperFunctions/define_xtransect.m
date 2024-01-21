@@ -1,4 +1,36 @@
 function [Products] = define_xtransect(origin_grid)
+%   define cross-shore transect (timestack)
+%
+%% Syntax
+% 
+% [Product] = define_xtransect([lat lon angle])
+%
+%% Description 
+% 
+%   Args:
+%           origin_grid (double) : [1 x 3 array] origin_grid definition [Latitude, Longitude, Angle]
+%
+%   Returns:
+%           Products (structure) : 
+%                               - productType : 'Timestack'
+%                               - type : 'xTransect'
+%                               - frameRate : frame rate to process data (Hz)
+%                               - lat : latitude of origin grid
+%                               - lon: longitude of origin grid
+%                               - angle: shorenormal angle of origid grid
+%                               - xlim : cross-shore limits of grid (pos is offshore of origin) (m)
+%                               - dx : Cross-shore resolution (m)
+%                               - y : Along-shore distance from origin (pos is to the right of the origin looking offshore) (m)
+%                               - z : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%               
+% Angle: Shorenormal angle of the locally defined grid (CW from North)
+%
+%% Example 1
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
 Product = struct('productType',[], 'type',[],  'frameRate',[],  'lat', [], 'lon',[],  'angle',[], 'xlim',[],  'ylim',[],  'dx',[],  'dy', [], 'x', [], 'y',[],  'z',[]);
 %Products = struct('productType',[], 'type',[],  'frameRate',[],  'lat', [], 'lon',[],  'angle',[], 'xlim',[],  'ylim',[],  'dx',[],  'dy', [], 'x', [], 'y',[],  'z',[]);
 

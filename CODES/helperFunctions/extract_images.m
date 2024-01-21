@@ -2,20 +2,32 @@ function extract_images(data_files, varargin)
 %   Extract images from given data files at specified frame rate
 %
 %% Syntax
-%           extract_images(data_files)
-%           extract_images(data_files, frameRate = 2)
+% 
+% extract_images(data_files)
+% extract_images(data_files, frameRate = 2)
 %
-%% Description
+%% Description 
+% 
 %   Args:
 %           data_files (structure) : Data files to extract images - requires data_files.folder and data_files.name
-%           frameRate (double): Extraction frame rate in Hz
+%           varargin :
+%                       frameRate (double): Extraction frame rate in Hz (default: 2Hz)
 %
 %   Returns:
 %               
 % 
 %   REQUIRES: ffmpeg installation (https://ffmpeg.org/)
 %
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%% Example 1
+% Extract images:
+% 
+% data_files = dir('DATA/20211026_Torrey/01');
+% extract_images(data_files, frameRate = 2)
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
 %% Options
 options.frameRate = 2; % frameRate in Hz (default = 2Hz)
 options = parseOptions( options , varargin );

@@ -22,8 +22,18 @@ function [C] = get_metadata(odir, oname, varargin)
 %
 %   REQUIRES: exiftool installation (https://exiftool.org/)
 %
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%% Example 1
+% Extract images:
+% 
+% data_files = dir('DATA/20211026_Torrey/01');
+% extract_images(data_files, frameRate = 2)
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
 %% Data
+
 assert(isa(odir, 'char'),'Error: odir must be a string to a directory path.');
 assert(isfolder(odir),'Error: odir must be the path to the directory folder.');
 assert(isa(oname, 'char'),'Error: oname must be a string for csv name.');

@@ -2,6 +2,35 @@ function [scp] = define_SCP(I, image_gcp, intrinsics_CIRN)
 %
 %   Define SCP radius and threshold parameters for image gcps.
 %
+%% Syntax
+%           [scp] = define_SCP(I, image_gcp, intrinsics_CIRN)
+%% Description
+%   Args:
+%           I (uint8) : Image to select gcp points in
+%           image_gcp (array) : [2 x n] gcp coordinates for n points in image
+%           intrinsics_CIRN : [1 x 11 array] intrinsics array as defined by CIRN 
+%
+%
+%   Returns:
+%          scp (structure) : 
+%                               - UVdo : [row col] coordinates of point in image (pixels)
+%                               - num : index of scp
+%                               - R : radius to look around (pixels)
+%                               - brightFlag : (bright/dark) bright or dark mask
+%                               - T : Threshold for pixel mask (0 - 255)
+%                               - z : elevation of scp point (NAVD88 m)
+%
+%
+%
+%
+%% Example 1
+%
+%% Citation Info 
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023; Last revision: XXX
+
+
+%%
 close all
 hFig = figure(1);clf
 imshow(I)
