@@ -1,26 +1,42 @@
-function [C, jpg_id, mov_id] = get_metadata(odir, oname, drone_file_name)
+function [C] = get_metadata(odir, oname, varargin)
+%   Returns table and saves .csv of metadata from images and videos.
+%% Syntax
+%           [C] = get_metadata('./DATA/20240101_SIO/01/', '20240101_SIO')
+%           [C] = get_metadata('./DATA/20240101_SIO/01/', '20240101_SIO', file_prefix = 'DJI')
+%           [C] = get_metadata('./DATA/20240101_SIO/01/', '20240101_SIO', save_dir = './DATA/20240101_SIO/01/Processed_data/')
+%
+%% Description
+%   Args:
+%           odir (string) : directory path (full or relative) where images/videos are located
+%           oname (string) : file name for metadata csv
+%           varargin :
+%                       file_prefix (string) : prefix of files to extract metadata from, 
+%                                                      e.g. 'DJI' for 'DJI_0004.MOV'. 
+%                                                      Will get metadata for all files in folder and 
+%                                                      subfolders if this is empty.
+%                       save_dir (string) : save directory, if not the same as odir
+%
+%   Returns:
+%       C (table) : Table of image/video metadata
+%
+%
+%   REQUIRES: exiftool installation (https://exiftool.org/)
+%
+% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%% Data
+assert(isa(odir, 'char'),'Error: odir must be a string to a directory path.');
+assert(isfolder(odir),'Error: odir must be the path to the directory folder.');
+assert(isa(oname, 'char'),'Error: oname must be a string for csv name.');
 
-system(sprintf('/usr/local/bin/exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s_0* > %s', odir, drone_file_name, fullfile(odir, 'Processed_data', [oname '.csv'])));
+options.file_prefix = ''; % Filename extension, e.g. 'DJI' for 'DJI_0004.MOV'.
+options.save_dir = odir;
+options = parseOptions(options , varargin);
 
-C = readtable(fullfile(odir, 'Processed_data', [oname '.csv']));
+assert(isa(options.file_prefix, 'char'),'Error: file_prefix must be a string.');
+assert(isa(options.save_dir, 'char'),'Error: save_dir must be a string to the saving folder path.');
+assert(isfolder(options.save_dir),'Error: save_dir must be the path to the saving folder.');
 
-format long
-% get indices of images and videos to extract from
-form = char(C.FileName);
-form = string(form(:,end-2:end));
-mov_id = find(form == 'MOV' | form == 'MP4');
-jpg_id = find(form == 'JPG');
+%% Use exiftool to pull metadata
+system(sprintf('/usr/local/bin/exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s* > %s', odir, options.file_prefix, fullfile(options.save_dir, [oname '.csv'])));
 
-% remove any weird videos
-% i_temp = find(isnan(C.Duration(mov_id))); mov_id(i_temp)=[];
-
-% if image taken at beginning & end of flight - use beginning image
-if length(jpg_id) > 1; jpg_id = jpg_id(1); end
-% if no image taken, use mov_id
-if isempty(jpg_id); jpg_id = mov_id(1); end
-
-% CONFIRM VIDEOS TO PROCESS
-[id, ~] = listdlg('ListString', append(string(C.FileName(mov_id)), ' - ',  string(C.Duration(mov_id))), 'SelectionMode','multiple', 'InitialValue',[1:length(mov_id)], 'PromptString', {'What movies do you want' 'to use? (command + for multiple)'});
-mov_id = mov_id(id);
-
-end
+C = readtable(fullfile(options.save_dir, [oname '.csv']));

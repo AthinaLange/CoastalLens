@@ -73,7 +73,6 @@ for dd = 1 : length(day_files)
 
                                             clear Irgb_temp
                                             for ii = 1:length(Products(pp).iP)
-                                                %%  XXX change this to allow for bigger grid XXX
                                                 if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= intrinsics.ImageSize)
                                                     Irgb_temp(ii, :) = uint8([0 0 0]);
                                                 else
@@ -95,14 +94,13 @@ for dd = 1 : length(day_files)
 
             elseif ind_scp_method == 2 % SCPs
                 %% =========================== SCPs ==================================
-                load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_SCP_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics','intrinsics')
-                intrinsics_CIRN = intrinsics;
+                load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_SCP_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics','intrinsics_CIRN')
                 for viewId = 1:length(images.Files)
                     viewId
                     I = readimage(images, viewId);
                     for pp = 1:length(Products)
-                   %     if rem(extract_Hz(hh),Products(pp).frameRate) == 0
-                     %       if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
+                        if rem(extract_Hz(hh),Products(pp).frameRate) == 0
+                            if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
 
                                 [IrIndv, Xout, Yout, Z] = getPixels(Products(pp), extrinsics(viewId,:), intrinsics_CIRN, I);
                                 Products(pp).localX = Xout;
@@ -113,8 +111,8 @@ for dd = 1 : length(day_files)
                                 else
                                     Products(pp).Irgb(viewId, :,:) = permute(IrIndv,[2 1 3]);
                                 end
-                      %      end % if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
-                      %  end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0
+                            end % if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
+                        end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0
                     end % for pp = 1:length(Products)
                 end %  for viewId = 1:length(images.Files)
 
@@ -126,27 +124,6 @@ for dd = 1 : length(day_files)
     end % for ff = 1 : length(flights)
 end % for dd = 1 : length(day_files)
 %%
-for viewId = 1:length(images.Files)
-viewId
-I = readimage(images, viewId);
-for pp = 1:length(Products)
-%     if rem(extract_Hz(hh),Products(pp).frameRate) == 0
-%       if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
-[IrIndv, Xout, Yout, Z] = getPixels(Products(pp), extrinsics(viewId,:), intrinsics_CIRN, I);
-Products(pp).localX = Xout;
-Products(pp).localY = Yout;
-Products(pp).localZ = Z;
-if contains(Products(pp).type, 'Grid')
-Products(pp).Irgb_scp(viewId, :,:,:) = IrIndv;
-else
-Products(pp).Irgb_scp(viewId, :,:) = permute(IrIndv,[2 1 3]);
-end
-%      end % if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
-%  end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0
-end % for pp = 1:length(Products)
-end %  for viewId = 1:length(images.Files)
-save(fullfile(odir, 'Processed_data', [oname '_Products_' char(string(extract_Hz(hh))) 'Hz' ]),'Products', '-v7.3')
-
 %% FUNCTIONS
 function [IrIndv, Xout, Yout, Z] = getPixels(Products, extrinsics, intrinsics_CIRN, I)
 

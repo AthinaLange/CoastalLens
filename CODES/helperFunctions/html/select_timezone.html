@@ -1,0 +1,115 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>select_timezone</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-01-09"><meta name="DC.source" content="select_timezone.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Syntax</a></li><li><a href="#4">Description</a></li><li><a href="#5">Select timezone</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [timezone] = select_timezone
+</pre><pre class="codeinput"><span class="comment">% select_timezone return timezone from user selection (based on MATLAB timezones)</span>
+</pre><h2 id="3">Syntax</h2><p>[timezone] = select_timezone</p><h2 id="4">Description</h2><p>'timezone' is a string variable of a user-selected Internet Assinged Numbers Authority (IANA) time zone accepted by the datetime function.</p><p>Can be used to define the timezone of a MATLAB datetime variable: datetime_variabel.TimeZone = timezone.</p><p>See <a href="a">href="matlab:web('https://www.mathworks.com/help/matlab/ref/timezones.html')"</a> MATLAB timezones&lt;/a&gt; for list of timezones.</p><p>(c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023</p><h2 id="5">Select timezone</h2><pre class="codeinput">cont_areas = [{<span class="string">'Africa'</span>}, {<span class="string">'America'</span>}, {<span class="string">'Antarctica'</span>}, {<span class="string">'Arctic'</span>}, {<span class="string">'Asia'</span>}, {<span class="string">'Atlantic'</span>}, {<span class="string">'Australia'</span>}, {<span class="string">'Europe'</span>}, {<span class="string">'Indian'</span>}, {<span class="string">'Pacific'</span>}, {<span class="string">'All'</span>}];
+[ind_area,~] = listdlg(<span class="string">'ListString'</span>, cont_areas, <span class="string">'SelectionMode'</span>,<span class="string">'single'</span>, <span class="string">'InitialValue'</span>,1, <span class="string">'PromptString'</span>, {<span class="string">'Which geographic region are you in?'</span>});
+
+geo_areas = timezones(char(cont_areas(ind_area)));
+[ind_area,~] = listdlg(<span class="string">'ListString'</span>, geo_areas.Name, <span class="string">'SelectionMode'</span>,<span class="string">'single'</span>, <span class="string">'InitialValue'</span>,1, <span class="string">'PromptString'</span>, {<span class="string">'Which geographic region are you in?'</span>});
+timezone = char(geo_areas.Name(ind_area));
+</pre><pre class="codeoutput">
+ans =
+
+    'America/Los_Angeles'
+
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [timezone] = select_timezone
+% select_timezone return timezone from user selection (based on MATLAB timezones)
+%% Syntax
+%
+% [timezone] = select_timezone 
+%
+%% Description
+%
+% 'timezone' is a string variable of a user-selected Internet Assinged
+% Numbers Authority (IANA) time zone accepted by the datetime function.
+%
+% Can be used to define the timezone of a MATLAB datetime variable: datetime_variabel.TimeZone =
+% timezone. 
+% 
+% See <a href="matlab:web('https://www.mathworks.com/help/matlab/ref/timezones.html')"> MATLAB timezones</a> for list of
+% timezones. 
+%
+%
+%
+%
+% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%% Select timezone
+
+cont_areas = [{'Africa'}, {'America'}, {'Antarctica'}, {'Arctic'}, {'Asia'}, {'Atlantic'}, {'Australia'}, {'Europe'}, {'Indian'}, {'Pacific'}, {'All'}];
+[ind_area,~] = listdlg('ListString', cont_areas, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
+
+geo_areas = timezones(char(cont_areas(ind_area)));
+[ind_area,~] = listdlg('ListString', geo_areas.Name, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
+timezone = char(geo_areas.Name(ind_area));
+##### SOURCE END #####
+--></body></html>

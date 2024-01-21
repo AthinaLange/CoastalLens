@@ -2,7 +2,7 @@ function [scp] = define_SCP(I, image_gcp, intrinsics_CIRN)
 %
 %   Define SCP radius and threshold parameters for image gcps.
 %
-
+close all
 hFig = figure(1);clf
 imshow(I)
 hold on
@@ -57,7 +57,7 @@ for gg = 1:length(image_gcp)
     I_gcp = I(round(scp(gg).UVdo(2)-scp(gg).R):round(scp(gg).UVdo(2)+scp(gg).R), round(scp(gg).UVdo(1)-scp(gg).R):round(scp(gg).UVdo(1)+scp(gg).R), :);
     hIN = figure(2);clf
     hIN.Position(3)=3*hIN.Position(4);
-    subplot(121)
+    subplot(121, 'Parent', hIN)
     imshow(rgb2gray(I_gcp))
     colormap jet
     hold on
@@ -66,8 +66,8 @@ for gg = 1:length(image_gcp)
         'Threshold direction',...
         'bright', 'dark', 'bright');
     scp(gg).brightFlag = answer;
-    subplot(122)
 
+   
     prev_threshold = 100;
     switch answer
         case 'bright'
@@ -78,7 +78,8 @@ for gg = 1:length(image_gcp)
     [rows, cols] = size(mask);
     [y, x] = ndgrid(1:rows, 1:cols);
     centroid = mean([x(mask), y(mask)]);
-    imshow(mask)
+    ax2=subplot(122, 'Parent', hIN);
+    imshow(mask, 'Parent', ax2)
     colormap jet
     hold on
     plot(centroid(1), centroid(2), 'w+', 'MarkerSize', 10);
@@ -86,7 +87,7 @@ for gg = 1:length(image_gcp)
     while true
         new_threshold = double(string(inputdlg({'Threshold'}, 'Click Enter with previous threshold to finish.',1, {num2str(prev_threshold)})));
         if new_threshold ~= prev_threshold
-            cla
+            cla(ax2)
             switch answer
                 case 'bright'
                     mask = rgb2gray(I_gcp) > new_threshold;
@@ -103,7 +104,7 @@ for gg = 1:length(image_gcp)
             else
                 centroid(2) = mean(y(mask));
             end
-            imshow(mask)
+            imshow(mask, 'Parent', ax2)
             colormap jet
             hold on
             plot(centroid(1), centroid(2), 'w+', 'MarkerSize', 10);

@@ -17,21 +17,21 @@
 %%
 % include data check
 % repeat for each day
-for dd = length(data_files)
-    clearvars -except dd *_dir user_email data_files
-    cd(fullfile(data_files(dd).folder, data_files(dd).name))
+for dd = 1:length(day_files)
+    clearvars -except dd *_dir user_email day_files
+    cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
-    load(fullfile(data_files(dd).folder, data_files(dd).name, 'input_data.mat'), 'extract_Hz', 'flights')
+    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'extract_Hz', 'flights')
 
     % repeat for each flight
     for ff = 1: length(flights)
         odir = fullfile(flights(ff).folder, flights(ff).name);
-        oname = [data_files(dd).name '_' flights(ff).name];
+        oname = [day_files(dd).name '_' flights(ff).name];
         cd(odir)
 
         load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C')
 
-        video_files = dir(fullfile(data_files(dd).folder, data_files(dd).name, flights(ff).name));
+        video_files = dir(fullfile(day_files(dd).folder, day_files(dd).name, flights(ff).name));
         video_files(~contains({video_files.name},  C.FileName(mov_id)))=[];
 
         % repeat for each extracted frame rate
@@ -59,4 +59,4 @@ for dd = length(data_files)
             sendmail(options.user_email, [oname '- Image Extraction Done'])
         end
     end % for ff = 1:length(flights)
-end % for dd = 1:length(data_files)
+end % for dd = 1:length(day_files)

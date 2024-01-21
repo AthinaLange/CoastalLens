@@ -21,11 +21,11 @@
 %           Grid & Transect Coordinates: User inputs or loads grid and transect coordinates.
 %           Coordinate System: User specifies local or world coordinates and pixel size (dx).
 %   6. Image Extraction
-%           Data Dependency: Requires data_files and user_email variables.
+%           Data Dependency: Requires day_files and user_email variables.
 %           Image Extraction: Uses FFmpeg to extract images from video files.
 %           Email Notification: Sends an email when image extraction is complete.
 %   7. Extrinsics Through Time (Currently commented out)
-%           Data Dependency: Requires data_files and user_email variables.
+%           Data Dependency: Requires day_files and user_email variables.
 %           Extrinsic Calibration: Determines camera pose from frame to frame using various methods like horizon tracking, drone metadata, or feature detection. This section is currently commented out.
 %       - Platform Detection
 %
@@ -156,9 +156,9 @@ end
 data_dir = uigetdir('.', 'DATA Folder');
 
 % Load in all days that need to be processed.
-data_files = dir(data_dir); data_files([data_files.isdir]==0)=[]; data_files(contains({data_files.name}, '.'))=[];
-[ind_datafiles,~] = listdlg('ListString',{data_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
-data_files = data_files(ind_datafiles);
+day_files = dir(data_dir); day_files([day_files.isdir]==0)=[]; day_files(contains({day_files.name}, '.'))=[];
+[ind_datafiles,~] = listdlg('ListString',{day_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
+day_files = day_files(ind_datafiles);
 
 %% =============== Confirm update emails and get email address. =====================================================================
 % Get user email
@@ -175,11 +175,11 @@ switch answer
         setpref('Internet','SMTP_Server','smtp.gmail.com');
         setpref('Internet','SMTP_Username','athinalange1996');
         setpref('Internet', 'SMTP_Password', 'baundwhnctgbsykb')
-        sendmail(user_email{2}, 'UAV Toolbox test email', [user_email{1} ' is processing UAV data from ' data_files.name '.'])
+        sendmail(user_email{2}, 'UAV Toolbox test email', [user_email{1} ' is processing UAV data from ' day_files.name '.'])
 
-        save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'data_files', 'user_email')
+        save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files', 'user_email')
     case 'No'
-        save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'data_files')
+        save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files')
 
 end
 
@@ -194,21 +194,21 @@ input_day_flight_data
 
 %% ====================================================================
 %                           EXTRACT IMAGES
-%                           - requires data_files and user_email (if emails wanted)
+%                           - requires day_files and user_email (if emails wanted)
 %                           - requires ffmpeg to extract images
 %  =====================================================================
 extract_images_from_UAV
 
 %% ====================================================================
 %                           EXTRINSICS THROUGH TIME
-%                           - requires data_files and user_email (if emails wanted)
+%                           - requires day_files and user_email (if emails wanted)
 %                           - requires XXX
 %  =====================================================================
 run_extrinsics
 
 %% ====================================================================
 %                           EXTRACT PRODUCTS
-%                           - requires data_files and user_email (if emails wanted)
+%                           - requires day_files and user_email (if emails wanted)
 %                           - requires XXX
 %  =====================================================================
 get_products

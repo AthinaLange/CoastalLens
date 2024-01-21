@@ -1,23 +1,24 @@
 function combine_images(data_files, varargin)
-% combine_images(data_files, imageDirectory)
-% COMBINE_IMAGES  Combine image sequence from multiple folders
-%     combine_images(data_files) Structure of data files - requires data_files.folder and data_files.name
-%     combine_images(data_files, imageDirectory) ImageDirectory where files should be moved to
+%   Combine image sequence from multiple folders
 %
+%% Syntax
+%           combine_images(data_files)
+%           combine_images(data_files, imageDirectory = pwd)
 %
+%% Description
+%   Args:
+%           data_files (structure) : Data files to extract images - requires data_files.folder and data_files.name
+%           frameRate (double): ImageDirectory where files should be saved to
 %
-%
-%
+%   Returns:
+%               
+% 
 % (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
-
-
-%%
-options.imageDirectory = fullfile(data_files(1).folder); % frameRate in Hz (default = 2Hz)
-
+%% Options
+options.imageDirectory = fullfile(data_files(1).folder); % imageDirectory where files should be saved
 options = parseOptions( options , varargin );
 
-
-%%
+%% Combine images
 for dd = 1:length(data_files)
     folder_name = split(data_files(dd).name, '.'); folder_name = string(folder_name{1});
     folder_name = fullfile(data_files(dd).folder, char(folder_name));

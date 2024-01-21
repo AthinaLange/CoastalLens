@@ -1,4 +1,18 @@
 function [pc] = get_local_survey
+%   Load in user-selected pointcloud.
+%
+%   Examples:
+%           [pc] = get_local_survey
+%
+%   Args:
+%           
+%
+%   Returns:
+%           pc (pointcloud) : Pointcloud loaded in
+%               
+% 
+% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+
 %% get_local_survey
 % Pulls in local lidar or SfM survey (can be Airborne or Mobile)
 % Find .las file

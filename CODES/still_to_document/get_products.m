@@ -1,5 +1,23 @@
 % GET PRODUCT DATA FROM R
 
+%% Data check
+if exist('data_files','var') && isstruct(data_files) && isfield(data_files, 'folder') && isfield(data_files, 'name')
+    %
+else  % Load in all days that need to be processed.
+    data_dir = uigetdir('.', 'DATA Folder');
+    disp('Please select the days to process:')
+    data_files = dir(data_dir); data_files([data_files.isdir]==0)=[]; data_files(contains({data_files.name}, '.'))=[];
+    [ind_datafiles,~] = listdlg('ListString',{data_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
+    data_files = data_files(ind_datafiles);
+end
+if exist('global_dir', 'var') && isstring(global_dir)
+    %
+else % select global directory
+    disp('Please select the global directory.')
+    global_dir = uigetdir('.', 'UAV Rectification');
+    cd(global_dir)
+end
+%%
 for dd = 1 : length(data_files)
     clearvars -except dd *_dir user_email data_files P
     cd(fullfile(data_files(dd).folder, data_files(dd).name))
@@ -153,56 +171,9 @@ cd(global_dir)
 
 %%
 %% FUNCTIONS
-function [IrIndv, Xout, Yout, Z] = getPixels(Products, pp, extrinsics, intrinsics_CIRN, I)
+function [IrIndv, Xout, Yout, Z] = getPixels(Products, extrinsics, intrinsics_CIRN, I)
 
-[y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
-localExtrinsics = localTransformExtrinsics([x2 y2], 270-Products(pp).angle, 1, extrinsics);
-
-
-if contains(Products(pp).type, 'Grid')
-    if Products(pp).xlim(1) < 0; Products(pp).xlim(1) = -Products(pp).xlim(1); end
-    ixlim = x2 - Products(pp).xlim;
-
-    if Products(pp).ylim(1) > 0; Products(pp).ylim(1) = -Products(pp).ylim(1); end
-    if Products(pp).ylim(2) < 0; Products(pp).ylim(2) = -Products(pp).ylim(2); end
-    iylim = y2 + Products(pp).ylim;
-
-    [iX, iY]=meshgrid(ixlim(1):Products(pp).dx:ixlim(2),iylim(1):Products(pp).dy:iylim(2));
-
-    % DEM stuff
-    if isempty(Products(pp).z); iz=0; else; iz = Products(pp).z; end
-    iZ=iX*0+iz;
-
-    X=iX; Y=iY; Z=iZ;
-    [ Xout, Yout]= localTransformPoints([x2 y2], 270-Products(pp).angle,1,X,Y);
-    Z=Xout*0+iz;
-    xyz = cat(2,Xout(:), Yout(:), Z(:));
-
-elseif contains(Products(pp).type, 'xTransect')
-    if Products(pp).xlim(1) < 0; Products(pp).xlim(1) = -Products(pp).xlim(1); end
-    ixlim = x2 - Products(pp).xlim;
-    iy = y2 + Products(pp).y;
-
-    X = [ixlim(1):Products(pp).dx:ixlim(2)]';
-    Y = X.*0+iy;
-    if isempty(Products(pp).z); iz=0; else; iz = Products(pp).z; end
-    Z = X.*0 + iz;
-    [ Xout, Yout]= localTransformPoints([x2 y2], 270-Products(pp).angle,1,X,Y);
-    xyz = cat(2,Xout(:), Yout(:), Z(:));
-elseif contains(Products(pp).type, 'yTransect')
-    if Products(pp).ylim(1) > 0; Products(pp).ylim(1) = -Products(pp).ylim(1); end
-    if Products(pp).ylim(2) < 0; Products(pp).ylim(2) = -Products(pp).ylim(2); end
-    iylim = y2 + Products(pp).ylim;
-
-    ix = x2 + Products(pp).x;
-
-    Y = [iylim(1):Products(pp).dy:iylim(2)]';
-    X = Y.*0+ix;
-    if isempty(Products(pp).z); iz=0; else; iz = Products(pp).z; end
-    Z = Y.*0 + iz;
-    [ Xout, Yout]= localTransformPoints([x2 y2], 270+Products(pp).angle,1,X,Y);
-    xyz = cat(2,Xout(:), Yout(:), Z(:));
-end
+[xyz, Xout, Yout, Z] = getCoords(Products, extrinsics);
 
 [P, ~, R, IC] = intrinsicsExtrinsics2P(intrinsics_CIRN, localExtrinsics);
 
