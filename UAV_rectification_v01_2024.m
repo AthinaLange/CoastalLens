@@ -98,12 +98,12 @@ if ismac || isunix
     disp('Choose UAV Rectification folder.')
     disp('For Athina: Athina_Automated_rectification_work') %% XXX
 end
-global_dir = uigetdir('.', 'UAV Rectification');
+global_dir = uigetdir('.');
 cd(global_dir)
 setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
 
 %% =============== Check that all necessary codes are loaded. =====================================================================
-code_dir = fullfile(global_dir, 'UAV_automated_rectification', 'CODES');
+code_dir = fullfile(global_dir, 'CODES');
 
 % Check that required rectification codes are downloaded.
 if ~exist(fullfile(code_dir, 'CIRN'), 'dir')
@@ -139,6 +139,7 @@ switch exiftool_answer
         disp('Please go to https://exiftool.org and install exiftool before proceeding.')
         ffmpeg_answer = questdlg('Is exiftool installed now?','exiftool Installation', 'Yes', 'No', 'Yes');
 end
+
 
 addpath(genpath(code_dir))
 

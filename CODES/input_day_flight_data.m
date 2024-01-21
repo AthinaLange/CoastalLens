@@ -693,3 +693,4 @@ for dd = 1 : length(day_files)
 end % for dd = 1:length(day_files)
 clearvars -except *_dir user_email day_files
 cd(global_dir)
+close all
