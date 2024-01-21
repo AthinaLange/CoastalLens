@@ -33,7 +33,7 @@ for dd = 1 : length(day_files)
 
         for hh = 1 : length(extract_Hz)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
-            images = imageDatastore(imageDirectory);images.Files = images.Files(1:60:end);
+            images = imageDatastore(imageDirectory);
 
             load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'worldPose', 'extrinsics', 'intrinsics')
             load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
