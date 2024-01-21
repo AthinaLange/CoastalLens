@@ -11,6 +11,9 @@ Run 'UAV_rectification_v01_2024.m' <br />
 Will run .m scripts in CODES/scripts/ <br />
 Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 
+## Demo
+'UAV_rectification_DEMO.m' runs a demo version of the code. 
+
 ## Testing
 This toolbox is currently in testing phase on the following systems:
 - MacBook Pro M1 2020 (OS 12.6), Matlab 2022b
