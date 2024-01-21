@@ -7,7 +7,7 @@ Requires [exiftool](https://exiftool.org) and [ffmpeg](https://ffmpeg.org/downlo
 Requires XXX MATLAB toolboxes. <br />
 
 ## Getting Started
-Run 'UAV_rectification.m' <br />
+Run 'UAV_rectification_v01_2024.m' <br />
 Will run .m scripts in CODES/scripts/ <br />
 Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 
