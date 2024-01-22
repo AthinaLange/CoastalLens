@@ -124,9 +124,9 @@ for dd = 1 : length(day_files)
                                 Products(pp).localY = Yout;
                                 Products(pp).localZ = Z;
                                 if contains(Products(pp).type, 'Grid')
-                                    Products(pp).Irgb(viewId, :,:,:) = IrIndv;
+                                    Products(pp).Irgb_scp(viewId, :,:,:) = IrIndv;
                                 else
-                                    Products(pp).Irgb(viewId, :,:) = permute(IrIndv,[2 1 3]);
+                                    Products(pp).Irgb_scp(viewId, :,:) = permute(IrIndv,[2 1 3]);
                                 end
                       %      end % if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
                       %  end % if rem(extract_Hz(hh),Products(pp).frameRate) == 0
