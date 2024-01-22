@@ -503,15 +503,41 @@ for dd = 1 : length(day_files)
         %% ========================extrinsicsMethod=====================================
         [ind_scp_method,tf] = listdlg('ListString',[{'Feature Matching'}, {'Using SCPs.'}],...
             'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Extrinsics Method'});
-        save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
+        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'ind_scp_method')
+        %% ========================Feature Detection Region===============================================
+        if ind_scp_method == 1
+            I=imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
+            figure(1);clf
+            image(I)
+            xticks([])
+            yticks([size(I,1)*[0.05:0.05:1]])
+            yticklabels({'5%', '10%', '15%', '20%', '25%', '30%', '35%', '40%', '45%', '50%', '55%', '60%', '65%', '70%', '75%', '80%', '85%', '90%', '95%', '100%'})
+            yline(round(size(I,1)*(3/4)), 'LineWidth', 3, 'Color', 'r')
+            yline(round(size(I,1)*(1/2)), 'LineWidth', 3, 'Color', 'r')
+            title('Example Cutoffs')
 
+            % Define cutoff region for feature matching
+            cutoff_fraction = string(inputdlg({'Bottom fraction of image to use for feature matching (e.g., 3/4 or 0.75 or 75)'}));
+            if contains(cutoff_fraction, '.')
+                cutoff_fraction = str2double(cutoff_fraction);
+            elseif contains(cutoff_fraction, '/')
+                ab=sscanf(cutoff_fraction,'%d/%d'); cutoff_fraction = ab(1)/ab(2);
+            else
+                cutoff_fraction = str2double(cutoff_fraction); cutoff_fraction = cutoff_fraction/100;
+            end
+            cutoff = round(size(I,1)*(cutoff_fraction));
+            R.cutoff = cutoff;
+
+            save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'R', '-append')
+            close all
+            
             %% ========================SCPs===============================================
             %  If using SCPs for tracking pose through time, extra step is required - define intensity threshold
             %  - Define search area radius - center of brightest (darkest) pixels in this region will be chosen as stability point from one frame to the next.
             %  - Define intensity threshold of brightest or darkest pixels in search area
             %  ============================================================================
 
-        if ind_scp_method == 2 % Using SCPs (similar to CIRN QCIT)
+        elseif ind_scp_method == 2 % Using SCPs (similar to CIRN QCIT)
             if strcmpi(gcp_method, 'manual_targets')
                 % repeat for each extracted frame rate
                 for hh = 1 : length(extract_Hz)

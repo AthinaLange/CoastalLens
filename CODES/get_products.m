@@ -35,8 +35,7 @@ for dd = 1 : length(day_files)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
             images = imageDatastore(imageDirectory);
 
-            load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'worldPose', 'extrinsics', 'intrinsics')
-            load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
+            load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'worldPose', 'extrinsics', 'intrinsics','ind_scp_method')
             if ind_scp_method == 1 % Using Feature Detection/Matching
                 extrinsicsInitial = extrinsics;
                 load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz(hh))) 'Hz' ]), 'extrinsics_transformations')

@@ -14,6 +14,8 @@ function [panorama, extrinsics] = get_extrinsics_fd(odir, oname, images, varargi
 %           images (imageDatastore) : Stores file name of m images to process
 %           varargin :
 %                       Method (string) : Feature type (default : 'SIFT')
+%                       cutoff (double) :  vertical pixel cutoff for mask. helps cut down on processing time.
+%                       
 %
 %   Returns:
 %          panorama (uint8) : constructed panorama image to show full field of view captured during flight
@@ -29,22 +31,29 @@ function [panorama, extrinsics] = get_extrinsics_fd(odir, oname, images, varargi
 
 
 options.Method = 'SIFT'; % Feature type
+options.cutoff = 1; % mask cutoff
 options = parseOptions( options , varargin );
+
 
 
 viewId = 1;
 I = im2gray(readimage(images, 1));
 [m, n, ~] = size(I);
+mask = imcomplement(poly2mask([0 n n 0], [options.cutoff options.cutoff 0 0], m, n));
+[I] = apply_binary_mask(I, mask);
 [prevPoints] = detectFeatures(I, options.Method);
 [prevFeatures, prevPoints] = extractFeatures(I, prevPoints);
-
+tic
 for viewId = 2:length(images.Files)
-    if rem(viewId, 100) == 0
-        disp(sprintf('viewId = %i', viewId))
-    end
+     disp(sprintf('viewId = %i', viewId))
+     if rem(viewId, 100) == 0
+         toc
+     end
 
     clear curr*
     I = im2gray(readimage(images, viewId));
+
+    [I] = apply_binary_mask(I, mask);
     imageSize(viewId,:) = size(I);
 
     % Detect and extract SURF features for I(n).

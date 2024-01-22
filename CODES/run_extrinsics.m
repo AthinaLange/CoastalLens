@@ -146,11 +146,10 @@ for dd = 1 : length(day_files)
         oname = [day_files(dd).name '_' flights(ff).name];
         cd(odir)
 
-        load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable']),'ind_scp_method')
+        load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'ind_scp_method', 'R')
 
         for hh = 1 : length(extract_Hz)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
-            % mkdir(sprintf('warped_images_%iHz', extract_Hz(hh)));
             images = imageDatastore(imageDirectory); 
 
             load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'C', 'mov_id', 'tz')
@@ -158,7 +157,7 @@ for dd = 1 : length(day_files)
             to = datetime(string(C.CreateDate(mov_id(1))), 'InputFormat', 'yyyy:MM:dd HH:mm:ss', 'TimeZone', tz);
             to.TimeZone = 'UTC';
             to = datenum(to);
-            t=(dts./24./3600).*([1:length(images.Files)]-1)+ to;
+            t = (dts./24./3600).*([1:length(images.Files)]-1)+ to;
 
 
             %% GET EXTRINSICS
@@ -167,7 +166,7 @@ for dd = 1 : length(day_files)
                 %           - Using neighboring images for feature detection
                 %  ===================================================================================
 
-                [panorama, extrinsics_transformations] = get_extrinsics_fd(odir, oname, images);
+                [panorama, extrinsics_transformations] = get_extrinsics_fd(odir, oname, images, cutoff=R.cutoff);
                 save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics_transformations', 't')
 
             elseif ind_scp_method == 2 % CIRN QCIT F
