@@ -150,7 +150,7 @@ for dd = 1 : length(day_files)
 
         for hh = 1 : length(extract_Hz)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
-            mkdir(sprintf('warped_images_%iHz', extract_Hz(hh)));
+            % mkdir(sprintf('warped_images_%iHz', extract_Hz(hh)));
             images = imageDatastore(imageDirectory); 
 
             load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'C', 'mov_id', 'tz')
