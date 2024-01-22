@@ -11,7 +11,7 @@ Run 'UAV_rectification_v01_2024.m' <br />
 Will run .m scripts in CODES/scripts/ <br />
 Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 
-## Demo
+## Demo (TBD)
 'UAV_rectification_DEMO.m' runs a demo version of the code. 
 
 ## Testing
