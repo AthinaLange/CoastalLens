@@ -101,7 +101,7 @@ end
 %                                   - with SCPs - define radius and thresholds
 %                               - check products
 %  ===============================================================================
-for dd = 5%1 : length(day_files)
+for dd = 5 : length(day_files)
     %% ==========================Housekeeping======================================
     clearvars -except dd *_dir user_email day_files
     cd([day_files(dd).folder '/' day_files(dd).name])
@@ -215,7 +215,7 @@ for dd = 5%1 : length(day_files)
     %% =============================================================================
     %                          PROCESS EACH FLIGHT
     %  ==============================================================================
-    for ff = 1%1:length(flights)
+    for ff = 1:length(flights)
         %% ========================Housekeeping=======================================
         clearvars -except dd ff *_dir user_email day_files flights
         load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'))
@@ -268,7 +268,7 @@ for dd = 5%1 : length(day_files)
         [UTMNorthing, UTMEasting, UTMZone] = ll_to_utm(lat, long);
         extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
 
-        save(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'extrinsicsInitialGuess', 'UTMNorthing', 'UTMEasting', 'zgeoid_offset', 'jpg_id', 'mov_id', 'lat', 'long', 'C', 'tz', 'UTMZone')
+        save(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'extrinsicsInitialGuess', 'UTMNorthing', 'UTMEasting', 'zgeoid_offset', 'jpg_id', 'mov_id', 'lat', 'long', 'C', 'tz')
 
         clearvars form i_temp  lat long zgeoid_offset UTMNorthing UTMEasting UTMZone
         %% ========================initialFrame=========================================
@@ -381,8 +381,23 @@ for dd = 5%1 : length(day_files)
             % XXX SOMETHING HERE XXX
 
         elseif ind_gcp_option == 2 % manual selection from LiDAR
-              
-            [world_gcp, image_gcp] = select_survey_gcp(I);%, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
+            [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR (TBD)'}, {'Local LiDAR/SfM survey'}],...
+                'SelectionMode','single', 'InitialValue',1, 'PromptString', {'LiDAR/SfM survey'});
+            if ind_lidar_option == 1 % airborne LiDAR
+                %get_noaa_lidar %% TODO XXX
+            elseif ind_lidar_option == 2 % local LiDAR survey
+                disp('Find local LiDAR/SfM survey folder.')
+                disp('For CPG LiDAR: CPG_data/LiDAR/20230220_NAD83_UTM11N_NAVD88_TorreyLot.las')
+                disp('For CPG SfM: CPG_data/20220817_00581_00590_NoWaves_TorreyCobble_P4RTK_epoch2010_geoid12b.las')
+
+                [pc] = load_pointcloud;
+            end
+            [world_gcp, image_gcp] = select_survey_gcp(pc, I, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
+            if ~isempty(pc.Color)
+                gcp_method = 'manual_SfM';
+            else
+                gcp_method = 'manual_LiDAR';
+            end
 
         elseif ind_gcp_option == 3 % manual selection from GoogleEarth
             gcp_method = 'manual_GoogleEarth';
@@ -413,13 +428,27 @@ for dd = 5%1 : length(day_files)
         catch % get more points
             iGCP = image_gcp; clear image_gcp
             wGCP = world_gcp; clear world_gcp
-            [ind_gcp_option2,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'(TBD) Select points from GoogleEarth'}, {'Select GCP targets'}],...
+            [ind_gcp_option2,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'Select points from GoogleEarth (TBD)'}, {'Select GCP targets'}],...
                 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Requires more GCP points'});
 
             if ind_gcp_option2 == 1 % manual selection from LiDAR
-               
-                 
-                [world_gcp, image_gcp, pc] = select_survey_gcp(I, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
+                [ind_lidar_option,~] = listdlg('ListString',[{'Airborne LiDAR (TBD)'}, {'Local LiDAR/SfM survey'}],...
+                    'SelectionMode','single', 'InitialValue',1, 'PromptString', {'LiDAR/SfM survey'});
+                if ind_lidar_option == 1 % airborne LiDAR
+                    %get_noaa_lidar %% TODO XXX
+                elseif ind_lidar_option == 2 % local LiDAR survey
+                    disp('Find local LiDAR/SfM survey folder.')
+                    disp('For CPG LiDAR: CPG_data/LiDAR/20230220_NAD83_UTM11N_NAVD88_TorreyLot.las')
+                    disp('For CPG SfM: CPG_data/20220817_00581_00590_NoWaves_TorreyCobble_P4RTK_epoch2010_geoid12b.las')
+
+                    [pc] = load_pointcloud;
+                end
+                [world_gcp, image_gcp] = select_survey_gcp(pc, I, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
+                if ~isempty(pc.Color)
+                    gcp_method = 'manual_SfM';
+                else
+                    gcp_method = 'manual_LiDAR';
+                end % if ~isempty(pc.Color)
 
             elseif ind_gcp_option2 == 2 % manual selection from GoogleEarth
                 gcp_method = 'manual_GoogleEarth';
@@ -437,15 +466,10 @@ for dd = 5%1 : length(day_files)
             try
                 worldPose = estworldpose(image_gcp,world_gcp, intrinsics);
             catch
-                try
-                    worldPose = estworldpose(image_gcp,world_gcp, intrinsics, 'MaxReprojectionError',2);
-                catch
-                    worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
-                    if exist('user_email', 'var')
-                        sendmail(user_email{2}, [oname '- World Pose not found'])
-                    end
+                worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
+                if exist('user_email', 'var')
+                    sendmail(user_email{2}, [oname '- World Pose not found'])
                 end
-
             end % try
 
         end % try
@@ -457,17 +481,16 @@ for dd = 5%1 : length(day_files)
         for ii = 1:length(image_gcp)
             text(image_gcp(ii,1)+25, image_gcp(ii,2)-25, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
         end
-        UVd = world2img(world_gcp,pose2extr(worldPose),intrinsics);
-        %[UVd,flag] = xyz2DistUV(intrinsics_CIRN,extrinsics,world_gcp); UVd = reshape(UVd, [],2);
+        [UVd,flag] = xyz2DistUV(intrinsics_CIRN,extrinsics,world_gcp); UVd = reshape(UVd, [],2);
         scatter(UVd(:,1), UVd(:,2), 50, 'y', 'LineWidth', 3)
         % confirm that worldPose and camera extrinsics agree
-        % if max([extrinsics(1:3)-worldPose.Translation]) > 1 % if extrinsics location disagrees by more than 1m than need to reasses
-        %     answer = questdlg('Problem with extrinsics or worldPose', 'Extrinsics Location Check', 'Yes', 'No', 'Yes');
-        %     %%% XXX TBD XXX
-        % end
+        if max([extrinsics(1:3)-worldPose.Translation]) > 1 % if extrinsics location disagrees by more than 1m than need to reasses
+            answer = questdlg('Problem with extrinsics or worldPose', 'Extrinsics Location Check', 'Yes', 'No', 'Yes');
+            %%% XXX TBD XXX
+        end
 
 
-        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsicsInitialGuess', 'extrinsics','intrinsics_CIRN', 'image_gcp','world_gcp', 'worldPose', 'intrinsics')
+        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsicsInitialGuess', 'extrinsics','intrinsics_CIRN', 'gcp_method', 'image_gcp','world_gcp', 'worldPose', 'intrinsics')
         print(hGCP, '-dpng', fullfile(odir, 'Processed_data', 'gcp.png'))
 
         close all

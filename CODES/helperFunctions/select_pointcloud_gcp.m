@@ -33,7 +33,7 @@ function [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, varargin)
 
 
 %%
-options.I =[];
+options.Image =[];
 options.intrinsics_CIRN = []; 
 options.extrinsicsInitialGuess = [];
 options = parseOptions(options , varargin);
@@ -49,22 +49,26 @@ else
     cPoints = Points(:,3);
 end
 %% Cut pointcloud to approximate projection of image
-if ~isempty(options.intrinsics_CIRN) && ~isempty(options.extrinsicsInitialGuess)
-    disp('hi')
-    [m,n,~] = size(options.I); % image dimensions for edge coordinates
-    i_bounds = [0 .1*m; n .1*m; n m; 0 m];
-
-    [w_bounds] = distUV2XYZ(options.intrinsics_CIRN, options.extrinsicsInitialGuess, i_bounds', 'z', zeros(1, size(i_bounds,1)));
-    w_bounds([1 4],2) = w_bounds([1 4],2) -100;
-    w_bounds([2 3],2) = w_bounds([2 3],2) +100;
-    w_bounds([3 4],1) = w_bounds([3 4],1) +100;
-    % %
-    [in,~] = inpolygon(Points(:,1), Points(:,2),[w_bounds(1:4,1); w_bounds(1,1)], [w_bounds(1:4,2); w_bounds(1,2)]);
-
-    pc_new = select(pc, in);
-else
-    pc_new = pc;
-end
+% if ~isempty(options.intrinsics_CIRN) && ~isempty(options.extrinsicsInitialGuess)
+%     disp('hi')
+%     [m,n,~] = size(options.Image); % image dimensions for edge coordinates
+%     i_bounds = [0 .1*m; n .1*m; n m; 0 m];
+% 
+%     [w_bounds] = distUV2XYZ(options.intrinsics_CIRN, options.extrinsicsInitialGuess, i_bounds', 'z', zeros(1, size(i_bounds,1)));
+%     w_bounds([1 4],2) = w_bounds([1 4],2) -100;
+%     w_bounds([2 3],2) = w_bounds([2 3],2) +100;
+%     w_bounds([3 4],1) = w_bounds([3 4],1) +100;
+%     % %
+%     [in,~] = inpolygon(Points(:,1), Points(:,2),[w_bounds(1:4,1); w_bounds(1,1)], [w_bounds(1:4,2); w_bounds(1,2)]);
+% 
+%     if ~isempty(find(in == 1))
+%         pc_new = select(pc, in);
+%     else
+%         pc_new = pc;
+%     end
+% else
+%     pc_new = pc;
+% end
 %% Select points from pointcloud
 
 ptCloudOut = pcdownsample(pc_new, 'random', round(100000/pc_new.Count,2));
