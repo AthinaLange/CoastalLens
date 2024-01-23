@@ -19,7 +19,7 @@ function [pc] = load_pointcloud
 % Nov 2023; Last revision: XXX
 
 %%
-[temp_file, temp_file_path] = uigetfile({'*.las'}, 'Pointcloud location');
+[temp_file, temp_file_path] = uigetfile({'*.las'; '*.laz'}, 'Pointcloud location');
 lasReader=lasFileReader(fullfile(temp_file_path, temp_file)); clear temp_file*
 pc = readPointCloud(lasReader);
 end

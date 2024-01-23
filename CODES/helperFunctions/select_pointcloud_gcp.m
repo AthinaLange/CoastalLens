@@ -1,4 +1,4 @@
-function [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, varargin)
+function [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, varargin)
 %   Choose GCP Locations in LiDAR/SfM survey
 %
 %% Syntax
@@ -33,7 +33,8 @@ function [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, varargin)
 
 
 %%
-options.intrinsics_CIRN = []; % file extension to search for
+options.I =[];
+options.intrinsics_CIRN = []; 
 options.extrinsicsInitialGuess = [];
 options = parseOptions(options , varargin);
 
@@ -48,8 +49,9 @@ else
     cPoints = Points(:,3);
 end
 %% Cut pointcloud to approximate projection of image
-if isempty(options.intrinsics_CIRN) || isempty(options.extrinsicsInitialGuess)
-    [m,n,~] = size(I); % image dimensions for edge coordinates
+if ~isempty(options.intrinsics_CIRN) && ~isempty(options.extrinsicsInitialGuess)
+    disp('hi')
+    [m,n,~] = size(options.I); % image dimensions for edge coordinates
     i_bounds = [0 .1*m; n .1*m; n m; 0 m];
 
     [w_bounds] = distUV2XYZ(options.intrinsics_CIRN, options.extrinsicsInitialGuess, i_bounds', 'z', zeros(1, size(i_bounds,1)));
