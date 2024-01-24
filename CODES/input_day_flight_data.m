@@ -211,7 +211,7 @@ for dd = 1 : length(day_files)
     %% =============================================================================
     %                          PROCESS EACH FLIGHT
     %  ==============================================================================
-    for ff = 2:length(flights)
+    for ff = 1%:length(flights)
         %% ========================Housekeeping=======================================
         clearvars -except dd ff *_dir user_email day_files flights
         load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'))
@@ -389,7 +389,8 @@ for dd = 1 : length(day_files)
 
         elseif ind_gcp_option == 4 % manual selection of GCP targets (QCIT Toolbox)
             gcp_method = 'manual_targets';
-            [image_gcp] = select_image_gcp(I);
+             image_fig = figure(1);clf
+            [image_gcp] = select_image_gcp(I, image_fig);
             [world_gcp] = select_target_gcp;
 
         elseif ind_gcp_option == 5 % using metadata
@@ -416,9 +417,10 @@ for dd = 1 : length(day_files)
                 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Requires more GCP points'});
 
             if ind_gcp_option2 == 1 % manual selection from LiDAR
-               
-                 
-                [world_gcp, image_gcp, pc] = select_survey_gcp(I, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
+                image_fig = figure(1);clf
+                main_fig = figure(2);clf
+                zoom_fig =  figure(3);clf; 
+                [world_gcp, image_gcp] = select_survey_gcp(I, image_fig, main_fig, zoom_fig);%, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
 
             elseif ind_gcp_option2 == 2 % manual selection from GoogleEarth
                 gcp_method = 'manual_GoogleEarth';
@@ -426,7 +428,9 @@ for dd = 1 : length(day_files)
 
             elseif ind_gcp_option2 == 3 % manual selection of GCP targets (QCIT Toolbox)
                 gcp_method = 'manual_targets';
-                [image_gcp] = select_image_gcp(I);
+                image_fig = figure(1);clf
+                [image_gcp] = select_image_gcp(I, image_fig);
+            
                 [world_gcp] = select_target_gcp;
 
             end % if ind_gcp_option2 == 1
@@ -639,7 +643,7 @@ for dd = 1 : length(day_files)
         load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']))
         grid_text{1} = sprintf('Lat / Long = %.2f / %.2f, Angle = %.2f deg', Products(1).lat, Products(1).lon, Products(1).angle);
         grid_text{2} = sprintf('Initial Extrinsics Guess: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f', extrinsicsInitialGuess);
-        grid_text{3} = sprintf('Corrected Extrinsics Guess: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f with %s method', extrinsics, gcp_method);
+        grid_text{3} = sprintf('Corrected Extrinsics Guess: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f', extrinsics);
         grid_text{4} = sprintf('World Pose: %.2f, %.2f, %.2f', worldPose.Translation);
         if ind_scp_method == 1
             grid_text{5} = sprintf('Using Feature Detection.');

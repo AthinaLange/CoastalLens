@@ -105,14 +105,14 @@ setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
 %% =============== Check that all necessary codes are loaded. =====================================================================
 code_dir = fullfile(global_dir, 'CODES');
 
-% Check that required rectification codes are downloaded.
-if ~exist(fullfile(code_dir, 'CIRN'), 'dir')
-    disp('Please download CIRN codes from GitHub.')
-end
-% Check that cBathy codes are downloaded.
-if ~exist(fullfile(code_dir, 'cBathy_2.0'), 'dir')
-    disp('Please download cBathy v2.0 codes from GitHub.')
-end
+% % Check that required rectification codes are downloaded.
+% if ~exist(fullfile(code_dir, 'CIRN'), 'dir')
+%     disp('Please download CIRN codes from GitHub.')
+% end
+% % Check that cBathy codes are downloaded.
+% if ~exist(fullfile(code_dir, 'cBathy_2.0'), 'dir')
+%     disp('Please download cBathy v2.0 codes from GitHub.')
+% end
 % Check that basic Functions are downloaded.
 if ~exist(fullfile(code_dir, 'basicFunctions'), 'dir')
     disp('Please download basicFunctions codes from GitHub.')
