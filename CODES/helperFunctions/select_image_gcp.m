@@ -1,4 +1,4 @@
-function [image_gcp] = select_image_gcp(I)
+function [image_gcp] = select_image_gcp(I, image_fig)
 %   Choose GCP Coordinates on Image
 %
 %% Syntax
@@ -22,17 +22,17 @@ function [image_gcp] = select_image_gcp(I)
 
 %%
 % Load in initial frame
-hFig = figure(1);clf
-image(I)
+ax = axes('Parent', image_fig);
+image(I, 'Parent', ax)
 hold on
 pan on
 
-title('Click outside image when done selecting points.')
+title('Click outside image when done selecting points.', 'Parent',ax)
 
 pointhandles = [NaN,NaN];
 while true
     % Wait for user to click a point
-    a = drawpoint();
+    a = drawpoint(ax);
     zoom out
     if (floor(a.Position(1)) == 0 || floor(a.Position(1)) == size(I,2) || floor(a.Position(2)) == 0 || floor(a.Position(2)) == size(I,1))
         break;  % Exit the loop when Enter is pressed
@@ -42,8 +42,8 @@ while true
 end
 pointhandles(1,:)=[];
 clear h
-hFig; clf
-imshow(I)
+cla(ax)
+imshow(I, 'Parent', ax)
 hold on
 for ii = 1:size(pointhandles,1)
     h(ii) = drawpoint('Position', pointhandles(ii,:), 'Label', ['GCP ' char(string(ii))]);
@@ -58,7 +58,7 @@ switch answer2
         end
 end
 
-figure(3);clf
+figure;
 imshow(I)
 hold on
 scatter(image_gcp(:,1), image_gcp(:,2), 50, 'r')

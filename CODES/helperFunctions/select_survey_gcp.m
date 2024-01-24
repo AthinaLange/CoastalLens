@@ -1,4 +1,4 @@
-function [survey_gcp, image_gcp] = select_survey_gcp(I, varargin)
+function [survey_gcp, image_gcp] = select_survey_gcp(I, image_fig, main_fig, zoom_fig, varargin)
 %
 %   Choose GCP Locations in LiDAR/SfM survey and image
 %
@@ -57,13 +57,12 @@ if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
     switch answer
         case 'Image'
             %% Choose GCP Coordinates on Image
-            figure(1);clf
 
-            [image_gcp] = select_image_gcp(I);
+            [image_gcp] = select_image_gcp(I, image_fig);
+            close(image_fig)
             gcp_num = length(image_gcp);
             %% Find corresponding points on LiDAR
-            main_fig=figure(2);clf
-            zoom_fig =  figure(3);clf; 
+
             [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig);
         case 'LiDAR/SfM'
             disp('Select LiDAR/SfM GCPs.')
@@ -72,8 +71,8 @@ if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
 
 
             % plot LiDAR/SfM gcps
-            hLid = figure(2);clf
-            ptCloudOut = pcdownsample(pc, 'random', round(100000/pc.Count,2));
+            main_fig
+            ptCloudOut = pcdownsample(pc, 'random', 50000/pc.Count);
 
             ax=pcshow(ptCloudOut);
             hold on
@@ -90,9 +89,7 @@ if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
             view(-90,90)
 
             %% Choose GCP Coordinates on Image
-            figure
-
-            [image_gcp] = select_image_gcp(I);
+            [image_gcp] = select_image_gcp(I, image_fig);
 
     end
 
@@ -100,9 +97,7 @@ else
 
 
     %% Choose GCP Coordinates on Image
-    figure
-
-    [image_gcp] = select_image_gcp(I);
+    [image_gcp] = select_image_gcp(I, image_fig);
 end
 
 % 

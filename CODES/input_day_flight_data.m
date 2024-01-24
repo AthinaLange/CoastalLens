@@ -378,8 +378,10 @@ for dd = 1 : length(day_files)
             % XXX SOMETHING HERE XXX
 
         elseif ind_gcp_option == 2 % manual selection from LiDAR
-              
-            [world_gcp, image_gcp] = select_survey_gcp(I);%, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
+            image_fig = figure(1);clf
+            main_fig = figure(2);clf
+            zoom_fig =  figure(3);clf; 
+            [world_gcp, image_gcp] = select_survey_gcp(I, image_fig, main_fig, zoom_fig);%, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
 
         elseif ind_gcp_option == 3 % manual selection from GoogleEarth
             gcp_method = 'manual_GoogleEarth';
