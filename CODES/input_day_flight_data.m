@@ -469,7 +469,7 @@ for dd = 1 : length(day_files)
         scatter(UVd(:,1), UVd(:,2), 50, 'y', 'LineWidth', 3)
 
 
-        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsicsInitialGuess', 'extrinsics','intrinsics_CIRN', 'image_gcp','world_gcp', 'worldPose', 'intrinsics')
+        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsicsInitialGuess','intrinsics_CIRN', 'image_gcp','world_gcp', 'worldPose', 'intrinsics')
         print(hGCP, '-dpng', fullfile(odir, 'Processed_data', 'gcp.png'))
 
         close all
@@ -477,7 +477,7 @@ for dd = 1 : length(day_files)
         %% ========================extrinsicsMethod=====================================
         [ind_scp_method,tf] = listdlg('ListString',[{'Feature Matching'}, {'Using SCPs.'}],...
             'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Extrinsics Method'});
-        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'ind_scp_method')
+        save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'ind_scp_method', '-append')
         %% ========================Feature Detection Region===============================================
         if ind_scp_method == 1
             I=imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
@@ -551,7 +551,7 @@ for dd = 1 : length(day_files)
         for pp = ids_grid % repeat for all grids
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                plot_grid(Products(pp), I, intrinsics_CIRN, extrinsics)
+                plot_grid(Products(pp), I, intrinsics, worldPose)
                 answer = questdlg('Happy with grid projection?', ...
                     'Grid projection',...
                     'Yes', 'No', 'Yes');
@@ -581,7 +581,7 @@ for dd = 1 : length(day_files)
         if ~isempty(find(contains(extractfield(Products, 'type'), 'xTransect')));
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                plot_xtransects(Products, I, intrinsics_CIRN, extrinsics)
+                plot_xtransects(Products, I, intrinsics, extrinsics)
                 answer = questdlg('Happy with transect projection?', ...
                     'Transect Projection',...
                     'Yes', 'No', 'Yes');
@@ -613,7 +613,7 @@ for dd = 1 : length(day_files)
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
 
-                plot_ytransects(Products, I, intrinsics_CIRN, extrinsics)
+                plot_ytransects(Products, I, intrinsics, extrinsics)
                 answer = questdlg('Happy with rough transect numbers?', ...
                     'Transect Numbers',...
                     'Yes', 'No', 'Yes');

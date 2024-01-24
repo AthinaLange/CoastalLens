@@ -1,4 +1,4 @@
-function plot_ytransects(Products, I, intrinsics_CIRN, extrinsics)
+function plot_ytransects(Products, I, intrinsics, extrinsics)
 %
 % Plot all ytransects as define in Products
 %
@@ -11,35 +11,19 @@ imshow(I)
 hold on
 title('yTransect')
 jj=0;
-le={};
-for pp = ids_ytransect % repeat for all xtransects
+for pp = ids_ytransect % repeat for all ytransects
     jj=jj+1;
-
+    [xyz, ~,~,~] = getCoords(Products(pp), extrinsics);
     [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
-    localExtrinsics = localTransformExtrinsics([x2 y2], Products(pp).angle-270, 1, extrinsics);
+    aa=xyz-[x2 y2 0];
+    iP = round(world2img(xyz, pose2extr(extrinsics), intrinsics));
 
-    if Products(pp).ylim(1) > 0; Products(pp).ylim(1) = -Products(pp).ylim(1); end
-    if Products(pp).ylim(2) < 0; Products(pp).ylim(2) = -Products(pp).ylim(2); end
-    iylim = y2 + Products(pp).ylim;
+    scatter(iP(:,1), iP(:,2), 25, 'filled')
+   xlim([0 size(I,2)])
+    ylim([0 size(I,1)])
 
-    ix = x2 + Products(pp).x;
+    le{jj}= [Products(pp).type ' - x = ' char(string(Products(pp).y)) 'm'];
 
-    Y = [iylim(1):Products(pp).dy:iylim(2)]';
-    X = Y.*0+ix;
-    if isempty(Products(pp).z); iz=0; else; iz = Products(pp).z; end
-    Z = Y.*0 + iz;
-    [ Xout, Yout]= localTransformPoints([x2 y2], Products(pp).angle-270,1,X,Y);
-    xyz = cat(2,Xout(:), Yout(:), Z(:));
-
-    [UVd] = xyz2DistUV(intrinsics_CIRN, localExtrinsics,xyz);
-
-    UVd = reshape(UVd,[],2);
-    plot(UVd(:,1),UVd(:,2),'*')
-    xlim([0 intrinsics_CIRN(1)])
-    ylim([0  intrinsics_CIRN(2)])
-
-    le{jj}= [Products(pp).type ' - y = ' char(string(Products(pp).y)) 'm'];
-
-end % for pp = 1:length(ids_xtransect)
+end % for pp = 1:length(ids_ytransect)
 legend(le)
 
