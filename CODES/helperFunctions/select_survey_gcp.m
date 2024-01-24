@@ -62,20 +62,14 @@ if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
             [image_gcp] = select_image_gcp(I);
             gcp_num = length(image_gcp);
             %% Find corresponding points on LiDAR
-            figure(2);clf
-            if ~isempty(options.intrinsics_CIRN) && ~isempty(options.extrinsicsInitialGuess)
-                [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, Image = I, intrinsics_CIRN = options.intrinsics_CIRN, extrinsicsInitialGuess = options.extrinsicsInitialGuess);
-            else
-                [survey_gcp] = select_pointcloud_gcp(pc, gcp_num);
-            end
+            main_fig=figure(2);clf
+            zoom_fig =  figure(3);clf; 
+            [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig);
         case 'LiDAR/SfM'
             disp('Select LiDAR/SfM GCPs.')
             gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find?'}));
-            if ~isempty(options.intrinsics_CIRN) && ~isempty(options.extrinsicsInitialGuess)
-                [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, Image = I, intrinsics_CIRN = options.intrinsics_CIRN, extrinsicsInitialGuess = options.extrinsicsInitialGuess);
-            else
                 [survey_gcp] = select_pointcloud_gcp(pc, gcp_num);
-            end
+
 
             % plot LiDAR/SfM gcps
             hLid = figure(2);clf

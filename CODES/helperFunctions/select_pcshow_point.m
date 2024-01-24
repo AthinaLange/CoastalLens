@@ -1,12 +1,14 @@
-function [selectedPoint,zoom_fig] = select_pcshow_point(pc)
+function [selectedPoint, zoom_fig] = select_pcshow_point(pc, zoom_fig)
 Points = pc.Location;
-zoom_fig=figure(3);clf
-pcshow(pc)
+%zoom_fig=figure(3); 
+clf(zoom_fig)
+ax = axes('Parent',zoom_fig);
+pcshow(pc, 'Parent', ax)
+zoom on
 hold on
 pause
 
 disp('Zoom in and click on GCP point and press ''Enter''.')
-
 point = get(gca, 'CurrentPoint'); % mouse click position
 camPos = get(gca, 'CameraPosition'); % camera position
 camTgt = get(gca, 'CameraTarget'); % where the camera is pointing to

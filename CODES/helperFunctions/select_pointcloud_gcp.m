@@ -1,18 +1,13 @@
-function [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, varargin)
+function [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig)
 %   Choose GCP Locations in LiDAR/SfM survey
 %
 %% Syntax
-%          [survey_gcp] = select_pointcloud_gcp(pc, I, gcp_num, varargin)
-%          [survey_gcp] = select_pointcloud_gcp(pc, I, 4, intrinsics_CIRN = intrinsics, extrinsicsInitialGuess = extrinsics)
+%          [survey_gcp] = select_pointcloud_gcp(pc, gcp_num)
 %
 %% Description
 %   Args:
 %           pc (PointCloud) : PointCloud to pull gcp points from
-%           I (uint8) : Image to select gcp points in
 %           gcp_num (double) : number of gcp's to select in pointcloud
-%           varargin :
-%                       intrinsics_CIRN : [1 x 11 array] intrinsics array as defined by CIRN 
-%                       extrinsicsInitialGuess : [1 x 6 array] extrinsics array as defined by CIRN
 %
 %   Returns:
 %          survey_gcp (array) : [3 x n] gcp coordinates for n points in pointcloud coordinate system
@@ -33,12 +28,6 @@ function [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, varargin)
 
 
 %%
-options.Image =[];
-options.intrinsics_CIRN = []; 
-options.extrinsicsInitialGuess = [];
-options = parseOptions(options , varargin);
-
-%%
 Points = pc.Location;
 if ~isempty(pc.Color)
     cPoints = pc.Color;
@@ -48,32 +37,13 @@ if ~isempty(pc.Color)
 else
     cPoints = Points(:,3);
 end
-%% Cut pointcloud to approximate projection of image
-% if ~isempty(options.intrinsics_CIRN) && ~isempty(options.extrinsicsInitialGuess)
-%     disp('hi')
-%     [m,n,~] = size(options.Image); % image dimensions for edge coordinates
-%     i_bounds = [0 .1*m; n .1*m; n m; 0 m];
-% 
-%     [w_bounds] = distUV2XYZ(options.intrinsics_CIRN, options.extrinsicsInitialGuess, i_bounds', 'z', zeros(1, size(i_bounds,1)));
-%     w_bounds([1 4],2) = w_bounds([1 4],2) -100;
-%     w_bounds([2 3],2) = w_bounds([2 3],2) +100;
-%     w_bounds([3 4],1) = w_bounds([3 4],1) +100;
-%     % %
-%     [in,~] = inpolygon(Points(:,1), Points(:,2),[w_bounds(1:4,1); w_bounds(1,1)], [w_bounds(1:4,2); w_bounds(1,2)]);
-% 
-%     if ~isempty(find(in == 1))
-%         pc_new = select(pc, in);
-%     else
-%         pc_new = pc;
-%     end
-% else
-%     pc_new = pc;
-% end
+
 %% Select points from pointcloud
 
-ptCloudOut = pcdownsample(pc, 'random', round(100000/pc.Count,2));
-main_fig=figure(2);clf
-ax=pcshow(ptCloudOut);
+ptCloudOut = pcdownsample(pc, 'random', 50000/pc.Count);
+%main_fig=figure(2); 
+ax = axes('Parent', main_fig);
+pcshow(ptCloudOut, 'Parent', ax);
 
 h = images.roi.Cuboid(ax);
 selectedPoints=[];
@@ -93,17 +63,22 @@ for ii = 1:gcp_num
 
     answer = 'Reselect';
     while contains(answer , 'Reselect')
-        [selectedPoint, zoom_fig] = select_pcshow_point(pc_small);
-
+        [selectedPoint, zoom_fig] = select_pcshow_point(pc_small, zoom_fig);
+        zoom_fig
+        pcshow(pc_small);hold on
         scatter3(selectedPoint(1), selectedPoint(2), selectedPoint(3), 100, 'r', 'filled')
+        set(gca, 'Xlim', [selectedPoint(1)-25 selectedPoint(1)+25], 'Ylim', [selectedPoint(2)-25 selectedPoint(2)+25])
         disp('Check if GCP is in the correct position. After rotating click ''See GCP?''.')
         c2 = uicontrol('String','See GCP?','Callback','uiresume(zoom_fig)');
         uiwait(zoom_fig)
         answer = questdlg('Are you happy with the point or do you want to reselect?','Happy with point', 'Yes', 'Reselect', 'Yes');
     end % while contains(answer , 'Reselect')
     selectedPoints(size(selectedPoints,1)+1,:)=selectedPoint;
+    clf(zoom_fig)
     uiresume(main_fig)
 end
+close(main_fig)
+close(zoom_fig)
 %%
 figure(2);clf
 ax=pcshow(ptCloudOut);
