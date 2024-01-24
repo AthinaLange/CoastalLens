@@ -50,13 +50,11 @@ for ii = 1:size(pointhandles,1)
 end
 title('Please check that you are happy with your ground control points. Otherwise please drag points to correct locations. Click enter when finished.')
 %% Allow for last minute changes to happen
-answer2 = questdlg('Are you happy with image GCP locations?', 'Image GCP locations', 'Yes', 'Yes');
-switch answer2
-    case 'Yes'
+
         for ii = 1:length(h)
             image_gcp(ii,:) = h(ii).Position;
         end
-end
+
 
 figure;
 imshow(I)

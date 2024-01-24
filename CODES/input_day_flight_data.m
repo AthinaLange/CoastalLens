@@ -206,12 +206,12 @@ for dd = 1 : length(day_files)
     %  ==============================================================================
     flights = dir(fullfile(day_files(dd).folder, day_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
     save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'),...
-                'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
+        'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
 
     %% =============================================================================
     %                          PROCESS EACH FLIGHT
     %  ==============================================================================
-    for ff = 1%:length(flights)
+    for ff = 1 : length(flights)
         %% ========================Housekeeping=======================================
         clearvars -except dd ff *_dir user_email day_files flights
         load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'))
@@ -237,17 +237,29 @@ for dd = 1 : length(day_files)
         end
 
         [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
+        if ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
+            answer2 = questdlg('Please download and install exiftool before proceeding.', '', 'Done', 'Done');
+            [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
 
+        end
         [jpg_id] = find_file_format_id(C, file_format = 'JPG');
         [mov_id] = find_file_format_id(C, file_format = {'MOV', 'MP4'});
+        if isempty(mov_id)
+            answer2 = questdlg('Please load a video file into the folder before proceeding.', '', 'Done', 'Done');
+            [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
+
+            [jpg_id] = find_file_format_id(C, file_format = 'JPG');
+            [mov_id] = find_file_format_id(C, file_format = {'MOV', 'MP4'});
+        end
 
         % if image taken at beginning & end of flight - use beginning image
         if length(jpg_id) > 1; jpg_id = jpg_id(1); end
         % if no image taken, use mov_id
         if isempty(jpg_id); jpg_id = mov_id(1); end
 
+
         % CONFIRM VIDEOS TO PROCESS
-        [id, ~] = listdlg('ListString', append(string(C.FileName(mov_id)), ' - ',  string(C.Duration(mov_id))), 'SelectionMode','multiple', 'InitialValue',[1:length(mov_id)], 'PromptString', {'What movies do you want' 'to use? (command + for multiple)'});
+        [id, ~] = listdlg('ListString', append(string(C.FileName(mov_id)), ' - ',  string(C.Duration(mov_id))), 'SelectionMode','multiple', 'InitialValue', [1:length(mov_id)], 'PromptString', {'What movies do you want' 'to use? (command + for multiple)'});
         mov_id = mov_id(id);
 
         % pull RTK-GPS coordinates from image and change to Eastings/Northings
@@ -369,18 +381,18 @@ for dd = 1 : length(day_files)
 
         if ind_gcp_option == 1 % automated from LiDAR
             gcp_method = 'auto_LiDAR';
-            
-                disp('Find local LiDAR/SfM survey folder.')
-                disp('For CPG LiDAR: CPG_data/LiDAR/20230220_NAD83_UTM11N_NAVD88_TorreyLot.las')
-                disp('For CPG SfM: CPG_data/20220817_00581_00590_NoWaves_TorreyCobble_P4RTK_epoch2010_geoid12b.las')
 
-                [pc] = load_pointcloud;
+            disp('Find local LiDAR/SfM survey folder.')
+            disp('For CPG LiDAR: CPG_data/LiDAR/20230220_NAD83_UTM11N_NAVD88_TorreyLot.las')
+            disp('For CPG SfM: CPG_data/20220817_00581_00590_NoWaves_TorreyCobble_P4RTK_epoch2010_geoid12b.las')
+
+            [pc] = load_pointcloud;
             % XXX SOMETHING HERE XXX
 
         elseif ind_gcp_option == 2 % manual selection from LiDAR
             image_fig = figure(1);clf
             main_fig = figure(2);clf
-            zoom_fig =  figure(3);clf; 
+            zoom_fig =  figure(3);clf;
             [world_gcp, image_gcp] = select_survey_gcp(I, image_fig, main_fig, zoom_fig);%, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
 
         elseif ind_gcp_option == 3 % manual selection from GoogleEarth
@@ -389,23 +401,17 @@ for dd = 1 : length(day_files)
 
         elseif ind_gcp_option == 4 % manual selection of GCP targets (QCIT Toolbox)
             gcp_method = 'manual_targets';
-             image_fig = figure(1);clf
+            image_fig = figure(1);clf
             [image_gcp] = select_image_gcp(I, image_fig);
             [world_gcp] = select_target_gcp;
 
         elseif ind_gcp_option == 5 % using metadata
-           % [worldPose] = CIRN2MATLAB(extrinsics);
+            % [worldPose] = CIRN2MATLAB(extrinsics);
             % check azimuthal, pitch and roll from image - Brittany
             % method
             % XXX TBD XXX
 
         end
-
-        % Getting CIRN extrinsics
-        extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
-        [extrinsics, extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag, intrinsics_CIRN, image_gcp, world_gcp);
-        % TODO add in reprojectionError
-        % TODO check that grid size all consistent
 
         % Getting MATLAB worldPose
         try % get worldPose
@@ -419,7 +425,7 @@ for dd = 1 : length(day_files)
             if ind_gcp_option2 == 1 % manual selection from LiDAR
                 image_fig = figure(1);clf
                 main_fig = figure(2);clf
-                zoom_fig =  figure(3);clf; 
+                zoom_fig =  figure(3);clf;
                 [world_gcp, image_gcp] = select_survey_gcp(I, image_fig, main_fig, zoom_fig);%, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
 
             elseif ind_gcp_option2 == 2 % manual selection from GoogleEarth
@@ -430,7 +436,6 @@ for dd = 1 : length(day_files)
                 gcp_method = 'manual_targets';
                 image_fig = figure(1);clf
                 [image_gcp] = select_image_gcp(I, image_fig);
-            
                 [world_gcp] = select_target_gcp;
 
             end % if ind_gcp_option2 == 1
@@ -461,13 +466,7 @@ for dd = 1 : length(day_files)
             text(image_gcp(ii,1)+25, image_gcp(ii,2)-25, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
         end
         UVd = world2img(world_gcp,pose2extr(worldPose),intrinsics);
-        %[UVd,flag] = xyz2DistUV(intrinsics_CIRN,extrinsics,world_gcp); UVd = reshape(UVd, [],2);
         scatter(UVd(:,1), UVd(:,2), 50, 'y', 'LineWidth', 3)
-        % confirm that worldPose and camera extrinsics agree
-        % if max([extrinsics(1:3)-worldPose.Translation]) > 1 % if extrinsics location disagrees by more than 1m than need to reasses
-        %     answer = questdlg('Problem with extrinsics or worldPose', 'Extrinsics Location Check', 'Yes', 'No', 'Yes');
-        %     %%% XXX TBD XXX
-        % end
 
 
         save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsicsInitialGuess', 'extrinsics','intrinsics_CIRN', 'image_gcp','world_gcp', 'worldPose', 'intrinsics')
@@ -505,7 +504,7 @@ for dd = 1 : length(day_files)
 
             save(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'R', '-append')
             close all
-            
+
             %% ========================SCPs===============================================
             %  If using SCPs for tracking pose through time, extra step is required - define intensity threshold
             %  - Define search area radius - center of brightest (darkest) pixels in this region will be chosen as stability point from one frame to the next.
@@ -513,6 +512,12 @@ for dd = 1 : length(day_files)
             %  ============================================================================
 
         elseif ind_scp_method == 2 % Using SCPs (similar to CIRN QCIT)
+
+            % Getting CIRN extrinsics
+            load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']))
+        extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
+        [extrinsics, extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag, intrinsics_CIRN, image_gcp, world_gcp);
+        
             if strcmpi(gcp_method, 'manual_targets')
                 % repeat for each extracted frame rate
                 for hh = 1 : length(extract_Hz)
