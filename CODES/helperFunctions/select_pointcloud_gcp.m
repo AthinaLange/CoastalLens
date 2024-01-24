@@ -71,7 +71,7 @@ end
 % end
 %% Select points from pointcloud
 
-ptCloudOut = pcdownsample(pc_new, 'random', round(100000/pc_new.Count,2));
+ptCloudOut = pcdownsample(pc, 'random', round(100000/pc.Count,2));
 main_fig=figure(2);clf
 ax=pcshow(ptCloudOut);
 
@@ -87,9 +87,9 @@ for ii = 1:gcp_num
     roi = [h.Position(1) h.Position(1)+h.Position(4) ...
         h.Position(2) h.Position(2)+h.Position(5) ...
         -5 25];
-    indices = findPointsInROI(pc_new,roi);
+    indices = findPointsInROI(pc,roi);
 
-    pc_small = select(pc_new, indices);
+    pc_small = select(pc, indices);
 
     answer = 'Reselect';
     while contains(answer , 'Reselect')

@@ -101,7 +101,7 @@ end
 %                                   - with SCPs - define radius and thresholds
 %                               - check products
 %  ===============================================================================
-for dd = 5%1 : length(day_files)
+for dd = 1 : length(day_files)
     %% ==========================Housekeeping======================================
     clearvars -except dd *_dir user_email day_files
     cd([day_files(dd).folder '/' day_files(dd).name])
@@ -110,7 +110,6 @@ for dd = 5%1 : length(day_files)
     %  =============================================================================
 
     % Check if user already has input file with all general drone / products information
-    disp('For CPG: ''day_input_data.mat'' in day files.')
     input_answer = questdlg('Do you have a .mat input data file?','Input Data File', 'Yes', 'No', 'No');
     switch input_answer
         case 'Yes'
@@ -206,16 +205,13 @@ for dd = 5%1 : length(day_files)
     %                           - Save camera intrinsics, extraction frame rates, products, flights for specific day, drone type and timezone
     %  ==============================================================================
     flights = dir(fullfile(day_files(dd).folder, day_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
-    switch input_answer
-        case 'No'
-            save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'),...
+    save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'),...
                 'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
-    end
 
     %% =============================================================================
     %                          PROCESS EACH FLIGHT
     %  ==============================================================================
-    for ff = 1%1:length(flights)
+    for ff = 2:length(flights)
         %% ========================Housekeeping=======================================
         clearvars -except dd ff *_dir user_email day_files flights
         load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'))
@@ -365,10 +361,11 @@ for dd = 5%1 : length(day_files)
         %  ============================================================================
         % whichever method generates image_gcp (N x 2) and world_gcp (N x 3)
         % use process_ig8_output_athina to get gps_northings.txt
+        close all
         I = imread( fullfile(odir, 'Processed_data', 'undistortImage.png'));
 
         [ind_gcp_option,~] = listdlg('ListString',[{'(TBD) Automated from Airborne LiDAR'}, {'Select points from LiDAR/SfM'}, {'(TBD) Select points from GoogleEarth'}, {'Select GCP targets'}, {'(TBD) Use Metadata'}],...
-            'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Initial GCP Method'});
+            'SelectionMode','single', 'InitialValue',2, 'PromptString', {'Initial GCP Method'});
 
         if ind_gcp_option == 1 % automated from LiDAR
             gcp_method = 'auto_LiDAR';

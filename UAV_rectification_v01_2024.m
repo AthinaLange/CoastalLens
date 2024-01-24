@@ -96,7 +96,7 @@ disp(platform)
 
 if ismac || isunix
     disp('Choose UAV Rectification folder.')
-    disp('For Athina: Athina_Automated_rectification_work') %% XXX
+    disp('For Athina: UAV_automated_rectification') %% XXX
 end
 global_dir = uigetdir('.');
 cd(global_dir)
