@@ -96,28 +96,18 @@ for dd = 1 : length(day_files)
             sprintf('Store this variable in %s', 'Initial_coordinates.mat')
         end
 
-        % IOEOVariable: ind_scp_method
-        if ~exist(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [day_files(dd).name '_' flights(ff).name '_IOEOVariable.mat']), 'file')
+        % IOEO: ind_scp_method worldPose, R, intrinsics, extrinsics, scp
+        if ~exist(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [day_files(dd).name '_' flights(ff).name '_IOEO.mat']), 'file')
             disp('Please define a SCP method in ind_scp_method variable.')
             [ind_scp_method,tf] = listdlg('ListString',[{'Feature Matching'}, {'Using SCPs.'}],...
                 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Extrinsics Method'});
-            save(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [day_files(dd).name '_' flights(ff).name '_IOEOVariable.mat']),'ind_scp_method')
-            sprintf('Store this variable in %s', [day_files(dd).name '_' flights(ff).name '_IOEOVariable.mat'])
-        end
-
-        % IOEOInitial: worldPose, R, intrinsics, extrinsics, intrinsics_CIRN
-        if ~exist(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [day_files(dd).name '_' flights(ff).name '_IOEOInitial.mat']), 'file')
+            save(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [day_files(dd).name '_' flights(ff).name '_IOEO.mat']),'ind_scp_method', '-append')
             disp('Depending on the SCP method, please include extrinsics and intrinsics information.')
-            disp('If using Feature Matching: worldPose, R and intrinsics.')
-            disp('If using SCPs: extrinsics and intrinsics_CIRN')
-            % TODO
-            sprintf('Store this variable in %s', [day_files(dd).name '_' flights(ff).name '_IOEOInitial.mat'])
-        end
-
-
-        % scpUVdInitial: scp (requires ind_scp_method and extract_Hz
-        load(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', [day_files(dd).name '_' flights(ff).name '_IOEOVariable.mat']), 'ind_scp_method')
-        if ind_scp_method == 2 % SCP
+            if ind_scp_method == 1 % SCP
+                disp('If using Feature Matching: worldPose, R and intrinsics.')
+                % TODO
+            elseif ind_scp_method == 2 % SCP
+                disp('If using SCPs: extrinsics and intrinsics_CIRN')
             extract_Hz_dir=dir(fullfile(flights(ff).folder, flights(ff).name));
             extract_Hz_dir([extract_Hz_dir.isdir]==0)=[]; extract_Hz_dir(~contains({extract_Hz_dir.name}, 'images_'))=[];
             for hh = 1:length(extract_Hz_dir)
@@ -129,6 +119,9 @@ for dd = 1 : length(day_files)
                 end
             end % hh
         end % if ind_scp_method
+            sprintf('Store this variable in %s', [day_files(dd).name '_' flights(ff).name '_IOEO.mat'])
+        end
+
     end % ff
 end % dd
 
@@ -146,7 +139,7 @@ for dd = 1 : length(day_files)
         oname = [day_files(dd).name '_' flights(ff).name];
         cd(odir)
 
-        load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'ind_scp_method', 'R')
+        load(fullfile(odir, 'Processed_data', [oname '_IOEO']),'ind_scp_method', 'R')
 
         for hh = 1 : length(extract_Hz)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
@@ -167,7 +160,7 @@ for dd = 1 : length(day_files)
                 %  ===================================================================================
 
                 [panorama, extrinsics_transformations] = get_extrinsics_fd(odir, oname, images, cutoff=R.cutoff);
-                save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics_transformations', 't')
+                save(fullfile(odir, 'Processed_data', [oname '_IOEO_FD_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics_transformations', 't')
 
             elseif ind_scp_method == 2 % CIRN QCIT F
                 %% ========================SCPs=====================================================
@@ -180,9 +173,10 @@ for dd = 1 : length(day_files)
                     'Yes', 'Yes');
 
                 load(fullfile(odir, 'Processed_data',  [oname '_scpUVdInitial_' char(string(extract_Hz)) 'Hz']), 'scp')
-                load(fullfile(odir, 'Processed_data',  [oname '_IOEOInitial']), 'extrinsics', 'intrinsics_CIRN')
+                load(fullfile(odir, 'Processed_data',  [oname '_IOEO']), 'extrinsics', 'intrinsics_CIRN')
 
                 [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, scp, extrinsics, intrinsics_CIRN, t);
+                save(fullfile(odir, 'Processed_data', [oname '_IOEO_SCP_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics', 't')
 
 
             end % if ind_scp_method == 1

@@ -35,10 +35,10 @@ for dd = 1 : length(day_files)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
             images = imageDatastore(imageDirectory);
 
-            load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'worldPose', 'extrinsics', 'intrinsics','ind_scp_method')
+            load(fullfile(odir, 'Processed_data', [oname '_IOEO']),'worldPose', 'intrinsics','ind_scp_method')
             if ind_scp_method == 1 % Using Feature Detection/Matching
-                extrinsicsInitial = extrinsics;
-                load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz(hh))) 'Hz' ]), 'extrinsics_transformations')
+                %extrinsicsInitial = extrinsics;
+                load(fullfile(odir, 'Processed_data', [oname '_IOEO_FD_' char(string(extract_Hz(hh))) 'Hz' ]), 'extrinsics_transformations')
               
                 %% construct panorama box
                 imageSize= size(readimage(images,1));
@@ -73,7 +73,7 @@ for dd = 1 : length(day_files)
                             %    if extract_Hz(hh) ~= Products(pp).frameRate  && rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0% if subsampled framerate
                                     
                                         if viewId == 1
-                                            [xyz, Xout, Yout, Z] = getCoords(Products(pp), extrinsicsInitial);
+                                            [xyz, Xout, Yout, Z] = getCoords(Products(pp), worldPose);
                                             Products(pp).localX = Xout;
                                             Products(pp).localY = Yout;
                                             Products(pp).localZ = Z;
@@ -88,11 +88,11 @@ for dd = 1 : length(day_files)
                                             clear Irgb_temp
                                             for ii = 1:length(Products(pp).iP)
                                                 %%  XXX change this to allow for bigger grid XXX
-                                                if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= intrinsics.ImageSize)
-                                                    Irgb_temp(ii, :) = uint8([0 0 0]);
-                                                else
-                                                    Irgb_temp(ii, :) = I(Products(pp).iP(ii,2), Products(pp).iP(ii,1),:);
-                                                end
+                                                 if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= panoramaView.ImageSize)
+                                                        Irgb_temp(ii, :) = uint8([0 0 0]);
+                                                    else
+                                                        Irgb_temp(ii, :) = I(Products(pp).iP(ii,2), Products(pp).iP(ii,1),:);
+                                                   end
                                             end
                                             if contains(Products(pp).type, 'Grid')
                                                 Products(pp).Irgb_2d(viewId, :,:,:) = reshape(Irgb_temp, size(Products(pp).localX,1), size(Products(pp).localX,2), 3);
@@ -109,7 +109,7 @@ for dd = 1 : length(day_files)
 
             elseif ind_scp_method == 2 % SCPs
                 %% =========================== SCPs ==================================
-                load(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_SCP_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics','intrinsics')
+                load(fullfile(odir, 'Processed_data', [oname '_IOEO_SCP_' char(string(extract_Hz(hh))) 'Hz' ]),'extrinsics','intrinsics')
                 intrinsics_CIRN = intrinsics;
                 for viewId = 1:length(images.Files)
                     viewId
@@ -249,65 +249,6 @@ end
 
 % Save Rectifications from Each Camera into A Matrix
 IrIndv=uint8(ir);
-
-end
-
-
-function [xyz, Xout, Yout, Z] = getCoords(Products, extrinsics)
-
-[y2,x2, ~] = ll_to_utm(Products.lat, Products.lon);
-localExtrinsics = localTransformExtrinsics([x2 y2], Products.angle-270, 1, extrinsics);
-
-
-if contains(Products.type, 'Grid')
-    if Products.xlim(1) < 0; Products.xlim(1) = -Products.xlim(1); end
-    ixlim = x2 - Products.xlim;
-
-    if Products.ylim(1) > 0; Products.ylim(1) = -Products.ylim(1); end
-    if Products.ylim(2) < 0; Products.ylim(2) = -Products.ylim(2); end
-    iylim = y2 + Products.ylim;
-
-    [iX, iY]=meshgrid(ixlim(1):Products.dx:ixlim(2),iylim(1):Products.dy:iylim(2));
-
-    % DEM stuff
-    if isempty(Products.z); iz=0; else; iz = Products.z; end
-    iZ=iX*0+iz;
-
-    X=iX; Y=iY; Z=iZ;
-    [Xout, Yout]=localTransformEquiGrid([x2 y2], Products.angle-270,1,iX,iY);
-    Z=Xout.*0+iz;
-
-    xyz = [Xout(:) Yout(:) Z(:)];
-
-
-elseif contains(Products.type, 'xTransect')
-    if Products.xlim(1) < 0; Products.xlim(1) = -Products.xlim(1); end
-    ixlim = x2 - Products.xlim;
-    iy = y2 + Products.y;
-
-    X = [ixlim(1):Products.dx:ixlim(2)]';
-    Y = X.*0+iy;
-    if isempty(Products.z); iz=0; else; iz = Products.z; end
-    Z = X.*0 + iz;
-    %Xout=X-x2;
-    %Yout=Y-y2;
-    [ Xout, Yout]= localTransformPoints([x2 y2], Products.angle-270,1,X,Y);
-    xyz = cat(2,Xout(:), Yout(:), Z(:));
-elseif contains(Products.type, 'yTransect')
-    if Products.ylim(1) > 0; Products.ylim(1) = -Products.ylim(1); end
-    if Products.ylim(2) < 0; Products.ylim(2) = -Products.ylim(2); end
-    iylim = y2 + Products.ylim;
-
-    ix = x2 + Products.x;
-
-    Y = [iylim(1):Products.dy:iylim(2)]';
-    X = Y.*0+ix;
-    if isempty(Products.z); iz=0; else; iz = Products.z; end
-    Z = Y.*0 + iz;
-    [ Xout, Yout]= localTransformPoints([x2 y2],Products.angle-270,1,X,Y);
-    xyz = cat(2,Xout(:), Yout(:), Z(:));
-end
-xyz = xyz+[x2 y2 0];
 
 end
 
