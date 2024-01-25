@@ -59,8 +59,9 @@ title('Please check that you are happy with your ground control points. Otherwis
 figure;
 imshow(I)
 hold on
+size(image_gcp)
 scatter(image_gcp(:,1), image_gcp(:,2), 50, 'r')
-for ii = 1:length(image_gcp)
+for ii = 1:size(image_gcp,1)
     text(image_gcp(ii,1)+50, image_gcp(ii,2)-50, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
 end
 end

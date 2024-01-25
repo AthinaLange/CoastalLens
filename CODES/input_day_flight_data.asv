@@ -397,10 +397,7 @@ for dd = 1 : length(day_files)
             image_fig = figure(1);clf
             [image_gcp] = select_image_gcp(I, image_fig);
             [world_gcp] = select_target_gcp;
-            if size(world_gcp,1) ~= size(image_gcp,1)
-                disp('Didn''t click the right number of points.')
-                [world_gcp] = select_target_gcp;
-            end
+            if size(world_gcp,1) ~=
 
         elseif ind_gcp_option == 5 % using metadata
             % [worldPose] = CIRN2MATLAB(extrinsics);
