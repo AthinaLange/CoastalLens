@@ -24,6 +24,7 @@ This toolbox is currently in testing phase on the following systems:
 ### Flight:
 - take pre- and post-video image for additional metadata, including RTK data
 - Toggle distortion correction on
+- Video formats 'MOV', 'MP$', 'TS' (add to metadata section in input_day_flight_data.m)
 
 ### General Folder Structure:
 ```bash
