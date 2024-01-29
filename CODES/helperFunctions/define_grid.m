@@ -55,7 +55,7 @@ if find(isnan(info)) ~= 8
     info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (+m from Origin)', 'Onshore cross-shore extent (+m from Origin)', ...
         'Southern Alongshore extent (+m from Origin)', 'Northern Alongshore extent (+m from Origin)',...
         'dx', 'dy', 'z elevation (tide level in relevant datum)'})));
-    info = abs(info); % making everything +meters from origin
+    info(1:7) = abs(info(1:7)); % making everything +meters from origin
 end
 
 if info(1) > 30

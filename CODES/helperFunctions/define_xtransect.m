@@ -55,7 +55,7 @@ if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
         'dx', 'z elevation (tide level in relevant datum)'})));
 end
 
-info_num = abs(double(string(info([1 2 3 5 6])))); % making everything +meters from origin
+info_num = abs(double(string(info([1 2 3 5])))); % making everything +meters from origin
 
 if info_num(1) > 30
     disp('Maximum frame rate is 30Hz - Please choose a different frame rate.')
@@ -70,14 +70,16 @@ if contains(yy, ',')
     yy = double(split(yy, ','));
 elseif contains(yy, ':')
     eval(['yy= ' char(yy)]);
-else
+elseif length(yy) == 1
+    yy=double(yy);
+ else
     disp('Please input in the correct format (comma-separated list or [ylim1:dy:ylim2])')
     yy = string(inputdlg({'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]'}));
 end
 
 switch answer
     case 'No'
-        Z = repmat(info_num(5), length(yy),1);
+        Z = repmat(double(string(info(6))), length(yy),1);
     case 'Yes'
         X_line = -[Product.xlim(1):Product.dx:Product.xlim(2)];
         Y_line = yy;
@@ -114,7 +116,7 @@ switch answer
                 end
         end
         Z = interp2(X_line, [DEM.y], Z_line, X, Y);
-        tide_level = info_num(5)*ones(size(X,1), size(X,2));
+        tide_level = double(string(info(6)))*ones(size(X,1), size(X,2));
         aa(:,:,1)=Z;
         aa(:,:,2)=tide_level;
         Z = max(aa,[],3);

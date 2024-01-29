@@ -67,7 +67,7 @@ if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
         case 'LiDAR/SfM'
             disp('Select LiDAR/SfM GCPs.')
             gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find?'}));
-                [survey_gcp] = select_pointcloud_gcp(pc, gcp_num);
+                [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig);
 
 
             % plot LiDAR/SfM gcps
@@ -83,7 +83,7 @@ if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
             ylim([min(survey_gcp(:,2))-50 max(survey_gcp(:,2))+50])
             hold on; % so we can highlight clicked points without clearing the figure
             scatter3(survey_gcp(:,1), survey_gcp(:,2), survey_gcp(:,3), 100, 'r', 'filled')
-            for ii = 1:length(survey_gcp)
+            for ii = 1:size(survey_gcp,1)
                 text(survey_gcp(ii,1)+1, survey_gcp(ii,2)+1, survey_gcp(ii,3)+.4, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
             end
             view(-90,90)

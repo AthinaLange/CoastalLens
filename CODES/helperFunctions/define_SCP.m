@@ -36,7 +36,7 @@ hFig = figure(1);clf
 imshow(I)
 hold on
 scatter(image_gcp(:,1), image_gcp(:,2), 50, 'y', 'LineWidth', 3)
-for ii = 1:length(image_gcp)
+for ii = 1:size(image_gcp,1)
     text(image_gcp(ii,1)+50, image_gcp(ii,2)-50, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
 end
 answer_z = questdlg('Are elevation values in GCP coordinates file?', ...
@@ -48,8 +48,8 @@ switch answer_z
         disp('For CPG: Should be under the individual day. gps_northings.txt')
         [temp_file, temp_file_path] = uigetfile({'*.txt'}, 'GCP Targets');
         load(fullfile(temp_file_path, temp_file)); clear temp_file*
-        for gg = 1:length(gps_northings)
-            gcp_options(gg,:) = sprintf('%i - %.2fm', gg, gps_northings(gg,4));
+        for gg = 1:size(gps_northings,1)
+            gcp_options{gg} = sprintf('%i - %.2fm', gg, gps_northings(gg,4));
         end
 end
 

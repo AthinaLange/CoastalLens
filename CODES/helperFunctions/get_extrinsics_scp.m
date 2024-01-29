@@ -1,4 +1,4 @@
-function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, extrinsics, intrinsics, t)
+function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, extrinsics, intrinsics, t, cameraParams)
 %
 %  get camera extrinsics using stability control points (following CIRN F)
 %
@@ -33,7 +33,7 @@ function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, 
 % Nov 2023; Last revision: XXX
 
 
-                In=readimage(images, 1);
+                In=undistortImage(readimage(images, 1), cameraParams);
                 f1=figure('Name', 'Image Viewer', 'Position', [100, 100, 1200, 800]);
                 handles.pauseButton = uicontrol('Style', 'pushbutton', 'String', 'Pause', 'Position', [20, 20, 60, 30]);
                 handles.imageAxis = axes('Parent', f1, 'Position', [0.1, 0.1, 0.8, 0.8]);
@@ -70,7 +70,7 @@ function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, 
                     clear extrinsics_new scpUVd_new
 
                     %  Load the New Image
-                    In=readimage(images, k);
+                    In=undistortImage(readimage(images, k), cameraParams);
                     [m,n,~]=size(In);
 
 

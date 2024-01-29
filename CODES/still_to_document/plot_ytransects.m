@@ -13,7 +13,7 @@ title('yTransect')
 jj=0;
 for pp = ids_ytransect % repeat for all ytransects
     jj=jj+1;
-    [xyz, ~,~,~] = getCoords(Products(pp), extrinsics);
+    [xyz, ~,~,~] = getCoords(Products(pp));
     [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
     aa=xyz-[x2 y2 0];
     iP = round(world2img(xyz, pose2extr(extrinsics), intrinsics));
@@ -22,7 +22,7 @@ for pp = ids_ytransect % repeat for all ytransects
    xlim([0 size(I,2)])
     ylim([0 size(I,1)])
 
-    le{jj}= [Products(pp).type ' - x = ' char(string(Products(pp).y)) 'm'];
+    le{jj}= [Products(pp).type ' - y = ' char(string(Products(pp).x)) 'm'];
 
 end % for pp = 1:length(ids_ytransect)
 legend(le)

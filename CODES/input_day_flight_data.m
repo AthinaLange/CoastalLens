@@ -101,7 +101,7 @@ end
 %                                   - with SCPs - define radius and thresholds
 %                               - check products
 %  ===============================================================================
-for dd = 1 : length(day_files)
+for dd = 2%1 : length(day_files)
     %% ==========================Housekeeping======================================
     clearvars -except dd *_dir user_email day_files
     cd([day_files(dd).folder '/' day_files(dd).name])
@@ -130,6 +130,9 @@ for dd = 1 : length(day_files)
             drone_type = string(inputdlg({'What drone system?'}));
         end
     end
+    if ~exist('drone_type', 'var') || ~isstring(drone_type)
+        break
+    end
     %% ==========================TimeZone==========================================
     %                                        Choose timezone of video recordings
     %  =============================================================================
@@ -148,6 +151,9 @@ for dd = 1 : length(day_files)
                     disp('For CPG: under CPG_data/cameraParams_whitecap.mat') %% XXX
                     [temp_file, temp_file_path] = uigetfile(global_dir, 'Camera Parameters');
                     load(fullfile(temp_file_path, temp_file)); clear temp_file*
+                    if ~exist('cameraParams', 'var') || (~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var'))
+                        cameraParams = cameraIntrinsics([intrinsics(5) intrinsics(6)], [intrinsics(3) intrinsics(4)], [intrinsics(2) intrinsics(1)], 'RadialDistortion', [intrinsics(7) intrinsics(8) intrinsics(9)], 'TangentialDistortion', [intrinsics(10) intrinsics(11)]);
+                    end
                 case 'No'
                     disp('Please calibrate camera to proceed.')
                     cameraCalibrator
@@ -156,6 +162,7 @@ for dd = 1 : length(day_files)
             clear answer
         end
     end
+
     %% ==========================product============================================
     %                          DEFINE PRODUCT TYPE
     %                           - Do you already have a product file - as made from user_input_products.m
@@ -222,7 +229,7 @@ for dd = 1 : length(day_files)
     %% =============================================================================
     %                          PROCESS EACH FLIGHT
     %  ==============================================================================
-    for ff = 1 : length(flights)
+    for ff = 2%1 : length(flights)
         %% ========================Housekeeping=======================================
         clearvars -except dd ff *_dir user_email day_files flights
         load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'))
@@ -243,24 +250,27 @@ for dd = 1 : length(day_files)
         if contains(drone_type, 'DJI')
             drone_file_name = 'DJI';
         else
-            temp_name = string(inputdlg({'What is the file prefix?'}));
+            temp_name = string(inputdlg({'What is the file prefix? Leave empty if starts with number.'}));
             drone_file_name = temp_name(1);
         end
-
-        [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
+        if size(drone_file_name,2) ~= 1
+            [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
+        else
+            [C] = get_metadata(odir, oname, save_dir = fullfile(odir, 'Processed_data'));
+        end
         if ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
             answer2 = questdlg('Please download and install exiftool before proceeding.', '', 'Done', 'Done');
             [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
 
         end
         [jpg_id] = find_file_format_id(C, file_format = 'JPG');
-        [mov_id] = find_file_format_id(C, file_format = {'MOV', 'MP4'});
+        [mov_id] = find_file_format_id(C, file_format = {'MOV', 'MP4', 'TS'});
         if isempty(mov_id)
             answer2 = questdlg('Please load a video file into the folder before proceeding.', '', 'Done', 'Done');
             [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
 
             [jpg_id] = find_file_format_id(C, file_format = 'JPG');
-            [mov_id] = find_file_format_id(C, file_format = {'MOV', 'MP4'});
+            [mov_id] = find_file_format_id(C, file_format = {'MOV', 'MP4', 'TS'});
         end
 
         % if image taken at beginning & end of flight - use beginning image
@@ -351,9 +361,12 @@ for dd = 1 : length(day_files)
             end
         end
        
-
-        intrinsics = cameraParams.Intrinsics;
-        save(fullfile(odir, 'Processed_data', [oname '_IOEO']), 'intrinsics')
+        if class(cameraParams) == 'cameraParameters'
+            R.intrinsics = cameraParams.Intrinsics;
+        elseif class(cameraParams) == 'cameraIntrinsics'
+            R.intrinsics = cameraParams;
+        end
+        save(fullfile(odir, 'Processed_data', [oname '_IOEO']), 'R')
         clearvars I J1 J2 tf ind_distortion hFig cameraParams_*
         close all
         %% ========================GCPs==============================================
@@ -412,7 +425,7 @@ for dd = 1 : length(day_files)
 
         % Getting MATLAB worldPose
         try % get worldPose
-            worldPose = estworldpose(image_gcp,world_gcp, intrinsics);
+            worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics);
         catch % get more points
             iGCP = image_gcp; clear image_gcp
             wGCP = world_gcp; clear world_gcp
@@ -440,10 +453,10 @@ for dd = 1 : length(day_files)
             image_gcp = [iGCP; image_gcp];
             world_gcp = [wGCP; world_gcp];
             try
-                worldPose = estworldpose(image_gcp,world_gcp, intrinsics);
+                worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics);
             catch
                 try
-                    worldPose = estworldpose(image_gcp,world_gcp, intrinsics, 'MaxReprojectionError',2);
+                    worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics, 'MaxReprojectionError',2);
                 catch
                     worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
                     if exist('user_email', 'var')
@@ -462,11 +475,14 @@ for dd = 1 : length(day_files)
         for ii = 1:length(image_gcp)
             text(image_gcp(ii,1)+25, image_gcp(ii,2)-25, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
         end
-        iP = world2img(world_gcp,pose2extr(worldPose),intrinsics);
+        iP = world2img(world_gcp,pose2extr(worldPose),R.intrinsics);
         scatter(iP(:,1), iP(:,2), 50, 'y', 'LineWidth', 3)
 
+        R.image_gcp = image_gcp;
+        R.world_gcp = world_gcp;
+        R.worldPose = worldPose;
 
-        save(fullfile(odir, 'Processed_data', [oname '_IOEO']), 'image_gcp','world_gcp', 'worldPose', 'intrinsics', '-append')
+        save(fullfile(odir, 'Processed_data', [oname '_IOEO']), 'R', '-append')
         print(hGCP, '-dpng', fullfile(odir, 'Processed_data', 'gcp.png'))
 
         close all
@@ -474,31 +490,35 @@ for dd = 1 : length(day_files)
         %% ========================extrinsicsMethod=====================================
         [ind_scp_method,tf] = listdlg('ListString',[{'Feature Matching'}, {'Using SCPs.'}],...
             'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Extrinsics Method'});
-        save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'ind_scp_method', '-append')
+        R.ind_scp_method = ind_scp_method;
         %% ========================Feature Detection Region===============================================
-        if ind_scp_method == 1
-            I=imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
-            figure(1);clf
-            image(I)
-            xticks([])
-            yticks([size(I,1)*[0.05:0.05:1]])
-            yticklabels({'5%', '10%', '15%', '20%', '25%', '30%', '35%', '40%', '45%', '50%', '55%', '60%', '65%', '70%', '75%', '80%', '85%', '90%', '95%', '100%'})
-            yline(round(size(I,1)*(3/4)), 'LineWidth', 3, 'Color', 'r')
-            yline(round(size(I,1)*(1/2)), 'LineWidth', 3, 'Color', 'r')
-            title('Example Cutoffs')
-
-            % Define cutoff region for feature matching
-            cutoff_fraction = string(inputdlg({'Bottom fraction of image to use for feature matching (e.g., 3/4 or 0.75 or 75)'}));
-            if contains(cutoff_fraction, '.')
-                cutoff_fraction = str2double(cutoff_fraction);
-            elseif contains(cutoff_fraction, '/')
-                ab=sscanf(cutoff_fraction,'%d/%d'); cutoff_fraction = ab(1)/ab(2);
-            else
-                cutoff_fraction = str2double(cutoff_fraction); cutoff_fraction = cutoff_fraction/100;
-            end
-            cutoff = round(size(I,1)*(cutoff_fraction));
-            R.cutoff = cutoff;
-
+        if R.ind_scp_method == 1
+            I=imread(fullfile(odir, 'Processed_data', 'undistortImage.png'));
+            % figure(1);clf
+            % image(I)
+            % xticks([])
+            % yticks([size(I,1)*[0.05:0.05:1]])
+            % yticklabels({'5%', '10%', '15%', '20%', '25%', '30%', '35%', '40%', '45%', '50%', '55%', '60%', '65%', '70%', '75%', '80%', '85%', '90%', '95%', '100%'})
+            % yline(round(size(I,1)*(3/4)), 'LineWidth', 3, 'Color', 'r')
+            % yline(round(size(I,1)*(1/2)), 'LineWidth', 3, 'Color', 'r')
+            % title('Example Cutoffs')
+            % 
+            % % Define cutoff region for feature matching
+            % cutoff_fraction = string(inputdlg({'Bottom fraction of image to use for feature matching (e.g., 3/4 or 0.75 or 75)'}));
+            % if contains(cutoff_fraction, '.')
+            %     cutoff_fraction = str2double(cutoff_fraction);
+            % elseif contains(cutoff_fraction, '/')
+            %     ab=sscanf(cutoff_fraction,'%d/%d'); cutoff_fraction = ab(1)/ab(2);
+            % else
+            %     cutoff_fraction = str2double(cutoff_fraction); cutoff_fraction = cutoff_fraction/100;
+            % end
+            % cutoff = round(size(I,1)*(cutoff_fraction));
+            % R.cutoff = cutoff;
+            [R.mask] = define_ocean_mask(I);
+            clf
+            [Itemp] = apply_binary_mask(I, mask);
+            image(Itemp)
+            clear Itemp
             save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
             close all
 
@@ -508,27 +528,27 @@ for dd = 1 : length(day_files)
             %  - Define intensity threshold of brightest or darkest pixels in search area
             %  ============================================================================
 
-        elseif ind_scp_method == 2 % Using SCPs (similar to CIRN QCIT)
+        elseif R.ind_scp_method == 2 % Using SCPs (similar to CIRN QCIT)
 
             load(fullfile(odir, 'Processed_data', [oname '_IOEO']))
-            load(fullfile(odir, 'Processed_data', 'Initial_coordinates'))
+            load(fullfile(odir, 'Processed_data', 'Inital_coordinates.mat'))
 
             % saving in CIRN format
-            intrinsics_CIRN(1) =  intrinsics.ImageSize(2);            % Number of pixel columns
-            intrinsics_CIRN(2) = intrinsics.ImageSize(1);            % Number of pixel rows
-            intrinsics_CIRN(3) = intrinsics.PrincipalPoint(1);         % U component of principal point
-            intrinsics_CIRN(4) = intrinsics.PrincipalPoint(2);          % V component of principal point
-            intrinsics_CIRN(5) = intrinsics.FocalLength(1);         % U components of focal lengths (in pixels)
-            intrinsics_CIRN(6) = intrinsics.FocalLength(2);         % V components of focal lengths (in pixels)
-            intrinsics_CIRN(7) = intrinsics.RadialDistortion(1);         % Radial distortion coefficient
-            intrinsics_CIRN(8) = intrinsics.RadialDistortion(2);         % Radial distortion coefficient
-            if length(intrinsics.RadialDistortion) == 3
-                intrinsics_CIRN(9) = intrinsics.RadialDistortion(3);         % Radial distortion coefficient
+            intrinsics_CIRN(1) =  R.intrinsics.ImageSize(2);            % Number of pixel columns
+            intrinsics_CIRN(2) = R.intrinsics.ImageSize(1);            % Number of pixel rows
+            intrinsics_CIRN(3) = R.intrinsics.PrincipalPoint(1);         % U component of principal point
+            intrinsics_CIRN(4) = R.intrinsics.PrincipalPoint(2);          % V component of principal point
+            intrinsics_CIRN(5) = R.intrinsics.FocalLength(1);         % U components of focal lengths (in pixels)
+            intrinsics_CIRN(6) = R.intrinsics.FocalLength(2);         % V components of focal lengths (in pixels)
+            intrinsics_CIRN(7) = R.intrinsics.RadialDistortion(1);         % Radial distortion coefficient
+            intrinsics_CIRN(8) = R.intrinsics.RadialDistortion(2);         % Radial distortion coefficient
+            if length(R.intrinsics.RadialDistortion) == 3
+                intrinsics_CIRN(9) = R.intrinsics.RadialDistortion(3);         % Radial distortion coefficient
             else
                 intrinsics_CIRN(9) = 0;         % Radial distortion coefficient
             end
-            intrinsics_CIRN(10) = intrinsics.TangentialDistortion(1);        % Tangential distortion coefficients
-            intrinsics_CIRN(11) = intrinsics.TangentialDistortion(2);        % Tangential distortion coefficients
+            intrinsics_CIRN(10) = R.intrinsics.TangentialDistortion(1);        % Tangential distortion coefficients
+            intrinsics_CIRN(11) = R.intrinsics.TangentialDistortion(2);        % Tangential distortion coefficients
 
             % Getting CIRN extrinsics
             % pull RTK-GPS coordinates from image and change to Eastings/Northings
@@ -550,13 +570,11 @@ for dd = 1 : length(day_files)
             [extrinsics, extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag, intrinsics_CIRN, image_gcp, world_gcp);
             save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'extrinsicsInitialGuess', 'intrinsics_CIRN', 'extrinsics', 'extrinsicsError', '-append')
 
+            I=imread(fullfile(odir, 'Processed_data', 'undistortImage.png'));
+            [scp] = define_SCP(I, image_gcp, intrinsics_CIRN);
+            save(fullfile(odir, 'Processed_data',  [oname '_scp']), 'scp')
 
-            % repeat for each extracted frame rate
-            for hh = 1 : length(extract_Hz)
-                I=imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
-                [scp] = define_SCP(I, image_gcp, intrinsics_CIRN);
-                save(fullfile(odir, 'Processed_data',  [oname '_scpUVdInitial_' char(string(extract_Hz(hh))) 'Hz']), 'scp')
-            end
+            save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
 
         end % if ind_scp_method == 1
 
@@ -567,9 +585,9 @@ for dd = 1 : length(day_files)
         %  =======================================================================5
         % =====
 
-        load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']),'extrinsics','intrinsics_CIRN')
+        load(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R')
         load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'Products')
-        I=imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
+        I=undistortImage(imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg')), R.intrinsics);
 
         %% ========================grid================================================
         %                          GRID
@@ -580,7 +598,7 @@ for dd = 1 : length(day_files)
         for pp = ids_grid % repeat for all grids
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                plot_grid(Products(pp), I, intrinsics, worldPose)
+                plot_grid(Products(pp), I, R.intrinsics, R.worldPose)
                 answer = questdlg('Happy with grid projection?', ...
                     'Grid projection',...
                     'Yes', 'No', 'Yes');
@@ -610,7 +628,7 @@ for dd = 1 : length(day_files)
         if ~isempty(find(contains(extractfield(Products, 'type'), 'xTransect')));
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                plot_xtransects(Products, I, intrinsics, worldPose)
+                plot_xtransects(Products, I, R.intrinsics, R.worldPose)
                 answer = questdlg('Happy with transect projection?', ...
                     'Transect Projection',...
                     'Yes', 'No', 'Yes');
@@ -642,7 +660,8 @@ for dd = 1 : length(day_files)
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
 
-                plot_ytransects(Products, I, intrinsics, worldPose)
+                plot_ytransects(Products, I, R.intrinsics, R.worldPose)
+                plot_xtransects(Products, I, R.intrinsics, R.worldPose)
                 answer = questdlg('Happy with rough transect numbers?', ...
                     'Transect Numbers',...
                     'Yes', 'No', 'Yes');
@@ -674,7 +693,7 @@ for dd = 1 : length(day_files)
         %                           - Products
         %  ============================================================================
         clear grid_text grid_plot
-        load(fullfile(odir, 'Processed_data', [oname '_IOEOInitial']))
+        load(fullfile(odir, 'Processed_data', [oname '_IOEO']))
         grid_text{1} = sprintf('Lat / Long = %.2f / %.2f, Angle = %.2f deg', Products(1).lat, Products(1).lon, Products(1).angle);
         grid_text{2} = sprintf('World Pose: %.2f, %.2f, %.2f', worldPose.Translation);
         if ind_scp_method == 1
@@ -708,7 +727,6 @@ for dd = 1 : length(day_files)
         if ~isempty(ids_ytransect)
             grid_plot{length(grid_plot)+1} = fullfile(odir ,'Processed_data', [oname '_yTransects.png' ]);
         end
-        grid_text
         if exist('user_email', 'var') && ~isempty(user_email)
             sendmail(user_email{2}, [oname '- Input Data'], grid_text, grid_plot)
         end

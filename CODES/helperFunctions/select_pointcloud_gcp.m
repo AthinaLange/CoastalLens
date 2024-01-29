@@ -50,6 +50,7 @@ h = images.roi.Cuboid(ax2);
 selectedPoints=[];
 for ii = 1:gcp_num
     figure(main_fig)
+    zoom on
     c = uicontrol('String','Continue','Callback','uiresume(main_fig)');
     draw(h)
     disp('Place cuboid over area of GCP and click ''Continue''.')

@@ -143,7 +143,8 @@ end
 
 addpath(genpath(code_dir))
 
-%% =============== Select days to process.  =====================================================================
+%% =============== Select days to process.  ===============
+% ======================================================
 % Load which data folders are to be processed
 if ismac || isunix
     disp('Choose DATA folder.')

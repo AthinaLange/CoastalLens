@@ -31,6 +31,7 @@ title('Click outside image when done selecting points.', 'Parent',ax)
 
 pointhandles = [NaN,NaN];
 while true
+    zoom on
     % Wait for user to click a point
     a = drawpoint(ax);
     zoom out

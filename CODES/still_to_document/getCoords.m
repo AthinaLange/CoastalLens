@@ -1,5 +1,5 @@
 
-function [xyz, Xout, Yout, Z] = getCoords(Products, extrinsics)
+function [xyz, Xout, Yout, Z] = getCoords(Products)
 
 [y2,x2, ~] = ll_to_utm(Products.lat, Products.lon);
 
@@ -17,11 +17,8 @@ if contains(Products.type, 'Grid')
     [X, Y]=meshgrid(ixlim(1):Products.dx:ixlim(2),iylim(1):Products.dy:iylim(2));
 
     % DEM stuff
-    if isempty(Products.z); iz=0; else; iz = Products.z; end
+    if isempty(Products.z); iz=0; elseif isnan(Products.z); iz=0; else; iz = Products.z; end
     Z=X*0+iz;
-
-    
-
 
 elseif contains(Products.type, 'xTransect')
     if Products.xlim(1) < 0; Products.xlim(1) = -Products.xlim(1); end
@@ -30,7 +27,7 @@ elseif contains(Products.type, 'xTransect')
 
     X = [ixlim(1):Products.dx:ixlim(2)]';
     Y = X.*0+iy;
-    if isempty(Products.z); iz=0; else; iz = Products.z; end
+    if isempty(Products.z); iz=0; elseif isnan(Products.z); iz=0; else; iz = Products.z; end
     Z = X.*0 + iz;    
   
 elseif contains(Products.type, 'yTransect')
@@ -38,11 +35,12 @@ elseif contains(Products.type, 'yTransect')
     if Products.ylim(2) < 0; Products.ylim(2) = -Products.ylim(2); end
     iylim = y2 + Products.ylim;
 
-    ix = x2 + Products.x;
+    if Products.x < 0; Products.x = -Products.x; end
+    ix = x2 - Products.x;
 
     Y = [iylim(1):Products.dy:iylim(2)]';
     X = Y.*0+ix;
-    if isempty(Products.z); iz=0; else; iz = Products.z; end
+    if isempty(Products.z); iz=0; elseif isnan(Products.z); iz=0; else; iz = Products.z; end
     Z = Y.*0 + iz;
 
 end

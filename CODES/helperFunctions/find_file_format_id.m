@@ -28,10 +28,14 @@ options = parseOptions(options , varargin);
 format long
 % get indices of images and videos to extract from
 form = char(C.FileName);
-form = string(form(:,end-2:end));
+for ii = 1:size(form,1)
+    aa=split(string(form(ii,:)), '.');
+    ending(ii,:) = aa(end);
+end
+ending = strtrim(ending);
 
-id = rem(find(form == string(options.file_format)), length(form));
-id(id == 0) = length(form);
+id = rem(find(ending == string(options.file_format)), length(ending));
+id(id == 0) = length(ending);
 id = sort(id);
 
 end
