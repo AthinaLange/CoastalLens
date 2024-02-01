@@ -12,7 +12,7 @@ Will run .m scripts in CODES/scripts/ <br />
 Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 
 ## Demo (TBD)
-'UAV_rectification_DEMO.m' runs a demo version of the code. 
+'UAV_rectification_DEMO.m' runs a demo version of the code. This will run the feature detection method and using Stability Control Points (based on CIRN QCIT code) and let you compare results.  
 
 ## Testing
 This toolbox is currently in testing phase on the following systems:
@@ -24,17 +24,15 @@ This toolbox is currently in testing phase on the following systems:
 ### Flight:
 - take pre- and post-video image for additional metadata, including RTK data
 - Toggle distortion correction on
-- Video formats 'MOV', 'MP$', 'TS' (add to metadata section in input_day_flight_data.m)
+- Video formats 'MOV', 'MP4', 'TS' (add to metadata section in input_day_flight_data.m)
 
 ### General Folder Structure:
 ```bash
 .
 ├── CODES
-│ ├── CIRN
 │ ├── scripts
 │ ├── basicFunctions
 │ ├── helperFunctions
-│ ├── cBathy_2.0
 ├── DATA
 │ └── YYYYMMDD_Location1
 │     ├── 01
@@ -51,4 +49,5 @@ This toolbox is currently in testing phase on the following systems:
 
 
 ## License
+MIT License
 
