@@ -135,7 +135,8 @@ for dd = 1 : length(day_files)
     load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'Products', 'extract_Hz', 'flights')
 
     % repeat for each flight
-    for ff = 1 : length(flights)
+    for ff = 1 : length(flights) 
+         clearvars -except dd *_dir user_email day_files Products extract_Hz flights ff
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [day_files(dd).name '_' flights(ff).name];
         cd(odir)
@@ -143,6 +144,7 @@ for dd = 1 : length(day_files)
         load(fullfile(odir, 'Processed_data', [oname '_IOEO']), 'R')
 
         for hh = 1 : length(extract_Hz)
+            clear extrinsics
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
             images = imageDatastore(imageDirectory); 
 

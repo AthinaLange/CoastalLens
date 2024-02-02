@@ -1,29 +1,29 @@
 function [id] = find_file_format_id(C, varargin)
-%   Returns table of metadata from images and videos.
-%
+%   Returns id of files (listed in table) matching specified file format.
 %% Syntax
 %           [id] = find_file_format_id(C, file_format = 'JPG')
 %           [id] = find_file_format_id(C, file_format = {'MOV', 'MP4'})
+%
 %% Description
 %   Args:
 %           C (table) : Table of image/video metadata
 %           varargin :
-%                       file_format (string, cell array of strings) : file extensions to search for 
+%                       file_format (string, cell array of strings) : file extensions to search for
 %                                                                                       (default: JPG)
 %
 %   Returns:
 %           id (array) : list of ids that match file_format
 %
-%% Example 1
-%
-%% Citation Info 
+%% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
+% Nov 2023;
 
 %% Options
 options.file_format = {'JPG'}; % file extension to search for
 options = parseOptions(options , varargin);
 
+assert(isa(C, 'table'), 'Error (find_file_format_id): C must be a table.')
+assert(isa(options.file_format, 'cell'), 'Error (find_file_format_id): file_format must be a string.')
 %% Pull index that matches file format
 format long
 % get indices of images and videos to extract from

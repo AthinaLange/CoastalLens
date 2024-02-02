@@ -1,29 +1,35 @@
 function combine_images(data_files, varargin)
 %   Combine image sequence from multiple folders
-%
 %% Syntax
-% 
 % combine_images(data_files)
 % combine_images(data_files, imageDirectory = pwd)
 %
-%% Description 
-% 
+%% Description
 %   Args:
 %           data_files (structure) : Data files to extract images - requires data_files.folder and data_files.name
 %           varargin :
-%                       imageDirectory (string): ImageDirectory where files should be saved to (default : pwd)
+%                       imageDirectory (string): Image directory where files should be saved to (default : pwd)
 %
 %   Returns:
-%               
 %
-%% Citation Info 
+%% Example 1
+% Extract images:
+%
+% data_files = dir('DATA/20211215_Torrey/01');
+% combine_images(data_files, imageDirectory = 'images_2Hz')
+%
+%% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
- 
+% Nov 2023;
 
 %% Options
 options.imageDirectory = fullfile(data_files(1).folder); % imageDirectory where files should be saved
 options = parseOptions( options , varargin );
+
+assert(isa(data_files, 'struct'), 'Error (combine_images): data_files must be a structure.')
+assert((isfield(data_files, 'folder') && isfield(data_files, 'name')), 'Error (combine_images): data_files must have fields .folder and .name.')
+assert(isa(options.imageDirectory, 'char'), 'Error (combine_images): imageDirectory must be a string.')
+assert(isfolder(options.imageDirectory),'Error (combine_images): imageDirectory must be the path to a folder.');
 
 %% Combine images
 for dd = 1:length(data_files)

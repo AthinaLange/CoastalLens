@@ -460,7 +460,7 @@ for dd = 1 : length(day_files)
         clear image_gcp world_gcp iP worldPose ind_gcp_option iGCP wGCP hGCP ii ans
         %% ========================Feature Detection Region===============================================
             
-            [R.mask] = define_ocean_mask(R.I);
+            [R.mask] = select_ocean_mask(R.I);
             clf
             [Itemp] = apply_binary_mask(R.I, R.mask);
             image(Itemp)

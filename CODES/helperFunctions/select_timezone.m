@@ -1,27 +1,23 @@
 function [timezone] = select_timezone
 %   select_timezone return timezone from user selection (based on MATLAB timezones)
-%
 %% Syntax
-% 
-% [timezone] = select_timezone 
+% [timezone] = select_timezone
 %
-%% Description 
-% 
+%% Description
 %   Args:
 %
 %   Returns:
-%           timezone (string): user-selected Internet Assinged Numbers Authority (IANA) time zone accepted by the datetime function
-% 
+%           timezone (string): user-selected Internet Assigned Numbers Authority (IANA) time zone accepted by the datetime function
 %
 %
-% Can be used to define the timezone of a MATLAB datetime variable: datetime_variabel.TimeZone = timezone.  
+% Can be used to define the timezone of a MATLAB datetime variable: datetime_variabel.TimeZone = timezone.
 % See <a href="matlab:web('https://www.mathworks.com/help/matlab/ref/timezones.html')"> MATLAB timezones</a> for list of
-% timezones. 
+% timezones.
 %
 %
-%% Citation Info 
+%% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
+% Nov 2023;
 
 %% Select timezone
 
