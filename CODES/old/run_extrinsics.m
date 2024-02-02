@@ -128,14 +128,14 @@ end % dd
 
 
 %% run_extrinsics
-for dd = 1 : length(day_files)
+for dd = 2% : length(day_files)
     clearvars -except dd *_dir user_email day_files
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
     load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'Products', 'extract_Hz', 'flights')
 
     % repeat for each flight
-    for ff = 1 : length(flights)
+    for ff = 2%1 : length(flights)
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [day_files(dd).name '_' flights(ff).name];
         cd(odir)
@@ -151,40 +151,46 @@ for dd = 1 : length(day_files)
             to = datetime(string(C.CreateDate(mov_id(1))), 'InputFormat', 'yyyy:MM:dd HH:mm:ss', 'TimeZone', tz);
             to.TimeZone = 'UTC';
             to = datenum(to);
-            t = (dts./24./3600).*([1:length(images.Files)]-1)+ to;
-            R.t = datetime(t, 'ConvertFrom', 'datenum', 'TimeZone', 'UTC');
-           
+            R.t = (dts./24./3600).*([1:length(images.Files)]-1)+ to;
+
+
             %% GET EXTRINSICS
+            if R.ind_scp_method == 1 % Using Feature Detection/Matching
                 %% ========================FeatureDetection============================================
                 %           - Using neighboring images for feature detection
                 %  ===================================================================================
 
-                [extrinsics] = get_extrinsics_fd(images, R.intrinsics, mask=R.mask);
+                [extrinsics] = get_extrinsics_fd( images, mask=R.mask);
                 % Create the panorama.
                 images.Files = images.Files(1:extract_Hz(hh):end);
-                [panorama] = plot_panorama(images, R.intrinsics, extrinsics(1:extract_Hz(hh):end));
+                [panorama] = plot_panorama(images, extrinsics(1:extract_Hz(hh):end));
                 %  Save File
                 figure(1);clf
                 imshow(panorama)
                 saveas(gca, fullfile(odir, 'Processed_data', [oname '_Panorama.png']))
                 R.extrinsics_2d = extrinsics;
-                save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
+                save(fullfile(odir, 'Processed_data', [oname '_IOEO_FD_' char(string(extract_Hz(hh))) 'Hz' ]),'R', 'panorama')
 
+            elseif R.ind_scp_method == 2 % CIRN QCIT F
                 %% ========================SCPs=====================================================
-                % 
-                % if exist('user_email', 'var')
-                %     sendmail(user_email{2}, [oname '- Please start extrinsics through time with SCPs.'])
-                % end
-                % answer = questdlg('Ready to start SCPs?', ...
-                %     'SCPs begin',...
-                %     'Yes', 'Yes');
-                % 
-                % load(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
-                % R.intrinsics_CIRN = intrinsics_CIRN;
-                % [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, R.scp, R.extrinsics_scp, R.intrinsics_CIRN, t, R.intrinsics);
-                % R.extrinsics_scp = extrinsics;
-                % save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R','-append')
 
+                if exist('user_email', 'var')
+                    sendmail(user_email{2}, [oname '- Please start extrinsics through time with SCPs.'])
+                end
+                answer = questdlg('Ready to start SCPs?', ...
+                    'SCPs begin',...
+                    'Yes', 'Yes');
+
+                load(fullfile(odir, 'Processed_data',  [oname '_scp']), 'scp')
+                load(fullfile(odir, 'Processed_data',  [oname '_IOEO']), 'extrinsics', 'intrinsics_CIRN')
+
+                [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, scp, extrinsics, intrinsics_CIRN, R.t, R.intrinsics);
+                R.extrinsics_scp = extrinsics;
+                R.intrinsics_CIRN = intrinsics_CIRN;
+                save(fullfile(odir, 'Processed_data', [oname '_IOEO_SCP_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
+
+
+            end % if ind_scp_method == 1
         end % for hh = 1 : length(extract_Hz)
         if exist('user_email', 'var')
             sendmail(user_email{2}, [oname '- Extrinsics through time DONE'])

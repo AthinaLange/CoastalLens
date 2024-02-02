@@ -122,14 +122,16 @@ for dd = 1 : length(day_files)
     %                                                    Choose drone system
     %  =============================================================================
     if ~exist('drone_type', 'var') || ~isstring(drone_type)
-        [ind_drone, ~] = listdlg('ListString',[{'DJI'}, {'Other'}], 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'What drone platform was used?'});
+        [ind_drone,tf] = listdlg('ListString',[{'DJI'}, {'Other'}], 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'What drone platform was used?'});
         if ind_drone == 1
             drone_type = "DJI";
         else
             drone_type = string(inputdlg({'What drone system?'}));
         end
     end
-  clear ind_drone
+    if ~exist('drone_type', 'var') || ~isstring(drone_type)
+        break
+    end
     %% ==========================TimeZone==========================================
     %                                        Choose timezone of video recordings
     %  =============================================================================
@@ -145,35 +147,20 @@ for dd = 1 : length(day_files)
             switch answer
                 case 'Yes'
                     disp('Load in camera calibration file.')
-                    disp('For DEMO: under DATA/cameraParams_whitecap.mat') %% XXX
+                    disp('For CPG: under CPG_data/cameraParams_whitecap.mat') %% XXX
                     [temp_file, temp_file_path] = uigetfile(global_dir, 'Camera Parameters');
                     load(fullfile(temp_file_path, temp_file)); clear temp_file*
-
-                    % If CIRN intrinsics used as input
-                    if ~exist('cameraParams', 'var') && (~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var'))
+                    if ~exist('cameraParams', 'var') || (~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var'))
                         cameraParams = cameraIntrinsics([intrinsics(5) intrinsics(6)], [intrinsics(3) intrinsics(4)], [intrinsics(2) intrinsics(1)], 'RadialDistortion', [intrinsics(7) intrinsics(8) intrinsics(9)], 'TangentialDistortion', [intrinsics(10) intrinsics(11)]);
-                    else % otherwise check that class is cameraIntrinsics
-                        if exist('cameraParams', 'var')
-                            if class(cameraParams) == 'cameraParameters'
-                                cameraParams = cameraParams.Intrinsics;
-                            end
-                        else
-                             if class(cameraParams_undistorted) == 'cameraParameters'
-                                cameraParams_undistorted = cameraParams_undistorted.Intrinsics;
-                             end
-                              if class(cameraParams_distorted) == 'cameraParameters'
-                                cameraParams_distorted = cameraParams_distorted.Intrinsics;
-                            end
-                        end
                     end
-                    case 'No'
-                        disp('Please calibrate camera to proceed.')
-                        cameraCalibrator
-                        return
-                    end
-                    clear answer
+                case 'No'
+                    disp('Please calibrate camera to proceed.')
+                    cameraCalibrator
+                    return
             end
+            clear answer
         end
+    end
 
     %% ==========================product============================================
     %                          DEFINE PRODUCT TYPE
@@ -187,21 +174,20 @@ for dd = 1 : length(day_files)
         switch answer
             case 'Yes'
                 disp('Please select file of products you want to load in.')
-                disp('For DEMO: DATA/products_Torrey.mat') %% XXX
+                disp('For CPG: CPG_data/products_Torrey.mat') %% XXX
                 [temp_file, temp_file_path] = uigetfile(global_dir, 'Product file');
                 load(fullfile(temp_file_path, temp_file)); clear temp_file*
 
                 if ~exist('Products', 'var')
                     disp('Please create Products file.')
                     disp('For CPG: construct DEM for appropriate day')
-                    
+                    %construct_MOPS_DEM %% XXX
                     user_input_products
                 end
             case 'No'
                 user_input_products
         end
         clear answer
-
     else % if products already defined. Confirm z
         z = extractfield(Products, 'z');
         if length(z) < length(Products) % if not all fields have an elevation, or its empty
@@ -212,7 +198,7 @@ for dd = 1 : length(day_files)
                 [Products.z] = deal(z);
             end
         end
-        clear z
+
     end
     %% ==========================extractionRate=======================================
     %                          EXTRACTION FRAME RATES
@@ -230,17 +216,14 @@ for dd = 1 : length(day_files)
             extract_Hz = [extract_Hz info_Hz(hh)];
         end
     end
-    clear hh info_Hz ans
+    clear hh info_Hz
     %% ==========================saveDayData========================================
     %                          SAVE DAY RELEVANT DATA
     %                           - Save camera intrinsics, extraction frame rates, products, flights for specific day, drone type and timezone
     %  ==============================================================================
     flights = dir(fullfile(day_files(dd).folder, day_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
-    switch input_answer
-        case 'No'
-                save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
-    end
-
+    save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'),...
+        'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
 
     %% =============================================================================
     %                          PROCESS EACH FLIGHT
@@ -263,28 +246,22 @@ for dd = 1 : length(day_files)
         %                               - mov_id indicates which movies to use in image extraction
         %                               - get inital camera position and pose from metadata
         %  ============================================================================
-        % Determine file name prefix if necessary.
         if contains(drone_type, 'DJI')
             drone_file_name = 'DJI';
         else
             temp_name = string(inputdlg({'What is the file prefix? Leave empty if starts with number.'}));
             drone_file_name = temp_name(1);
         end
-
-        % extract metadata
         if size(drone_file_name,2) ~= 1
             [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
         else
             [C] = get_metadata(odir, oname, save_dir = fullfile(odir, 'Processed_data'));
         end
-
-        % check if csv file was created with metadata - if not install exiftool
         if ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
             answer2 = questdlg('Please download and install exiftool before proceeding.', '', 'Done', 'Done');
             [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
-        end
 
-        % find jpg/mov id's -> check if files loading
+        end
         [jpg_id] = find_file_format_id(C, file_format = 'JPG');
         [mov_id] = find_file_format_id(C, file_format = {'MOV', 'MP4', 'TS'});
         if isempty(mov_id)
@@ -307,7 +284,7 @@ for dd = 1 : length(day_files)
 
         save(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C', 'tz')
 
-        clearvars answer2 id drone_file_name drone_type jpg_id
+        clearvars form i_temp  lat long zgeoid_offset UTMNorthing UTMEasting UTMZone
         %% ========================initialFrame=========================================
         %                          EXTRACT INITIAL FRAME
         %                           - Use ffmpeg tool to extract first frame to be used for distortion and product location check
@@ -315,7 +292,7 @@ for dd = 1 : length(day_files)
         if ~exist(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'), 'file')
             system(['ffmpeg -ss 00:00:00 -i ' char(string(C.FileName(mov_id(1)))) ' -frames:v 1 -loglevel quiet -stats -qscale:v 2 Processed_data/Initial_frame.jpg']);
         end
-        clear C mov_id
+
         %% ========================distortion===========================================
         %                          CONFIRM DISTORTION
         %                           - If cameraParameters includes both a _distorted and _undistorted version
@@ -328,7 +305,7 @@ for dd = 1 : length(day_files)
         %  ============================================================================
         I = imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
         % if both a distorted and undistorted version of the codes exists
-        if exist('cameraParams_distorted', 'var') && exist('cameraParams_undistorted', 'var')
+        if exist('cameraParams_distorted', 'var') & exist('cameraParams_undistorted', 'var')
             J1 = undistortImage(I, cameraParams_distorted);
             J2 = undistortImage(I, cameraParams_undistorted);
             hFig = figure(1);clf
@@ -340,16 +317,18 @@ for dd = 1 : length(day_files)
             [ind_distortion,tf] = listdlg('ListString',[{'Distorted (Off)'}, {'Undistorted (On)'}, {'Recalibrate Camera'}], 'SelectionMode','single', 'InitialValue',2, 'PromptString', {'Distortion correction On/Off?'});
             if ind_distortion == 1
                 cameraParams = cameraParams_distorted;
+                %clf;imshowpair(I,J1, 'montage'); print(gcf, '-dpng', fullfile(odir, 'Processed_data', 'undistortImage_pair.png'))
                 clf;imshow(J1); imwrite(J1, fullfile(odir, 'Processed_data', 'undistortImage.png'), 'png')
             elseif ind_distortion == 2
                 cameraParams = cameraParams_undistorted;
+                %clf;imshowpair(I,J2, 'montage'); print(gcf, '-dpng', fullfile(odir, 'Processed_data', 'undistortImage_pair.png'))
                 clf;imshow(J2); imwrite(J2, fullfile(odir, 'Processed_data', 'undistortImage.png'), 'png')
             elseif ind_distortion == 3
                 disp('Please recalibrate camera or check that correct intrinsics file is used.')
                 return
             end
 
-       % if only 1 cameraParams version exists
+            % if only 1 cameraParams version exists
         else
             J1 = undistortImage(I, cameraParams);
             hFig = figure(1);clf
@@ -357,6 +336,7 @@ for dd = 1 : length(day_files)
 
             [ind_distortion,tf] = listdlg('ListString',[{'Correctly calibrated'}, {'Recalibrate Camera'}], 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Is the camera corrected calibrated?'});
             if ind_distortion == 1
+                %clf;imshowpair(I,J1, 'montage'); print(gcf, '-dpng', fullfile(odir, 'Processed_data', 'undistortImage_pair.png'))
                 clf;imshow(J1); imwrite(J1, fullfile(odir, 'Processed_data', 'undistortImage.png'), 'png')
             elseif ind_distortion == 2
                 disp('Please recalibrate camera or check that correct intrinsics file is used.')
@@ -364,22 +344,28 @@ for dd = 1 : length(day_files)
                 return
             end
         end
-
-        R.intrinsics = cameraParams;
-        R.I = undistortImage(I, R.intrinsics);
-        
+       R.I =  imread( fullfile(odir, 'Processed_data', 'undistortImage.png'));
+        if class(cameraParams) == 'cameraParameters'
+            R.intrinsics = cameraParams.Intrinsics;
+        elseif class(cameraParams) == 'cameraIntrinsics'
+            R.intrinsics = cameraParams;
+        end
         save(fullfile(odir, 'Processed_data', [oname '_IOEO']), 'R')
         clearvars I J1 J2 tf ind_distortion hFig cameraParams_*
         close all
         %% ========================GCPs==============================================
-        %                          GET GCPs HERE
-        %                           - Option 1: Manual from hand selection from LiDAR or SfM (airborne or local)
-        %                           - Option 2: Manual from GCP targets
+        %                          GET GCPs HERE (TODO)
+        %                           - Option 1: Fully Automated from LiDAR points
+        %        DONE                   - Option 2: Manual from hand selection from LiDAR or SfM (airborne or local)
+        %                           - Option 3: Manual from hand selection from GoogleEarth
+        %        DONE                   - Option 4: Manual from GCP targets
+        %                           - Option 5: Use camera metadata
         %  ============================================================================
         % whichever method generates image_gcp (N x 2) and world_gcp (N x 3)
         % use process_ig8_output_athina to get gps_northings.txt
         close all
        
+
         [ind_gcp_option,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'Select GCP targets'}],...
             'SelectionMode','single', 'InitialValue',2, 'PromptString', {'Initial GCP Method'});
 
@@ -387,9 +373,11 @@ for dd = 1 : length(day_files)
             image_fig = figure(1);clf
             main_fig = figure(2);clf
             zoom_fig =  figure(3);clf;
-            [world_gcp, image_gcp] = select_survey_gcp(R.I, image_fig, main_fig, zoom_fig);
+            [world_gcp, image_gcp] = select_survey_gcp(R.I, image_fig, main_fig, zoom_fig);%, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
+            gcp_method = 'LiDAR/SfM';
     
         elseif ind_gcp_option == 2 % manual selection of GCP targets (QCIT Toolbox)
+            gcp_method = 'manual_targets';
             image_fig = figure(1);clf
             [image_gcp] = select_image_gcp(R.I, image_fig);
             [world_gcp] = select_target_gcp;
@@ -412,9 +400,10 @@ for dd = 1 : length(day_files)
                 image_fig = figure(1);clf
                 main_fig = figure(2);clf
                 zoom_fig =  figure(3);clf;
-                [world_gcp, image_gcp] = select_survey_gcp(R.I, image_fig, main_fig, zoom_fig);
+                [world_gcp, image_gcp] = select_survey_gcp(R.I, image_fig, main_fig, zoom_fig);%, intrinsics_CIRN, extrinsicsInitialGuess); % includes select_image_gcp
 
             elseif ind_gcp_option2 == 2 % manual selection of GCP targets (QCIT Toolbox)
+                gcp_method = 'manual_targets';
                 image_fig = figure(1);clf
                 [image_gcp] = select_image_gcp(R.I, image_fig);
                 [world_gcp] = select_target_gcp;
@@ -427,15 +416,16 @@ for dd = 1 : length(day_files)
                 worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics);
             catch
                 try
-                    worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics, 'MaxReprojectionError',3);
+                    worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics, 'MaxReprojectionError',2);
                 catch
                     worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
-                    disp('World Pose not found.')
                     if exist('user_email', 'var')
                         sendmail(user_email{2}, [oname '- World Pose not found'])
                     end
                 end
+
             end % try
+
         end % try
 
         hGCP = figure(3);clf
@@ -457,64 +447,63 @@ for dd = 1 : length(day_files)
 
         close all
 
-        clear image_gcp world_gcp iP worldPose ind_gcp_option iGCP wGCP hGCP ii ans
+ 
         %% ========================Feature Detection Region===============================================
             
             [R.mask] = define_ocean_mask(R.I);
             clf
-            [Itemp] = apply_binary_mask(R.I, R.mask);
+            [Itemp] = apply_binary_mask(R.I, mask);
             image(Itemp)
-            pause(0.5)
             clear Itemp
             save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
             close all
         %% ========================SCP================================================
 
-            % load(fullfile(odir, 'Processed_data', 'Inital_coordinates.mat'))
-            % 
-            % % saving in CIRN format
-            % intrinsics_CIRN(1) =  R.intrinsics.ImageSize(2);            % Number of pixel columns
-            % intrinsics_CIRN(2) = R.intrinsics.ImageSize(1);            % Number of pixel rows
-            % intrinsics_CIRN(3) = R.intrinsics.PrincipalPoint(1);         % U component of principal point
-            % intrinsics_CIRN(4) = R.intrinsics.PrincipalPoint(2);          % V component of principal point
-            % intrinsics_CIRN(5) = R.intrinsics.FocalLength(1);         % U components of focal lengths (in pixels)
-            % intrinsics_CIRN(6) = R.intrinsics.FocalLength(2);         % V components of focal lengths (in pixels)
-            % intrinsics_CIRN(7) = R.intrinsics.RadialDistortion(1);         % Radial distortion coefficient
-            % intrinsics_CIRN(8) = R.intrinsics.RadialDistortion(2);         % Radial distortion coefficient
-            % if length(R.intrinsics.RadialDistortion) == 3
-            %     intrinsics_CIRN(9) = R.intrinsics.RadialDistortion(3);         % Radial distortion coefficient
-            % else
-            %     intrinsics_CIRN(9) = 0;         % Radial distortion coefficient
-            % end
-            % intrinsics_CIRN(10) = R.intrinsics.TangentialDistortion(1);        % Tangential distortion coefficients
-            % intrinsics_CIRN(11) = R.intrinsics.TangentialDistortion(2);        % Tangential distortion coefficients
-            % 
-            % % Getting CIRN extrinsics
-            % % pull RTK-GPS coordinates from image and change to Eastings/Northings
-            % % requires intg2012b and ll_to_utm codes (in basic_codes)
-            % load(fullfile(odir, 'Processed_data', [oname '.csv'], 'C', 'jpg_id', 'mov_id')
-            % lat = char(C.GPSLatitude(jpg_id));
-            % lat = str2double(lat(1:10));
-            % long = char(C.GPSLongitude(jpg_id));
-            % if long(end) == 'W'
-            %     long = str2double(['-' long(1:11)]);
-            % else
-            %     long = str2double(long(1:11));
-            % end
-            % [zgeoid_offset] = intg2012b(code_dir, lat,long);
-            % [UTMNorthing, UTMEasting, UTMZone] = ll_to_utm(lat, long);
-            % extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
-            % 
-            % extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
-            % 
-            % R.intrinsics_CIRN = intrinsics_CIRN;
-            % 
-            % [extrinsics, extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag);
-            % R.extrinsics_scp = extrinsics;
-            % [scp] = define_SCP(R.I, R.image_gcp, R.intrinsics_CIRN);
-            % R.scp = scp;
-            % 
-            % save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
+           load(fullfile(odir, 'Processed_data', 'Inital_coordinates.mat'))
+
+            % saving in CIRN format
+            intrinsics_CIRN(1) =  R.intrinsics.ImageSize(2);            % Number of pixel columns
+            intrinsics_CIRN(2) = R.intrinsics.ImageSize(1);            % Number of pixel rows
+            intrinsics_CIRN(3) = R.intrinsics.PrincipalPoint(1);         % U component of principal point
+            intrinsics_CIRN(4) = R.intrinsics.PrincipalPoint(2);          % V component of principal point
+            intrinsics_CIRN(5) = R.intrinsics.FocalLength(1);         % U components of focal lengths (in pixels)
+            intrinsics_CIRN(6) = R.intrinsics.FocalLength(2);         % V components of focal lengths (in pixels)
+            intrinsics_CIRN(7) = R.intrinsics.RadialDistortion(1);         % Radial distortion coefficient
+            intrinsics_CIRN(8) = R.intrinsics.RadialDistortion(2);         % Radial distortion coefficient
+            if length(R.intrinsics.RadialDistortion) == 3
+                intrinsics_CIRN(9) = R.intrinsics.RadialDistortion(3);         % Radial distortion coefficient
+            else
+                intrinsics_CIRN(9) = 0;         % Radial distortion coefficient
+            end
+            intrinsics_CIRN(10) = R.intrinsics.TangentialDistortion(1);        % Tangential distortion coefficients
+            intrinsics_CIRN(11) = R.intrinsics.TangentialDistortion(2);        % Tangential distortion coefficients
+
+            % Getting CIRN extrinsics
+            % pull RTK-GPS coordinates from image and change to Eastings/Northings
+            % requires intg2012b and ll_to_utm codes (in basic_codes)
+            load(fullfile(odir, 'Processed_data', [oname '.csv'], 'C', 'jpg_id', 'mov_id')
+            lat = char(C.GPSLatitude(jpg_id));
+            lat = str2double(lat(1:10));
+            long = char(C.GPSLongitude(jpg_id));
+            if long(end) == 'W'
+                long = str2double(['-' long(1:11)]);
+            else
+                long = str2double(long(1:11));
+            end
+            [zgeoid_offset] = intg2012b(code_dir, lat,long);
+            [UTMNorthing, UTMEasting, UTMZone] = ll_to_utm(lat, long);
+            extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
+
+            extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
+
+            R.intrinsics_CIRN = intrinsics_CIRN;
+            
+            [extrinsics, extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag);
+            R.extrinsics_scp = extrinsics;
+            [scp] = define_SCP(R.I, R.image_gcp, R.intrinsics_CIRN);
+            R.scp = scp;
+
+            save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
 
         %% ========================productsCheck=======================================
         %                          CHECK PRODUCTS ON INITIAL IMAGE
@@ -555,7 +544,7 @@ for dd = 1 : length(day_files)
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))
         end % for pp = 1:length(ids_grid)
 
-        clearvars ids_grid  pp gridChangeIndex answer origin_grid Product1
+        clearvars ids_grid info Product1 gridChangeIndex answer localIr Ir pp x2 y2 localExtrinsics ixlim iylim iX iY iz iZ X Y Z localX localY localZ
 
         %% ========================xTransects==========================================
         %                          xTransects
@@ -586,7 +575,7 @@ for dd = 1 : length(day_files)
             end % check gridCheckIndex
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_xTransects.png' ]))
 
-           clearvars  gridChangeIndex answer origin_grid Product1 productCounter
+            clearvars ids_xtransect pp jj x2 y2 ixlim iy X Y Z xyz UVd le answer gridChangeIndex
         end
         %% ========================yTransects==========================================
         %                         yTransects
@@ -618,7 +607,7 @@ for dd = 1 : length(day_files)
             end % check gridCheckIndex
             print(gcf,'-dpng',fullfile(odir, 'Processed_data', [oname '_yTransects.png' ]))
 
-            clearvars  gridChangeIndex answer origin_grid Product1 productCounter
+            clearvars pp jj x2 y2 iylim ix X Y Z xyz UVd le answer gridChangeIndex
         end
         %% ========================email===============================================
         %                         SEND EMAIL WITH INPUT DATA

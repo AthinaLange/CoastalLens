@@ -1,5 +1,5 @@
 
-function [xyz, Xout, Yout, Z] = getCoords(Products)
+function [xyz, ep, np, Z] = getCoords(Products)
 
 [y2,x2, ~] = ll_to_utm(Products.lat, Products.lon);
 

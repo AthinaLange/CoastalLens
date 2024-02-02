@@ -1,4 +1,4 @@
-function [extrinsics] = get_extrinsics_fd( images, varargin)
+function [extrinsics] = get_extrinsics_fd( images, intrinsics, varargin)
 %
 % get camera extrinsics using feature detection
 %
@@ -10,6 +10,7 @@ function [extrinsics] = get_extrinsics_fd( images, varargin)
 % 
 %   Args:
 %           images (imageDatastore) : Stores file name of m images to process
+%           intrinsics (cameraIntrinsics) : camera intrinsics object to undistort images
 %           varargin :
 %                       Method (string) : Feature type (default : 'SIFT')
 %                       mask (double) :  binary mask. helps cut down on processing time.
@@ -28,7 +29,7 @@ function [extrinsics] = get_extrinsics_fd( images, varargin)
 % Jan 2024; Last revision: XXX
 
 viewId = 1;
-I = im2gray(readimage(images, 1));
+I = im2gray(undistortImage(readimage(images, 1), intrinsics));
 [m, n, ~] = size(I);
 
 
@@ -41,13 +42,14 @@ options = parseOptions( options , varargin );
 [prevFeatures, prevPoints] = extractFeatures(I, prevPoints);
 tic
 for viewId = 2:length(images.Files)
-     disp(sprintf('viewId = %i', viewId))
-     if rem(viewId, 100) == 0
-         toc
-     end
+     
+   %  if rem(viewId, 100) == 0
+         disp(sprintf('viewId = %i', viewId))
+    %     toc
+     %end
 
     clear curr*
-    I = im2gray(readimage(images, viewId));
+    I = im2gray(undistortImage(readimage(images, viewId), intrinsics));
 
     [I] = apply_binary_mask(I, options.mask);
     imageSize(viewId,:) = size(I);

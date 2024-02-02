@@ -171,19 +171,20 @@ for dd = 1 : length(day_files)
                 save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
 
                 %% ========================SCPs=====================================================
-                % 
-                % if exist('user_email', 'var')
-                %     sendmail(user_email{2}, [oname '- Please start extrinsics through time with SCPs.'])
-                % end
-                % answer = questdlg('Ready to start SCPs?', ...
-                %     'SCPs begin',...
-                %     'Yes', 'Yes');
-                % 
-                % load(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
-                % R.intrinsics_CIRN = intrinsics_CIRN;
-                % [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, R.scp, R.extrinsics_scp, R.intrinsics_CIRN, t, R.intrinsics);
-                % R.extrinsics_scp = extrinsics;
-                % save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R','-append')
+
+                if exist('user_email', 'var')
+                    sendmail(user_email{2}, [oname '- Please start extrinsics through time with SCPs.'])
+                end
+                answer = questdlg('Ready to start SCPs?', ...
+                    'SCPs begin',...
+                    'Yes', 'Yes');
+
+                load(fullfile(odir, 'Processed_data',  [oname '_IOEO']), 'extrinsics', 'scp', 'intrinsics_CIRN')
+                load(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
+                R.intrinsics_CIRN = intrinsics_CIRN;
+                [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, scp, extrinsics, R.intrinsics_CIRN, t, R.intrinsics);
+                R.extrinsics_scp = extrinsics;
+                save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R','-append')
 
         end % for hh = 1 : length(extract_Hz)
         if exist('user_email', 'var')

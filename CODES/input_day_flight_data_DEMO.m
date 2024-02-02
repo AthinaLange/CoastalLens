@@ -457,64 +457,63 @@ for dd = 1 : length(day_files)
 
         close all
 
-        clear image_gcp world_gcp iP worldPose ind_gcp_option iGCP wGCP hGCP ii ans
+        clear image_gcp world_gcp iP worldPose ind_gcp_option iGCP wGCP
         %% ========================Feature Detection Region===============================================
             
             [R.mask] = define_ocean_mask(R.I);
             clf
-            [Itemp] = apply_binary_mask(R.I, R.mask);
+            [Itemp] = apply_binary_mask(R.I, mask);
             image(Itemp)
-            pause(0.5)
             clear Itemp
             save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
             close all
         %% ========================SCP================================================
 
-            % load(fullfile(odir, 'Processed_data', 'Inital_coordinates.mat'))
-            % 
-            % % saving in CIRN format
-            % intrinsics_CIRN(1) =  R.intrinsics.ImageSize(2);            % Number of pixel columns
-            % intrinsics_CIRN(2) = R.intrinsics.ImageSize(1);            % Number of pixel rows
-            % intrinsics_CIRN(3) = R.intrinsics.PrincipalPoint(1);         % U component of principal point
-            % intrinsics_CIRN(4) = R.intrinsics.PrincipalPoint(2);          % V component of principal point
-            % intrinsics_CIRN(5) = R.intrinsics.FocalLength(1);         % U components of focal lengths (in pixels)
-            % intrinsics_CIRN(6) = R.intrinsics.FocalLength(2);         % V components of focal lengths (in pixels)
-            % intrinsics_CIRN(7) = R.intrinsics.RadialDistortion(1);         % Radial distortion coefficient
-            % intrinsics_CIRN(8) = R.intrinsics.RadialDistortion(2);         % Radial distortion coefficient
-            % if length(R.intrinsics.RadialDistortion) == 3
-            %     intrinsics_CIRN(9) = R.intrinsics.RadialDistortion(3);         % Radial distortion coefficient
-            % else
-            %     intrinsics_CIRN(9) = 0;         % Radial distortion coefficient
-            % end
-            % intrinsics_CIRN(10) = R.intrinsics.TangentialDistortion(1);        % Tangential distortion coefficients
-            % intrinsics_CIRN(11) = R.intrinsics.TangentialDistortion(2);        % Tangential distortion coefficients
-            % 
-            % % Getting CIRN extrinsics
-            % % pull RTK-GPS coordinates from image and change to Eastings/Northings
-            % % requires intg2012b and ll_to_utm codes (in basic_codes)
-            % load(fullfile(odir, 'Processed_data', [oname '.csv'], 'C', 'jpg_id', 'mov_id')
-            % lat = char(C.GPSLatitude(jpg_id));
-            % lat = str2double(lat(1:10));
-            % long = char(C.GPSLongitude(jpg_id));
-            % if long(end) == 'W'
-            %     long = str2double(['-' long(1:11)]);
-            % else
-            %     long = str2double(long(1:11));
-            % end
-            % [zgeoid_offset] = intg2012b(code_dir, lat,long);
-            % [UTMNorthing, UTMEasting, UTMZone] = ll_to_utm(lat, long);
-            % extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
-            % 
-            % extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
-            % 
-            % R.intrinsics_CIRN = intrinsics_CIRN;
-            % 
-            % [extrinsics, extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag);
-            % R.extrinsics_scp = extrinsics;
-            % [scp] = define_SCP(R.I, R.image_gcp, R.intrinsics_CIRN);
-            % R.scp = scp;
-            % 
-            % save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
+            load(fullfile(odir, 'Processed_data', 'Inital_coordinates.mat'))
+
+            % saving in CIRN format
+            intrinsics_CIRN(1) =  R.intrinsics.ImageSize(2);            % Number of pixel columns
+            intrinsics_CIRN(2) = R.intrinsics.ImageSize(1);            % Number of pixel rows
+            intrinsics_CIRN(3) = R.intrinsics.PrincipalPoint(1);         % U component of principal point
+            intrinsics_CIRN(4) = R.intrinsics.PrincipalPoint(2);          % V component of principal point
+            intrinsics_CIRN(5) = R.intrinsics.FocalLength(1);         % U components of focal lengths (in pixels)
+            intrinsics_CIRN(6) = R.intrinsics.FocalLength(2);         % V components of focal lengths (in pixels)
+            intrinsics_CIRN(7) = R.intrinsics.RadialDistortion(1);         % Radial distortion coefficient
+            intrinsics_CIRN(8) = R.intrinsics.RadialDistortion(2);         % Radial distortion coefficient
+            if length(R.intrinsics.RadialDistortion) == 3
+                intrinsics_CIRN(9) = R.intrinsics.RadialDistortion(3);         % Radial distortion coefficient
+            else
+                intrinsics_CIRN(9) = 0;         % Radial distortion coefficient
+            end
+            intrinsics_CIRN(10) = R.intrinsics.TangentialDistortion(1);        % Tangential distortion coefficients
+            intrinsics_CIRN(11) = R.intrinsics.TangentialDistortion(2);        % Tangential distortion coefficients
+
+            % Getting CIRN extrinsics
+            % pull RTK-GPS coordinates from image and change to Eastings/Northings
+            % requires intg2012b and ll_to_utm codes (in basic_codes)
+            load(fullfile(odir, 'Processed_data', [oname '.csv'], 'C', 'jpg_id', 'mov_id')
+            lat = char(C.GPSLatitude(jpg_id));
+            lat = str2double(lat(1:10));
+            long = char(C.GPSLongitude(jpg_id));
+            if long(end) == 'W'
+                long = str2double(['-' long(1:11)]);
+            else
+                long = str2double(long(1:11));
+            end
+            [zgeoid_offset] = intg2012b(code_dir, lat,long);
+            [UTMNorthing, UTMEasting, UTMZone] = ll_to_utm(lat, long);
+            extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
+
+            extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
+
+            R.intrinsics_CIRN = intrinsics_CIRN;
+
+            [extrinsics, extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag);
+            R.extrinsics_scp = extrinsics;
+            [scp] = define_SCP(R.I, R.image_gcp, R.intrinsics_CIRN);
+            R.scp = scp;
+
+            save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
 
         %% ========================productsCheck=======================================
         %                          CHECK PRODUCTS ON INITIAL IMAGE

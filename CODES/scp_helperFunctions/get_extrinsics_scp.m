@@ -163,7 +163,7 @@ function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, 
                 variableCamSolutionMeta.solutionSTD= sqrt(var(extrinsics));
 
                 %  Save File
-                save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz)) 'Hz' ]),'extrinsics','t','variableCamSolutionMeta','imageNames','intrinsics')
+                save(fullfile(odir, 'Processed_data', [oname '_IOEOVariable_' char(string(extract_Hz)) 'Hz' ]),'extrinsics','t','variableCamSolutionMeta','imageNames','intrinsics', 'scpUVdn_full')
 
                 %  Display
                 disp(' ')

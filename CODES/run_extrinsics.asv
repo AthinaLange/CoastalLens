@@ -179,9 +179,10 @@ for dd = 1 : length(day_files)
                 %     'SCPs begin',...
                 %     'Yes', 'Yes');
                 % 
+                % load(fullfile(odir, 'Processed_data',  [oname '_IOEO']), 'extrinsics', 'scp', 'intrinsics_CIRN')
                 % load(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
                 % R.intrinsics_CIRN = intrinsics_CIRN;
-                % [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, R.scp, R.extrinsics_scp, R.intrinsics_CIRN, t, R.intrinsics);
+                % [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, scp, extrinsics, R.intrinsics_CIRN, t, R.intrinsics);
                 % R.extrinsics_scp = extrinsics;
                 % save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R','-append')
 

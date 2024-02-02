@@ -48,9 +48,9 @@ for dd = 1:length(day_files)
 
                 % replacing 1st image with image extracted as initial frame for gcp and scp accuracy
                 if ispc
-                    system(['cp Processed_data\Initial_frame.jpg ' imageDirectory '\Frame_00001.jpg'])
+                    system(['cp Processed_data\Initial_frame.jpg ' imageDirectory '\Frame_00001.jpg']);
                 else
-                    system(['cp Processed_data/Initial_frame.jpg ' imageDirectory '/Frame_00001.jpg'])
+                    system(['cp Processed_data/Initial_frame.jpg ' imageDirectory '/Frame_00001.jpg']);
                 end
             end % if ~exist(sprintf('images_%iHz', extract_Hz(hh)), 'dir')
         end % for hh = 1:length(extract_Hz)
@@ -60,3 +60,5 @@ for dd = 1:length(day_files)
         end
     end % for ff = 1:length(flights)
 end % for dd = 1:length(day_files)
+clearvars -except *_dir user_email day_files
+cd(global_dir)
