@@ -1,8 +1,35 @@
-function plot_xtransects(Products, I, intrinsics, extrinsics)
+function plot_xtransects(Products, I, intrinsics, worldPose)
+%   Plot xtransects on oblique image
+%% Syntax
+%           plot_xtransects(Products, I, intrinsics, worldPose)
 %
-% Plot all xtransects as define in Products
+%% Description
+%   Args:
+%           Products (structure) : Single Products object. All necessary variables given in define_xtransect.
+%           I (uint8 image) : Oblique image
+%           intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
+%           worldPose (rigidtform3d) : worldPose of oblique image
 %
+%   Returns:
+%
+%   Function dependencies:
+%       getCoords
+%       ll_to_utm
+%
+%% Example 1
+% plot_xtransects(Products(1), R.I, R.intrinsics, R.worldPose)
+%
+%% Citation Info
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023;
 
+%% Data
+assert(isa(Products, 'structure'), 'Error (plot_xtransects): Products must be a structure.')
+assert(isa(I, 'uint8'), 'Error (plot_xtransects): I must be a uint8 image.')
+assert(isa(intrinsics, 'cameraIntrinsics'), 'Error (plot_xtransects): intrinsics must be a cameraIntrinsics object.')
+assert(isa(worldPose, 'rigidtform3d'), 'Error (plot_xtransects): worldPose must be a rigidtform3d object.')
+
+%% Get coordinates and pixel location
 ids_xtransect = find(contains(extractfield(Products, 'type'), 'xTransect'));
 
 figure(5);clf
@@ -11,19 +38,19 @@ imshow(I)
 hold on
 title('Timestack')
 jj=0;
-for pp = ids_xtransect% repeat for all xtransects
+for pp = ids_xtransect % repeat for all xtransects
     jj=jj+1;
-    [xyz, ~,~,~] = getCoords(Products(pp));
+    [xyz] = getCoords(Products(pp));
     [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
-    aa=xyz-[x2 y2 0]; 
-    iP = round(world2img(xyz, pose2extr(extrinsics), intrinsics));
+    aa=xyz-[x2 y2 0];
+    iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
 
     scatter(iP(:,1), iP(:,2), 25, 'filled')
-   xlim([0 size(I,2)])
+    xlim([0 size(I,2)])
     ylim([0 size(I,1)])
 
     le{jj}= [Products(pp).type ' - x = ' char(string(Products(pp).y)) 'm'];
 
 end % for pp = 1:length(ids_xtransect)
 legend(le)
-
+end

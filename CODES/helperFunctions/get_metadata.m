@@ -47,3 +47,4 @@ assert(isfolder(options.save_dir),'Error (get_metadata): save_dir must be the pa
 system(sprintf('/usr/local/bin/exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s* > %s', odir, options.file_prefix, fullfile(options.save_dir, [oname '.csv'])));
 
 C = readtable(fullfile(options.save_dir, [oname '.csv']));
+end

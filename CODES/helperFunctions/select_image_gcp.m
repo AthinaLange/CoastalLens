@@ -1,11 +1,11 @@
 function [image_gcp] = select_image_gcp(I, image_fig)
-%   Choose GCP Coordinates on Image
-%
+%   Choose GCP Coordinates in Image
 %% Syntax
-%           [image_gcp] = select_image_gcp(I)
+%           [image_gcp] = select_image_gcp(I, image_fig)
 %% Description
 %   Args:
-%           I (uint8) : Image to select gcp points in
+%           I (uint8 image) : image to select gcp points in
+%           image_fig (figure handle) : figure handle for image to load in
 %
 %   Returns:
 %          image_gcp (array) : [2 x n] gcp coordinates for n points in image
@@ -13,15 +13,17 @@ function [image_gcp] = select_image_gcp(I, image_fig)
 % Click on however many GCP you would like to use
 % To exit, click outside image
 %
+% Passing the figure handles is necessary.
 %
-%% Example 1
-%
-%% Citation Info 
+%% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
+% Nov 2023; 
 
-%%
-% Load in initial frame
+%% Data
+assert(isa(I, 'uint8'), 'Error (select_image_gcp): I must be a uint8 image.')
+assert(strcmp(class(image_fig), 'matlab.ui.Figure'), 'Error (select_image_gcp): image_fig must be a figure handle.')
+
+%% Plot image
 ax = axes('Parent', image_fig);
 image(I, 'Parent', ax)
 hold on
@@ -49,13 +51,10 @@ hold on
 for ii = 1:size(pointhandles,1)
     h(ii) = drawpoint('Position', pointhandles(ii,:), 'Label', ['GCP ' char(string(ii))]);
 end
-title('Please check that you are happy with your ground control points. Otherwise please drag points to correct locations. Click enter when finished.')
-%% Allow for last minute changes to happen
 
-        for ii = 1:length(h)
-            image_gcp(ii,:) = h(ii).Position;
-        end
-
+for ii = 1:length(h)
+    image_gcp(ii,:) = h(ii).Position;
+end
 
 figure;
 imshow(I)

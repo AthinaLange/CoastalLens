@@ -16,7 +16,6 @@ function extract_images(data_files, varargin)
 %   REQUIRES: ffmpeg installation (https://ffmpeg.org/)
 %
 %% Example 1
-% Extract images:
 %
 % data_files = dir('DATA/20211026_Torrey/01');
 % extract_images(data_files, frameRate = 2)
@@ -42,4 +41,3 @@ for dd = 1:length(data_files)
 end
 
 end
-

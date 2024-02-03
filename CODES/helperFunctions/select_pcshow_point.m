@@ -1,6 +1,31 @@
 function [selectedPoint, zoom_fig] = select_pcshow_point(pc, zoom_fig)
+%  Return 3d coordinates of point selected in pointcloud.
+%% Syntax
+%           [selectedPoint, zoom_fig] = select_pcshow_point(pc, zoom_fig)
+%
+%% Description
+%   Args:
+%           pc (pointCloud) : pointcloud where user is selecting point
+%           zoom_fig (figure handle) : figure handle where pointcloud will
+%           be displayed and point clicked
+% 
+%   Returns:
+%       selectedPoints (double) : [3 x 1] (x,y,z) coordinates of selected point from pointcloud pc
+%       zoom_fig (figure handle) : figure handle where pointcloud will be displayed and point clicked
+%
+%
+%   Passing the figure handle is necessary.
+%
+%% Citation Info
+% github.com/AthinaLange/UAV_automated_rectification
+% Nov 2023;
+
+%% Data
+assert(isa(pc, 'pointCloud'), 'Error (select_pcshow_point): pc must be a pointCloud object.')
+assert(strcmp(class(zoom_fig), 'matlab.ui.Figure'), 'Error (select_pcshow_point): zoom_fig must be a figure handle.')
+
+%% Plot pointcloud
 Points = pc.Location;
-%zoom_fig=figure(3); 
 clf(zoom_fig)
 ax = axes('Parent',zoom_fig);
 pcshow(pc, 'Parent', ax)
@@ -9,6 +34,8 @@ hold on
 pause
 
 disp('Zoom in and click on GCP point and press ''Enter''.')
+
+% Get clicked point coordinates
 point = get(gca, 'CurrentPoint'); % mouse click position
 camPos = get(gca, 'CameraPosition'); % camera position
 camTgt = get(gca, 'CameraTarget'); % where the camera is pointing to

@@ -13,9 +13,9 @@ function combine_images(data_files, varargin)
 %   Returns:
 %
 %% Example 1
-% Extract images:
 %
 % data_files = dir('DATA/20211215_Torrey/01');
+% extract_images(data_files, frameRate = 2)
 % combine_images(data_files, imageDirectory = 'images_2Hz')
 %
 %% Citation Info

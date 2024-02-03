@@ -73,10 +73,11 @@ for  dd = 1 : length(day_files)
 
                             %% FD
                             if viewId == 1
-                                [xyz, Xout, Yout, Z] = getCoords(Products(pp));
-                                Products(pp).localX = Xout;
-                                Products(pp).localY = Yout;
-                                Products(pp).localZ = Z;
+                                [xyz
+] = getCoords(Products(pp));
+                                % Products(pp).localX = Xout;
+                                % Products(pp).localY = Yout;
+                                % Products(pp).localZ = Z;
                                 %find orientation of original image in panoramaView
                                 % mask = imwarp(true(size(I,1),size(I,2)), R.extrinsics_2d(viewId), 'OutputView', panoramaView);
                                 % BW = boundarymask(mask);

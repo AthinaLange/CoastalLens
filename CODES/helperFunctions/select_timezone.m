@@ -15,6 +15,9 @@ function [timezone] = select_timezone
 % timezones.
 %
 %
+%% Example 1
+% [timezone] = select_timezone;
+% datetime('now', 'TimeZone', timezone)
 %% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
 % Nov 2023;
@@ -27,3 +30,4 @@ cont_areas = [{'Africa'}, {'America'}, {'Antarctica'}, {'Arctic'}, {'Asia'}, {'A
 geo_areas = timezones(char(cont_areas(ind_area)));
 [ind_area,~] = listdlg('ListString', geo_areas.Name, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
 timezone = char(geo_areas.Name(ind_area));
+end

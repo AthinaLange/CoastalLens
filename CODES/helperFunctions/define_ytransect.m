@@ -1,17 +1,15 @@
-function [Products] = define_ytransect(origin_grid)
-%   define along-shore transect
-%
+function [Product] = define_ytransect(origin_grid)
+%   Define along-shore transect.
 %% Syntax
-% 
 % [Product] = define_ytransect([lat lon angle])
 %
-%% Description 
-% 
+%% Description
+%
 %   Args:
 %           origin_grid (double) : [1 x 3 array] origin_grid definition [Latitude, Longitude, Angle]
 %
 %   Returns:
-%           Products (structure) : 
+%           Products (structure) :
 %                               - productType : 'yTransect'
 %                               - type : 'yTransect'
 %                               - frameRate : frame rate to process data (Hz)
@@ -22,16 +20,17 @@ function [Products] = define_ytransect(origin_grid)
 %                               - dy : Along-shore resolution (m)
 %                               - x : Cross-shore distance from origin (pos is offshore of origin) (m)
 %                               - z : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
-%               
+%
 % Angle: Shorenormal angle of the locally defined grid (CW from North)
 %
-%% Example 1
-%
-%% Citation Info 
+%% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
+% Nov 2023;
 
-
+%%
+assert(isa(origin_grid, 'double'), 'Error (define_ytransect): origin_grid must be an array of doubles.')
+assert(length(origin_grid)==3, 'Error (define_ytransect): origin_grid must contain 3 values.')
+%%
 Product = struct('productType',[], 'type',[],  'frameRate',[],  'lat', [], 'lon',[],  'angle',[], 'xlim',[],  'ylim',[],  'dx',[],  'dy', [], 'x', [], 'y',[],  'z',[]);
 
 Product.productType = 'yTransect';
@@ -41,9 +40,9 @@ Product.lon = origin_grid(2);
 Product.angle = origin_grid(3);
 
 
- info = inputdlg({'Frame Rate (Hz)', 'Southern alongshore extent (m from Origin)', 'Northern alongshore extent (m from Origin)', ...
-        'Cross-shore location of transects (m from Origin) - e.g. 50, 100, 200 OR [50:50:200]',...
-        'dy', 'z elevation (tide level in relevant datum - or elevation if on beach)'});
+info = inputdlg({'Frame Rate (Hz)', 'Southern alongshore extent (m from Origin)', 'Northern alongshore extent (m from Origin)', ...
+    'Cross-shore location of transects (m from Origin) - e.g. 50, 100, 200 OR [50:50:200]',...
+    'dy', 'z elevation (tide level in relevant datum - or elevation if on beach)'});
 
 % check that there's a value in all the required fields
 if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
@@ -86,10 +85,9 @@ else
     Product.z = 0;
 end
 
-
 for ii = 1:length(xx)
-    Products(ii) = Product;
-    Products(ii).x = xx(ii);
+    Product(ii) = Product;
+    Product(ii).x = xx(ii);
 end
 
 end

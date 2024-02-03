@@ -1,33 +1,36 @@
 function [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig)
 %   Choose GCP Locations in LiDAR/SfM survey
-%
 %% Syntax
-%          [survey_gcp] = select_pointcloud_gcp(pc, gcp_num)
+%         [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig)
 %
 %% Description
 %   Args:
 %           pc (PointCloud) : PointCloud to pull gcp points from
 %           gcp_num (double) : number of gcp's to select in pointcloud
+%           main_fig (figure handle) : figure handle where pointcloud willbe displayed and zoom area chosen
+%           zoom_fig (figure handle) : figure handle where zoomed in pointcloud will be displayed and point clicked
 %
 %   Returns:
 %          survey_gcp (array) : [3 x n] gcp coordinates for n points in pointcloud coordinate system
 %
-%  varargin's crops the Pointcloud to avoid slowing your computer
-%  cut pointcloud to approximate dimensions of image
-%  downsample points and plot pointCloud. Move box over relevant area for a given GCP
-%  In zoomed in pointCloud, click on GCP, and hit Enter. Confirm if you like the point, or reclick.
-%  Repeat for all GCPs to be found
+%
+% Place rectangle box over the relevant region for a given GCP to downsample points.
+% In zoomed in pointCloud, click on GCP, and hit Enter. Confirm if you like the point, or reclick.
+% Repeat for all GCPs to be found
 %
 %
-%
-%% Example 1
-%
-%% Citation Info 
+%% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
 % Nov 2023; Last revision: XXX
 
+%% Data
+assert(isa(pc, 'pointCloud'), 'Error (select_pointcloud_gcp): pc must be a pointCloud object.')
+assert(isa(gcp_num, 'double'), 'Error (select_pointcloud_gcp): gcp_num must be a double.')
+assert(length(gcp_num) == 1, 'Error (select_pointcloud_gcp): gcp_num must be a single value.')
+assert(strcmp(class(main_fig), 'matlab.ui.Figure'), 'Error (select_pointcloud_gcp): main_fig must be a figure handle.')
+assert(strcmp(class(zoom_fig), 'matlab.ui.Figure'), 'Error (select_pointcloud_gcp): zoom_fig must be a figure handle.')
 
-%%
+%% Get pointcloud points
 Points = pc.Location;
 if ~isempty(pc.Color)
     cPoints = pc.Color;
@@ -38,9 +41,9 @@ else
     cPoints = Points(:,3);
 end
 
-%% Select points from pointcloud
+%% Select GCP points from pointcloud
 
-ptCloudOut = pcdownsample(pc, 'random', 50000/pc.Count);
+ptCloudOut = pcdownsample(pc, 'random', 50000/pc.Count); % downsample to avoid computer crashing
 
 ax2 = axes('Parent', main_fig);
 ax3 = axes('Parent', zoom_fig);
@@ -48,7 +51,8 @@ pcshow(ptCloudOut, 'Parent', ax2);
 
 h = images.roi.Cuboid(ax2);
 selectedPoints=[];
-for ii = 1:gcp_num
+for ii = 1:gcp_num % repeat for all gcps
+    % find smaller region for specific gcp
     figure(main_fig)
     zoom on
     c = uicontrol('String','Continue','Callback','uiresume(main_fig)');
@@ -63,6 +67,7 @@ for ii = 1:gcp_num
 
     pc_small = select(pc, indices);
 
+    % select gcp point in zoomed in region
     answer = 'Reselect';
     while contains(answer , 'Reselect')
         figure(zoom_fig)
@@ -99,5 +104,4 @@ switch answer
 end % switch answer
 
 
-%%
 end

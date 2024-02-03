@@ -1,8 +1,6 @@
-function [Products] = define_xtransect(origin_grid)
-%   define cross-shore transect (timestack)
-%
+function [Product] = define_xtransect(origin_grid)
+%   Define cross-shore transect (timestack).
 %% Syntax
-% 
 % [Product] = define_xtransect([lat lon angle])
 %
 %% Description 
@@ -25,14 +23,15 @@ function [Products] = define_xtransect(origin_grid)
 %               
 % Angle: Shorenormal angle of the locally defined grid (CW from North)
 %
-%% Example 1
-%
 %% Citation Info 
 % github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
+% Nov 2023; 
 
+%%
+assert(isa(origin_grid, 'double'), 'Error (define_xtransect): origin_grid must be an array of doubles.')
+assert(length(origin_grid)==3, 'Error (define_xtransect): origin_grid must contain 3 values.')
+%%
 Product = struct('productType',[], 'type',[],  'frameRate',[],  'lat', [], 'lon',[],  'angle',[], 'xlim',[],  'ylim',[],  'dx',[],  'dy', [], 'x', [], 'y',[],  'z',[]);
-%Products = struct('productType',[], 'type',[],  'frameRate',[],  'lat', [], 'lon',[],  'angle',[], 'xlim',[],  'ylim',[],  'dx',[],  'dy', [], 'x', [], 'y',[],  'z',[]);
 
 Product.productType = 'Timestack';
 Product.type = 'xTransect';
@@ -124,9 +123,9 @@ switch answer
 end
 
 for ii = 1:length(yy)
-    Products(ii) = Product;
-    Products(ii).y = yy(ii);
-    Products(ii).z = Z(ii,:);
+    Product(ii) = Product;
+    Product(ii).y = yy(ii);
+    Product(ii).z = Z(ii,:);
 end
 
 end
