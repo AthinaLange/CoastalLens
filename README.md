@@ -40,13 +40,13 @@ This toolbox is currently in testing phase on the following systems:
 │ ├── helperFunctions
 ├── DATA
 │ └── YYYYMMDD_Location1
-│     ├── 01
-│     ├── 02
-│     ├── 03
+│     ├── Flight_01
+│     ├── Flight_02
+│     ├── Flight_03
 │ └── YYYYMMDD_Location2
-│     ├── 01
-│     ├── 02
-│     ├── 03
+│     ├── Flight_01
+│     ├── Flight_02
+│     ├── Flight_03
 ```
 
 ## Core Scripts
