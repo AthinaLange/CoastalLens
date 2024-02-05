@@ -32,6 +32,7 @@ This toolbox is currently in testing phase on the following systems:
 - Video formats 'MOV', 'MP4', 'TS' (add to metadata section in input_day_flight_data.m)
 
 ### General Folder Structure:
+Please set up your CODES and DATA folder in the following structure. The DATA folder may be located in a different folder than your general path, but must be organized as indicated, with all flights in the relevant day/location folder.
 ```bash
 .
 ├── CODES
