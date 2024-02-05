@@ -25,6 +25,7 @@ Data to test the code is provided in the DATA folder.
 This toolbox is currently in testing phase on the following systems:
 - MacBook Pro M1 2020 (OS 12.6), Matlab 2022b
 - MacBook Pro M2 2023 (OS 13.2.1), Matlab 2023a
+- Linux (Ubuntu 22.04.3 LTS), Matlab 2022b
 - DJI Drones
 
 ## Recommendations
@@ -209,7 +210,9 @@ If you run into any problems while running the code, or think other things shoul
 
 
 ## License
-MIT License
+
+The **UAV automated rectification toolbox** is provided under the [MIT license](https://opensource.org/licenses/MIT).
+
 
 ## Cite As
 
