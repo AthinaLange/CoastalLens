@@ -1,5 +1,5 @@
 function [selected_data] = select_data_from_text_file
-%   Choose data from text file
+%   select_data_from_text_file returns user-selected data from a comma-separated table in a text file.
 %% Syntax
 %          [selected_data] = select_data_from_text_file
 %

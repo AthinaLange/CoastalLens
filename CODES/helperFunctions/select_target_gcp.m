@@ -1,5 +1,6 @@
 function [target_gcp] = select_target_gcp
-% Select corresponding coordinates for the targets that were chosen in select_image_gcp
+% select_target_gcp returns selected corresponding coordinates for the
+% points that were chosen in select_image_gcp.
 %% Syntax
 %           [target_gcp] = select_target_gcp
 %% Description

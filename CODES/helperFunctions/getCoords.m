@@ -1,5 +1,6 @@
-function [xyz] = getCoords(Products)
-%   Get (x,y,z) world coordinates from Products
+function [xyz, X, Y, Z] = getCoords(Products)
+%   getCoords returns the (x,y,z) world coordinates for the dimensions
+%   specified in Products.
 %% Syntax
 %            [xyz] = getCoords(Products)
 %
@@ -26,16 +27,16 @@ assert(size(Products,2)==1, 'Error (getCoords): Products must be a single object
 % Reorganize coordinates
 if ~isempty(Products.xlim)
     if Products.xlim(1) < 0; Products.xlim(1) = -Products.xlim(1); end
-end
+end % if ~isempty(Products.xlim)
 if ~isempty(Products.ylim)
     if Products.ylim(1) > 0; Products.ylim(1) = -Products.ylim(1); end
     if Products.ylim(2) < 0; Products.ylim(2) = -Products.ylim(2); end
-end 
+end % if ~isempty(Products.ylim)
 if isempty(Products.z) || isnan(Products.z)
     iz=0; 
 else
     iz = Products.z; 
-end
+end % if isempty(Products.z) || isnan(Products.z)
 
 if contains(Products.type, 'Grid')
     ixlim = x2 - Products.xlim;
@@ -52,7 +53,7 @@ elseif contains(Products.type, 'yTransect')
     iylim = y2 + Products.ylim;
     Y = [iylim(1):Products.dy:iylim(2)]';
     X = Y.*0 + ix;
-end
+end % if contains(Products.type, 'Grid')
 
 Z = X.*0 + iz;
 

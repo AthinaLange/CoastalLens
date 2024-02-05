@@ -1,5 +1,5 @@
 function [C] = get_metadata(odir, oname, varargin)
-%   Returns table and saves .csv of metadata from images and videos.
+%   get_metadata returns table C and saves .csv of metadata from images and videos.
 %% Syntax
 %           [C] = get_metadata('./DATA/20240101_SIO/01/', '20240101_SIO')
 %           [C] = get_metadata('./DATA/20240101_SIO/01/', '20240101_SIO', file_prefix = 'DJI')

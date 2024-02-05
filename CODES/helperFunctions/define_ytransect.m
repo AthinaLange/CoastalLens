@@ -1,7 +1,7 @@
-function [Product] = define_ytransect(origin_grid)
-%   Define along-shore transect.
+function [Products] = define_ytransect(origin_grid)
+%   define_ytransect returns structure with dimensions needed for an  along-shore transect.
 %% Syntax
-% [Product] = define_ytransect([lat lon angle])
+% [Products] = define_ytransect([lat lon angle])
 %
 %% Description
 %
@@ -27,7 +27,7 @@ function [Product] = define_ytransect(origin_grid)
 % github.com/AthinaLange/UAV_automated_rectification
 % Nov 2023;
 
-%%
+%% Data
 assert(isa(origin_grid, 'double'), 'Error (define_ytransect): origin_grid must be an array of doubles.')
 assert(length(origin_grid)==3, 'Error (define_ytransect): origin_grid must contain 3 values.')
 %%
@@ -50,21 +50,21 @@ if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
     info = double(string(inputdlg({'Frame Rate (Hz)', 'Southern alongshore extent (m from Origin)', 'Northern alongshore extent (m from Origin)', ...
         'Cross-shore location of transects (m from Origin) - e.g. 50, 100, 200 OR [50:50:200]',...
         'dy', 'z elevation (tide level in relevant datum - or elevation if on beach)'})));
-end
+end % if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
 
 info_num = abs(double(string(info([1 2 3 5])))); % making everything +meters from origin
 
 if info_num(1) > 30
     disp('Maximum frame rate is 30Hz - Please choose a different frame rate.')
     info_num(1) = double(string(inputdlg({'Frame Rate (Hz)'})));
-end
+end % if info_num(1) > 30
 Product.frameRate = info_num(1);
 
 if Product.angle < 180 % East Coast
     Product.ylim = [-info_num(3) info_num(2)]; % -north +south
 elseif Product.angle > 180 % West Coast
     Product.ylim = [-info_num(2) info_num(3)]; % -south +north
-end
+end % if Product.angle < 180 % East Coast
 Product.dy = info_num(4);
 
 xx = string(info(4));
@@ -77,17 +77,17 @@ elseif length(xx) == 1
 else
     disp('Please input in the correct format (comma-separated list or [ylim1:dy:ylim2])')
     xx = string(inputdlg({'Cross-shore location of transects (m from Origin) - e.g. 50, 100, 200 OR [50:50:200]'}));
-end
+end % if contains(xx, ',')
 
 if ~isnan(double(string(info(6))))
     Product.z = double(string(info(6)));
 else
     Product.z = 0;
-end
+end % if ~isnan(double(string(info(6))))
 
 for ii = 1:length(xx)
-    Product(ii) = Product;
-    Product(ii).x = xx(ii);
-end
+    Products(ii) = Product;
+    Products(ii).x = xx(ii);
+end % for ii = 1:length(xx)
 
 end

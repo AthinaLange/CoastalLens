@@ -1,5 +1,5 @@
 function extract_images(data_files, varargin)
-%   Extract images from given data files at specified frame rate
+%   extract_images extracts images from given data files at specified frame rate
 %% Syntax
 % extract_images(data_files)
 % extract_images(data_files, frameRate = 2)
@@ -38,6 +38,6 @@ for dd = 1:length(data_files)
     folder_name = split(data_files(dd).name, '.'); folder_name = string(folder_name{1});
     mkdir(fullfile(data_files(dd).folder, folder_name))
     system(['ffmpeg -i ' char(string(data_files(dd).name)) ' -qscale:v 2 -r ' char(string(options.frameRate)) ' ' fullfile(data_files(dd).folder, char(folder_name), 'Frame_%05d.jpg')])
-end
+end % for dd = 1:length(data_files)
 
 end

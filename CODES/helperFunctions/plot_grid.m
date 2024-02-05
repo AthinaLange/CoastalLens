@@ -1,5 +1,5 @@
 function plot_grid(Products, I, intrinsics, worldPose)
-%   Plot grid points on oblique image
+%   plot_grid plots grid points on oblique image as specified output from define_grid.
 %% Syntax
 %           plot_grid(Products, I, intrinsics, worldPose)
 %
@@ -31,7 +31,7 @@ assert(isa(intrinsics, 'cameraIntrinsics'), 'Error (plot_grid): intrinsics must 
 assert(isa(worldPose, 'rigidtform3d'), 'Error (plot_grid): worldPose must be a rigidtform3d object.')
 
 %% Get coordinates and pixel location
-[xyz] = getCoords(Products);
+[xyz,~,~,~] = getCoords(Products);
 [y2,x2, ~] = ll_to_utm(Products.lat, Products.lon);
 aa=xyz-[x2 y2 0];
 iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));

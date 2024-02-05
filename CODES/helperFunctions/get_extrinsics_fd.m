@@ -1,52 +1,66 @@
 function [extrinsics] = get_extrinsics_fd( images, intrinsics, varargin)
-%
-% get camera extrinsics using feature detection
-%
+% get_extrinsics_fd returns 2D projective transformation between image frames using feature detection.
 %% Syntax
-% 
-%  [panorama, extrinsics] = get_extrinsics_fd(odir, oname, images, varargin)
+%  [extrinsics] = get_extrinsics_fd(images, intrinsics)
+%  [extrinsics] = get_extrinsics_fd(images, intrinsics, Method = 'SURF')
+%  [extrinsics] = get_extrinsics_fd(images, intrinsics, mask = R.mask)
+%  [extrinsics] = get_extrinsics_fd(images, intrinsics, Method = 'SURF', mask = R.mask)
 %
-%% Description 
-% 
+%% Description
+%
 %   Args:
 %           images (imageDatastore) : Stores file name of m images to process
 %           intrinsics (cameraIntrinsics) : camera intrinsics object to undistort images
 %           varargin :
 %                       Method (string) : Feature type (default : 'SIFT')
-%                       mask (double) :  binary mask. helps cut down on processing time.
-%                       
+%                       mask (logical) :  binary mask (same dimensions as images). helps cut down on processing time.
 %
 %   Returns:
-%          panorama (uint8) : constructed panorama image to show full field of view captured during flight
-%          extrinsics (array) : 2D projective transformation between subsequent frames
-%               
+%          extrinsics (array) : [1 x m] 2D projective transformation between subsequent frames
 %
 %
 %% Example 1
+% intrinsics = cameraParams.Intrinsics;
+% R.I = readimage('DATA/20211215_Torrey/01/DJI_0001.JPG');
+% [R.mask] = select_ocean_mask(R.I);
+% imageDirectory = './DATA/20211215_Torrey/01/images_2Hz/'
+% images = imageDatastore(imageDirectory);
+% [extrinsics] = get_extrinsics_fd(images, intrinsics, mask = R.mask)
 %
-%% Citation Info 
+%% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
-% Jan 2024; Last revision: XXX
+% Jan 2024;
+
+%% Data
+assert(strcmp(class(images), 'matlab.io.datastore.ImageDatastore'), 'Error (get_extrinsics_fd): images must be a ImageDatastore object.')
+assert(isa(intrinsics, 'cameraIntrinsics'), 'Error (get_extrinsics_fd): intrinsics must be a cameraIntrinsics object.')
 
 viewId = 1;
 I = im2gray(undistortImage(readimage(images, 1), intrinsics));
 [m, n, ~] = size(I);
 
-
 options.Method = 'SIFT'; % Feature type
 options.mask = imcomplement(poly2mask([0 n n 0], [1 1 0 0], m, n)); % mask cutoff
 options = parseOptions( options , varargin );
 
+assert(isa(options.Method, 'string'), 'Error (get_extrinsics_fd): Method must be a string.')
+assert(contains(options.Method, {'SIFT' ,'SURF', 'BRISK', 'ORB', 'KAZE'}), 'Error (get_extrinsics_fd): Method must be one of the following allowed features: SIFT, BRISK, ORB, KAZE or SURF.')
+
+assert(isa(options.mask, 'logical'), 'Error (get_extrinsics_fd): mask must be an binary mask.')
+assert(size(options.mask) == size(I, [1 2]), 'Error (get_extrinsics_fd): mask must be the same size as I.')
+
+
+%% Find features in 1st image
 [I] = apply_binary_mask(I, options.mask);
 [prevPoints] = detectFeatures(I, options.Method);
 [prevFeatures, prevPoints] = extractFeatures(I, prevPoints);
-tic
+
+%% Find corresponding features in subsequent images
 for viewId = 2:length(images.Files)
-     
-   %  if rem(viewId, 100) == 0
-         disp(sprintf('viewId = %i', viewId))
-    %     toc
-     %end
+
+    if rem(viewId, 100) == 0
+        fprintf('viewId = %i\n', viewId)
+    end % if rem(viewId, 100) == 0
 
     clear curr*
     I = im2gray(undistortImage(readimage(images, viewId), intrinsics));
@@ -74,7 +88,7 @@ for viewId = 2:length(images.Files)
     clear prev*
     prevPoints = currPoints;
     prevFeatures = currFeatures;
-end
+end % for viewId = 2:length(images.Files)
 
 extrinsics = tforms;
 

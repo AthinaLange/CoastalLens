@@ -1,13 +1,13 @@
 function [panorama] = plot_panorama(images, intrinsics, extrinsics)
-%   Plot panorama from image sequence and corresponding extrinsics.
+%   plot_panorama returns a panorama image from image sequence and corresponding extrinsics.
 %% Syntax
 %           [panorama] = plot_panorama(images, intrinsics, extrinsics)
 %
 %% Description
 %   Args:
-%           images (imageDatastore) : image dataset (n images) to use to construct panorama
+%           images (imageDatastore) : image dataset (m images) to use to construct panorama
 %           intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
-%           extrinsics (projtform2d) : [1 x n] projection for n images
+%           extrinsics (projtform2d) : [1 x m] projection for m images
 %
 %   Returns:
 %           panorama (uint8 image): stitched panorama image
@@ -33,7 +33,7 @@ I = undistortImage(readimage(images, 1), intrinsics);
 for i = 1:numel(extrinsics)
     imageSize(i,:) = size(I);
     [xlim(i,:), ylim(i,:)] = outputLimits(extrinsics(i), [1 imageSize(i,2)], [1 imageSize(i,1)]);
-end
+end % for i = 1:numel(extrinsics)
 
 maxImageSize = max(imageSize);
 
@@ -70,6 +70,6 @@ for i = 1:length(images.Files)
 
     % Overlay the warpedImage onto the panorama.
     panorama = step(blender, panorama, warpedImage, mask);
-end
+end % for i = 1:length(images.Files)
 
 end

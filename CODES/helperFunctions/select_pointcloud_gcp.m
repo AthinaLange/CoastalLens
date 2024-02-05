@@ -1,5 +1,6 @@
 function [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig)
-%   Choose GCP Locations in LiDAR/SfM survey
+%   select_pointcloud_gcp returns world coordinates (from pointcloud) of
+%   selected points.
 %% Syntax
 %         [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig)
 %
@@ -21,7 +22,7 @@ function [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig)
 %
 %% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
+% Nov 2023; 
 
 %% Data
 assert(isa(pc, 'pointCloud'), 'Error (select_pointcloud_gcp): pc must be a pointCloud object.')
@@ -36,10 +37,10 @@ if ~isempty(pc.Color)
     cPoints = pc.Color;
     if contains(class(cPoints), 'uint16')
         cPoints = double(cPoints) / 65535;
-    end
+    end %  if contains(class(cPoints), 'uint16')
 else
     cPoints = Points(:,3);
-end
+end % if ~isempty(pc.Color)
 
 %% Select GCP points from pointcloud
 
@@ -83,7 +84,7 @@ for ii = 1:gcp_num % repeat for all gcps
     selectedPoints(size(selectedPoints,1)+1,:)=selectedPoint;
     clf(zoom_fig)
     uiresume(main_fig)
-end
+end % for ii = 1:gcp_num
 %close(main_fig)
 close(zoom_fig)
 %%

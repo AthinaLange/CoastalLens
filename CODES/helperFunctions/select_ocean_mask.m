@@ -1,5 +1,5 @@
 function [mask] = select_ocean_mask(I)
-%   Create binary mask between two selected edge points - suitable for
+%   select_ocean_mask returns a binary mask between two selected edge points - suitable for
 %   removing the ocean from oblique coastal imagery
 %% Syntax
 %           [mask] = select_ocean_mask(I)

@@ -1,5 +1,5 @@
 function [I_mask] = apply_binary_mask(I, mask)
-%   Apply a binary mask to image I and return masked image
+%   apply_binary_mask returns a masked image.
 %% Syntax
 %           [I_mask] = apply_binary_mask(I, mask)
 %
@@ -10,7 +10,7 @@ function [I_mask] = apply_binary_mask(I, mask)
 %
 %   Returns:
 %           I_mask (uint8 image) : Image with applied mask
-%           
+%
 %% Example 1
 %
 % I = readimage('DATA/20211215_Torrey/01/DJI_0001.JPG');
@@ -28,10 +28,11 @@ assert(isa(mask, 'logical'), 'Error (apply_binary_mask): mask must be an binary 
 assert(size(mask) == size(I, [1 2]), 'Error (apply_binary_mask): mask must be the same size as I.')
 
 %%
+I_mask = zeros(size(I),'like', I);
 for ii = 1:size(I,3)
     aa=I(:,:,ii);
     aa(~mask)=0;
     I_mask(:,:,ii)=aa;
-end
+end % for ii = 1:size(I,3)
 
 end

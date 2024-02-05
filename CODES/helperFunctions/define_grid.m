@@ -1,5 +1,5 @@
 function [Product] = define_grid(origin_grid)
-%   Define cBathy-type grid.
+%   define_grid returns structure with dimensions needed for a cBathy-type grid.
 %% Syntax
 % [Product] = define_grid([lat lon angle])
 %
@@ -56,12 +56,12 @@ if find(isnan(info)) ~= 8
         'Southern Alongshore extent (+m from Origin)', 'Northern Alongshore extent (+m from Origin)',...
         'dx', 'dy', 'z elevation (tide level in relevant datum)'})));
     info(1:7) = abs(info(1:7)); % making everything +meters from origin
-end
+end % if find(isnan(info)) ~= 8
 
 if info(1) > 30
     disp('Maximum frame rate is 30Hz - Please choose a different frame rate.')
     info(1) = double(string(inputdlg({'Frame Rate (Hz)'})));
-end
+end % if info(1) > 30
 Product.frameRate = info(1);
 
 Product.xlim = [info(2) -info(3)]; % offshore limit is negative meters
@@ -69,7 +69,7 @@ if origin_grid(3) < 180 % East Coast
     Product.ylim = [-info(5) info(4)]; % -north +south
 elseif origin_grid(3) > 180 % West Coast
     Product.ylim = [-info(4) info(5)]; % -south +north
-end
+end % if origin_grid(3) < 180 % East Coast
 Product.dx = info(6);
 Product.dy = info(7);
 switch answer
@@ -89,7 +89,7 @@ switch answer
         grid_scale = nanmean(floor(log(abs([Product.ylim]))./log(10)));
         if DEM_scale ~= grid_scale
             answer2 = 'Global';
-        end
+        end % if DEM_scale ~= grid_scale
         switch answer2
             case 'Global' % assumes DEM in UTM coordinates
                 [origin_grid(1), origin_grid(2), ~] = ll_to_utm(origin_grid(1), origin_grid(2));
@@ -108,12 +108,12 @@ switch answer
             case 'Local' % assumes same grid origin and orientation
                 for ii = 1:length(DEM)
                     Z_line(ii,:) = interp1(DEM(ii).x, DEM(ii).z, X_line);
-                end
-        end
+                end %  for ii = 1:length(DEM)
+        end % switch answer2
         Z = interp2(X_line, [DEM.y], Z_line, X, Y);
         tide_level = info(8)*ones(size(X,1), size(X,2));
         aa(:,:,1)=Z;
         aa(:,:,2)=tide_level;
         Product.z = max(aa,[],3);
-end
+end % switch answer
 end

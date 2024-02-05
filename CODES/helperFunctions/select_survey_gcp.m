@@ -1,5 +1,5 @@
 function [survey_gcp, image_gcp] = select_survey_gcp(I, image_fig, main_fig, zoom_fig)
-%   Choose GCP Locations in LiDAR/SfM survey and image
+%   select_survey_gcp returns world coordinates (from pointcloud) and pixel coordinates of selected points in image.
 %% Syntax
 %           [survey_gcp, image_gcp] = select_survey_gcp(I, image_fig,main_fig, zoom_fig)
 %% Description
@@ -18,7 +18,7 @@ function [survey_gcp, image_gcp] = select_survey_gcp(I, image_fig, main_fig, zoo
 %
 %% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; 
+% Nov 2023;
 
 %% Data
 assert(isa(I, 'uint8'), 'Error (select_survey_gcp): I must be a uint8 image.')
@@ -38,9 +38,9 @@ switch answer2
         [ind_survey_pts,~] = listdlg('ListString', arrayfun(@num2str, [1:size(survey_gcp,1)], 'UniformOutput', false), 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'What survey points' 'did you use? (command + for multiple)'});
         aa = survey_gcp(ind_survey_pts,:); clear survey_gcp;
         survey_gcp = aa;
-end
+end % switch answer2
 
-if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
+if ~exist('survey_gcp', 'var') || size(survey_gcp,2) ~= 3
     disp('Find local LiDAR/SfM survey folder.')
     disp('For CPG LiDAR: CPG_data/LiDAR/20230220_NAD83_UTM11N_NAVD88_TorreyLot.las')
     disp('For CPG SfM: CPG_data/20220817_00581_00590_NoWaves_TorreyCobble_P4RTK_epoch2010_geoid12b.las')
@@ -55,7 +55,6 @@ if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
             gcp_num = length(image_gcp);
             %% Find corresponding points on LiDAR
             [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig);
-
         case 'LiDAR/SfM'
             disp('Select LiDAR/SfM GCPs.')
             gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find?'}));
@@ -76,17 +75,14 @@ if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
             scatter3(survey_gcp(:,1), survey_gcp(:,2), survey_gcp(:,3), 100, 'r', 'filled')
             for ii = 1:size(survey_gcp,1)
                 text(survey_gcp(ii,1)+1, survey_gcp(ii,2)+1, survey_gcp(ii,3)+.4, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
-            end
+            end % for ii = 1:size(survey_gcp,1)
             view(-90,90)
-
             %% Choose GCP Coordinates on Image
             [image_gcp] = select_image_gcp(I, image_fig);
-
-    end
-
+    end % switch answer
 else
     %% Choose GCP Coordinates on Image
     [image_gcp] = select_image_gcp(I, image_fig);
-end
+end % if ~exist('survey_gcp', 'var') | size(survey_gcp,2) ~= 3
 
 end

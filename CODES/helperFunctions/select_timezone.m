@@ -1,5 +1,5 @@
 function [timezone] = select_timezone
-%   select_timezone return timezone from user selection (based on MATLAB timezones)
+%   select_timezone returns timezone from user selection (based on MATLAB timezones)
 %% Syntax
 % [timezone] = select_timezone
 %

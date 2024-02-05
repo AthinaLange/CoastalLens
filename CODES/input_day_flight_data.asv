@@ -195,10 +195,10 @@ for dd = 1 : length(day_files)
                     disp('Please create Products file.')
                     disp('For CPG: construct DEM for appropriate day')
 
-                    [Products] = user_input_products;
+                    user_input_products
                 end % if ~exist('Products', 'var')
             case 'No'
-                [Products] = user_input_products;
+                user_input_products
         end % switch answer
         clear answer
 
@@ -444,7 +444,7 @@ for dd = 1 : length(day_files)
         scatter(image_gcp(:,1), image_gcp(:,2), 100, 'r', 'filled')
         for ii = 1:length(image_gcp)
             text(image_gcp(ii,1)+25, image_gcp(ii,2)-25, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
-        end % for ii = 1:length(image_gcp)
+        end
         iP = world2img(world_gcp,pose2extr(worldPose),R.intrinsics);
         scatter(iP(:,1), iP(:,2), 50, 'y', 'LineWidth', 3)
 
@@ -536,7 +536,10 @@ for dd = 1 : length(day_files)
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
                 plot_grid(Products(pp), R.I, R.intrinsics, R.worldPose)
-                answer = questdlg('Happy with grid projection?', 'Grid projection', 'Yes', 'No', 'Yes');
+                answer = questdlg('Happy with grid projection?', ...
+                    'Grid projection',...
+                    'Yes', 'No', 'Yes');
+
                 switch answer
                     case 'Yes'
                         gridChangeIndex = 1;
@@ -544,11 +547,13 @@ for dd = 1 : length(day_files)
                         disp('Please change grid.')
                         origin_grid = [Products(pp).lat Products(pp).lon, Products(pp).angle];
                         [Product1] = define_grid(origin_grid);
+
                         Products(pp) = Product1;
-                end % switch answer
-            end % while gridChangeIndex == 0
+
+                end % check answer
+            end % check gridCheckIndex
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))
-        end % for pp = ids_grid
+        end % for pp = 1:length(ids_grid)
 
         clearvars ids_grid  pp gridChangeIndex answer origin_grid Product1
 
@@ -557,11 +562,14 @@ for dd = 1 : length(day_files)
         %                           - Projects all xTransects onto inital frame
         %                           - If unhappy, can reinput transect data
         %  ============================================================================
-        if ~isempty(find(contains(extractfield(Products, 'type'), 'xTransect'), 1))
+        if ~isempty(find(contains(extractfield(Products, 'type'), 'xTransect')));
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
                 plot_xtransects(Products, R.I, R.intrinsics, R.worldPose)
-                answer = questdlg('Happy with transect projection?', 'Transect Projection', 'Yes', 'No', 'Yes');
+                answer = questdlg('Happy with transect projection?', ...
+                    'Transect Projection',...
+                    'Yes', 'No', 'Yes');
+
                 switch answer
                     case 'Yes'
                         gridChangeIndex = 1;
@@ -570,24 +578,29 @@ for dd = 1 : length(day_files)
                         origin_grid = [Products(ids_xtransect(1)).lat Products(ids_xtransect(1)).lon, Products(ids_xtransect(1)).angle];
                         Products(ids_xtransect) = [];
                         productCounter = length(Products);
+
                         [Product1] = define_xtransect(origin_grid);
                         Products(productCounter:productCounter+length(Product1))=Product1;
-                end % switch answer
-            end % while gridChangeIndex == 0
+
+                end % check answer
+            end % check gridCheckIndex
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_xTransects.png' ]))
 
             clearvars  gridChangeIndex answer origin_grid Product1 productCounter
-        end % if ~isempty(find(contains(extractfield(Products, 'type'), 'xTransect'), 1))
+        end
         %% ========================yTransects==========================================
         %                         yTransects
         %                           - Projects all yTransects onto inital frame
         %                           - If unhappy, can reinput transect data
         %  ============================================================================
-        if ~isempty(find(contains(extractfield(Products, 'type'), 'yTransect'), 1))
+        if ~isempty(find(contains(extractfield(Products, 'type'), 'yTransect')));
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
+
                 plot_ytransects(Products, R.I, R.intrinsics, R.worldPose)
-                answer = questdlg('Happy with rough transect numbers?', 'Transect Numbers', 'Yes', 'No', 'Yes');
+                answer = questdlg('Happy with rough transect numbers?', ...
+                    'Transect Numbers',...
+                    'Yes', 'No', 'Yes');
                 switch answer
                     case 'Yes'
                         gridChangeIndex = 1;
@@ -596,14 +609,17 @@ for dd = 1 : length(day_files)
                         origin_grid = [Products(ids_ytransect(1)).lat Products(ids_ytransect(1)).lon, Products(ids_ytransect(1)).angle];
                         Products(ids_ytransect) = [];
                         productCounter = length(Products);
+
                         [Product1] = define_ytransect(origin_grid);
                         Products(productCounter:productCounter+length(Product1))=Product1;
+
+
                 end % switch answer
-            end % while gridChangeIndex == 0
+            end % check gridCheckIndex
             print(gcf,'-dpng',fullfile(odir, 'Processed_data', [oname '_yTransects.png' ]))
 
             clearvars  gridChangeIndex answer origin_grid Product1 productCounter
-        end %  if ~isempty(find(contains(extractfield(Products, 'type'), 'yTransect'), 1))
+        end
         %% ========================email===============================================
         %                         SEND EMAIL WITH INPUT DATA
         %                           - Origin of Coordinate System
@@ -629,22 +645,22 @@ for dd = 1 : length(day_files)
         for pp = ids_grid
             grid_text{length(grid_text)+1} = sprintf('Type = %s, frameRate = %i Hz, xlim = [%i %i], ylim = [%i %i], (dx,dy) = [%.1f %.1f] m', Products(pp).type, Products(pp).frameRate, Products(pp).xlim(1), Products(pp).xlim(2), Products(pp).ylim(1), Products(pp).ylim(2), Products(pp).dx, Products(pp).dy);
             grid_plot{length(grid_plot)+1} =fullfile(odir ,'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]);
-        end % for pp = ids_grid
+        end
         for pp = ids_xtransect
             grid_text{length(grid_text)+1} = sprintf('Type = %s, frameRate = %i Hz, xlim = [%i %i], y = %.1f m, dx = %.1f m', Products(pp).type, Products(pp).frameRate, Products(pp).xlim(1), Products(pp).xlim(2), Products(pp).y, Products(pp).dx);
-        end % for pp = ids_xtransect
+        end
         for pp = ids_ytransect
             grid_text{length(grid_text)+1} = sprintf('Type = %s, frameRate = %i Hz, x = %.1f m, ylim = [%i %i], dy = %.1f m', Products(pp).type, Products(pp).frameRate, Products(pp).x, Products(pp).ylim(1), Products(pp).ylim(2), Products(pp).dy);
-        end % for pp = ids_ytransect
+        end
         if ~isempty(ids_xtransect)
             grid_plot{length(grid_plot)+1} =fullfile(odir ,'Processed_data',  [oname '_xTransects.png' ]);
-        end % if ~isempty(ids_xtransect)
+        end
         if ~isempty(ids_ytransect)
             grid_plot{length(grid_plot)+1} = fullfile(odir ,'Processed_data', [oname '_yTransects.png' ]);
-        end % if ~isempty(ids_ytransect)
+        end
         if exist('user_email', 'var') && ~isempty(user_email)
             sendmail(user_email{2}, [oname '- Input Data'], grid_text, grid_plot)
-        end % if exist('user_email', 'var') && ~isempty(user_email)
+        end
 
         close all
     end % for ff = 1:length(flights)

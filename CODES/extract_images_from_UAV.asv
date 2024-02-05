@@ -21,7 +21,7 @@
 %% Function Dependenies
 % extract_images
 % combine_images
-%
+% 
 %% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
 % Sept 2023;
@@ -39,7 +39,7 @@ if ~exist('global_dir', 'var') || ~exist('day_files', 'var') || ~isstruct(day_fi
     end
     if ~exist('day_files', 'var') || ~isstruct(day_files) || ~isfield(day_files, 'folder') || ~isfield(day_files, 'name')
         disp('Choose DATA folder.')
-        disp('For Athina: DATA')
+        disp('For Athina: DATA') 
         data_dir = uigetdir('.', 'DATA Folder');
 
         day_files = dir(data_dir); day_files([day_files.isdir]==0)=[]; day_files(contains({day_files.name}, '.'))=[];
@@ -53,7 +53,7 @@ for dd = 1:length(day_files)
     assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat')),['Error (extract_images_from_UAV): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat') ' doesn''t exist.']);
     load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'flights')
     for ff = 1:length(flights)
-        assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat')), ['Error (extract_images_from_UAV): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat') ' doesn''t exist.']);
+    assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat')), ['Error (extract_images_from_UAV): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat') ' doesn''t exist.']);
     end
 end
 
@@ -63,11 +63,8 @@ for dd = 1:length(day_files)
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
     load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'extract_Hz', 'flights')
-    assert(exist(extract_Hz, 'var'), 'Error (extract_images_from_UAV): extract_Hz must exist and be stored in ''day_input_data.mat''.')
     assert(isa(extract_Hz, 'double'), 'Error (extract_images_from_UAV): extract_Hz must be a double or array of doubles.')
-    assert(exist(flights, 'var'), 'Error (extract_images_from_UAV): flights must exist and be stored in ''day_input_data.mat''.')
-    assert(isa(flights, 'struct'), 'Error (extract_images_from_UAV): flights must be a structure.')
-    assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (extract_images_from_UAV): flights must have fields .folder and .name.')
+    assert(isa(flights, 'struct'), 'Error (extract_images_from_UAV): flights must be a )
 
     % repeat for each flight
     for ff = 1: length(flights)
@@ -75,11 +72,7 @@ for dd = 1:length(day_files)
         oname = [day_files(dd).name '_' flights(ff).name];
         cd(odir)
 
-        load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'mov_id', 'C')
-        assert(exist(C, 'var'), 'Error (extract_images_from_UAV): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
-        assert(isa(C, 'table'), 'Error (extract_images_from_UAV): C must be a table. run get_metadata.')
-        assert(exist(mov_id, 'var'), 'Error (extract_images_from_UAV): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''})')
-        assert(isa(mov_id, 'double'), 'Error (extract_images_from_UAV): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''})')
+        load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C')
 
         video_files = dir(fullfile(day_files(dd).folder, day_files(dd).name, flights(ff).name));
         video_files(~contains({video_files.name},  C.FileName(mov_id)))=[];
@@ -108,7 +101,6 @@ for dd = 1:length(day_files)
         if exist('options.user_email', 'var')
             sendmail(options.user_email, [oname '- Image Extraction Done'])
         end % if exist('options.user_email', 'var')
-        
     end % for ff = 1:length(flights)
 end % for dd = 1:length(day_files)
 clearvars -except *_dir user_email day_files

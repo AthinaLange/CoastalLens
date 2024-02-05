@@ -1,5 +1,6 @@
 function combine_images(data_files, varargin)
-%   Combine image sequence from multiple folders
+%   combine_images combines images in sequence from multiple folders given
+%   in data_files.
 %% Syntax
 % combine_images(data_files)
 % combine_images(data_files, imageDirectory = pwd)
@@ -55,7 +56,7 @@ for dd = 1:length(data_files)
                 id = ['0' char(string(ll))];
             else
                 id = [char(string(ll))];
-            end
+            end % if ll < 10
 
             if ll+Lfull < 10
                 id_full = ['0000' char(string(ll+Lfull))];
@@ -67,10 +68,10 @@ for dd = 1:length(data_files)
                 id_full = ['0' char(string(ll+Lfull))];
             else
                 id_full = [char(string(ll+Lfull))];
-            end
+            end %  if ll+Lfull < 10
 
             movefile(fullfile(folder_name, ['Frame_' id '.jpg']), fullfile(options.imageDirectory, ['Frame_' id_full '.jpg']))
-        end % for ll = 1:length(L)
+        end % for ll = 1: length(L.Files)
     end  % if dd == 1
     % remove placeholder folders
     rmdir(folder_name, 's')

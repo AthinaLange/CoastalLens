@@ -1,5 +1,5 @@
 function [pc] = load_pointcloud
-%   Load in user-selected pointcloud (from .las file).
+%   load_pointcloud returns a pointCloud object from user-selected .las file.
 %% Syntax
 %           [pc] = load_pointcloud
 %

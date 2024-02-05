@@ -1,5 +1,5 @@
 function [id] = find_file_format_id(C, varargin)
-%   Returns id of files (listed in table) matching specified file format.
+%   find_file_format_id returns id of files (listed in table C) matching specified file format.
 %% Syntax
 %           [id] = find_file_format_id(C, file_format = 'JPG')
 %           [id] = find_file_format_id(C, file_format = {'MOV', 'MP4'})
@@ -31,7 +31,7 @@ form = char(C.FileName);
 for ii = 1:size(form,1)
     aa=split(string(form(ii,:)), '.');
     ending(ii,:) = aa(end);
-end
+end % for ii = 1:size(form,1)
 ending = strtrim(ending);
 
 id = rem(find(ending == string(options.file_format)), length(ending));

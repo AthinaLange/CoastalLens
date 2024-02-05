@@ -1,5 +1,5 @@
 function [image_gcp] = select_image_gcp(I, image_fig)
-%   Choose GCP Coordinates in Image
+%   select_image_gcp returns pixel coordinates of selected points in image.
 %% Syntax
 %           [image_gcp] = select_image_gcp(I, image_fig)
 %% Description
@@ -41,8 +41,8 @@ while true
         break;  % Exit the loop when Enter is pressed
     else
         pointhandles(end+1,:) = a.Position;
-    end
-end
+    end % if (floor(a.Position(1)) == 0 || floor(a.Position(1)) == size(I,2) || floor(a.Position(2)) == 0 || floor(a.Position(2)) == size(I,1))
+end % while true
 pointhandles(1,:)=[];
 clear h
 cla(ax)
@@ -50,11 +50,11 @@ imshow(I, 'Parent', ax)
 hold on
 for ii = 1:size(pointhandles,1)
     h(ii) = drawpoint('Position', pointhandles(ii,:), 'Label', ['GCP ' char(string(ii))]);
-end
+end % for ii = 1:size(pointhandles,1)
 
 for ii = 1:length(h)
     image_gcp(ii,:) = h(ii).Position;
-end
+end % for ii = 1:length(h)
 
 figure;
 imshow(I)
@@ -63,5 +63,5 @@ size(image_gcp)
 scatter(image_gcp(:,1), image_gcp(:,2), 50, 'r')
 for ii = 1:size(image_gcp,1)
     text(image_gcp(ii,1)+50, image_gcp(ii,2)-50, ['GCP ' char(string(ii))], 'FontSize', 14, 'BackgroundColor', 'w')
-end
+end % for ii = 1:size(image_gcp,1)
 end

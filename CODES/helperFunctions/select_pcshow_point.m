@@ -1,5 +1,5 @@
 function [selectedPoint, zoom_fig] = select_pcshow_point(pc, zoom_fig)
-%  Return 3d coordinates of point selected in pointcloud.
+%  select_pcshow_point returns world coordinates of point selected in pointcloud.
 %% Syntax
 %           [selectedPoint, zoom_fig] = select_pcshow_point(pc, zoom_fig)
 %

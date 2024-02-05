@@ -1,5 +1,5 @@
 function plot_xtransects(Products, I, intrinsics, worldPose)
-%   Plot xtransects on oblique image
+%   plot_xtransects plots cross-shore transects on oblique image as specified output from define_xtransect.
 %% Syntax
 %           plot_xtransects(Products, I, intrinsics, worldPose)
 %
@@ -40,7 +40,7 @@ title('Timestack')
 jj=0;
 for pp = ids_xtransect % repeat for all xtransects
     jj=jj+1;
-    [xyz] = getCoords(Products(pp));
+    [xyz,~,~,~] = getCoords(Products(pp));
     [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
     aa=xyz-[x2 y2 0];
     iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
@@ -51,6 +51,6 @@ for pp = ids_xtransect % repeat for all xtransects
 
     le{jj}= [Products(pp).type ' - x = ' char(string(Products(pp).y)) 'm'];
 
-end % for pp = 1:length(ids_xtransect)
+end % for pp = ids_xtransect 
 legend(le)
 end

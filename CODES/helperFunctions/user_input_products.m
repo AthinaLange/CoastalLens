@@ -1,15 +1,35 @@
-%% user_input_products
-% gets all required product data for UAV_automated_rectification toolbox
+function [Products] = user_input_products
+%   user_input_products returns structure with dimensions needed to construct cBathy-type grids, cross-shore and along-shore transects.
+%% Syntax
+%           [Products] = user_input_products
 %
-% - Define origin of grid
-% - Define products - grid, xTransect, yTransect
+%% Description
+%   Args:
 %
-% TODO incorporate DEM into grid
+%   Returns:
+%           Products (structure) : 
+%                               - productType : 'cBathy', 'Timestack', 'yTransect'
+%                               - type : 'Grid', 'xTransect', 'yTransect'
+%                               - frameRate : frame rate to process data (Hz)
+%                               - lat : latitude of origin grid
+%                               - lon: longitude of origin grid
+%                               - angle: shorenormal angle of origid grid
+%                               - xlim : cross-shore limits of grid (+ is offshore of origin) (m)
+%                               - ylim : along-shore limits of grid (+ is to the right of origin looking offshore) (m)
+%                               - dx : Cross-shore resolution (m)
+%                               - dy : Along-shore resolution (m)
+%                               - x : Cross-shore distance from origin (+ is offshore of origin) (m)
+%                               - y : Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
+%                               - z : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%               
+% Angle: Shorenormal angle of the locally defined grid (CW from North)
 %
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Sept 2023
+%
+%% Citation Info
+% github.com/AthinaLange/UAV_automated_rectification
+% Sept 2023;
 
-%% ====================================================================
-%                          ORIGIN FILE
+%% ===============ORIGIN FILE=====================================================
 %                           - Check if user already has origin file for given location
 %                           - Check that Lat / Lon / Angle correct order of magnitude - otherwise fill in again
 %  =====================================================================
@@ -26,97 +46,84 @@ switch answer2
     case 'No'
         origin_grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
         origin_grid = double(string(origin_grid));
-end
+end & switch answer2
 
 % Check latitude
 if abs(origin_grid(1)) < 90
     Product_base.lat = origin_grid(1);
 else
     Product_base.lat = double(string(inputdlg('Latitude of Origin')));
-end
+end % if abs(origin_grid(1)) < 90
+
 % Check longitude
 if abs(origin_grid(2)) < 180
     Product_base.lon = origin_grid(2);
 else
     Product_base.lon = double(string(inputdlg('Longitude of Origin')));
-end
+end % if abs(origin_grid(2)) < 180
+
 % Check angle
 if origin_grid(3) < 360 && origin_grid(3) > 0
     Product_base.angle = origin_grid(3);
 else
     Product_base.angle = double(string(inputdlg('Angle (CC degrees from North)')));
-end
+end % if origin_grid(3) < 360 && origin_grid(3) > 0
 origin_grid = [Product_base.lat Product_base.lon Product_base.angle];
 
 productFlag = 0;
 productCounter = 0;
 
-%% ====================================================================
-%                         PRODUCT INFO
+%% ===============PRODUCT INFO====================================================
 %                           - GRID (cBathy)
 %                                   - Frame Rate
 %                                   - Cross-shore extent (Offshore and Onshore in m from origin)
 %                                   - Alongshore extent (Southern and Northern edge in m from origin) - flips based on grid angle
 %                                   - dx, dy
-%                                   - z elevation - TODO add DEM
+%                                   - z elevation
 %                           - xTransect (Timestack)
 %                                   - Frame Rate
 %                                   - Cross-shore extent (Offshore and Onshore in m from origin)
 %                                   - Alongshore locations of transets (in m from origin) - e.g. -100, 0, 100 OR [-100:100:100]
 %                                   - dx
-%                                   - z elevation - TODO add DEM
+%                                   - z elevation 
 %                           - yTransect
 %                                   - Frame Rate
 %                                   - Alongshore extent (Southern and Northern edge in m from origin)
 %                                   - Cross-shore locations of transets (in m from origin) - e.g. 50, 100, 200 OR [50:50:200]
 %                                   - dy
-%                                   - z elevation - TODO add DEM
+%                                   - z elevation 
 %  =====================================================================
 while productFlag == 0
     clear productType Product1 info yy xx info_num
     productCounter = productCounter + 1;
-
     [productType_ind,tf] = listdlg('ListString',{'Grid (cBathy)', 'xTransect (Timestack)', 'yTransect', 'Other (Not recommended)'}, 'SelectionMode','single', 'InitialValue',[1], 'Name', 'What product do you want to create?');
 
-    % ===========================================================================
     % ============================== GRID =======================================
-    % ===========================================================================
     if productType_ind == 1
         [Product1] = define_grid(origin_grid);
-
         Products(productCounter) = Product1;
-
-        % ===========================================================================
         % ============================== xTransect ==================================
-        % ===========================================================================
     elseif productType_ind == 2
         [Product1] = define_xtransect(origin_grid);
-
         for ii = 1:length(Product1)
             Products(productCounter+ii-1)=Product1(ii);
-        end
-
+        end % for ii = 1:length(Product1)
         productCounter = length(Products);
-
-        % ===========================================================================
         % ============================== yTransect ==================================
-        % ===========================================================================
     elseif productType_ind == 3
         [Product1] = define_ytransect(origin_grid);
-
         for ii = 1:length(Product1)
             Products(productCounter+ii-1)=Product1(ii);
-        end
-
+        end % for ii = 1:length(Product1)
         productCounter = length(Products);
-    end % productType
+    end %  if productType_ind == 1
 
     answer2 = questdlg('Define more products?', 'Do you want to create more products?', 'Yes', 'No', 'Yes');
     switch answer2
         case 'No'
             productFlag = 1;
-    end
-end % while productFlag = 0
+    end %  switch answer2
+end % while productFlag == 0
 
 
 answer4 = questdlg('Do you want to save this product file for the future?', 'Save Products file', 'Yes', 'No', 'Yes');
@@ -126,4 +133,4 @@ switch answer4
         disp('Location where Products file to be saved.')
         temp_file_path = uigetdir(global_dir, 'Products file save location');
         save(fullfile(temp_file_path, [info{1} '.mat']), 'Products', 'origin_grid')
-end
+end % switch answer4
