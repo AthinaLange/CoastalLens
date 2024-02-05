@@ -6,7 +6,7 @@ Uncrewed aerial vehicles (UAVs) are an important tool for coastal monitoring wit
 
 ## Installation
 Requires MATLAB (min v2022b - for estworldpose function) <br />
-Requires [exiftool](https://exiftool.org) and [ffmpeg](https://ffmpeg.org/download.html). <br />
+Requires [exiftool](https://exiftool.org) and [ffmpeg](https://ffmpeg.org/download.html). See [Installation Help](https://github.com/AthinaLange/UAV_automated_rectification/wiki/installation_help) for installation guides based on your OS. <br />
 Requires XXX MATLAB toolboxes. <br />
 
 ## Getting Started
@@ -32,6 +32,7 @@ This toolbox is currently in testing phase on the following systems:
 - Video formats 'MOV', 'MP4', 'TS' (add to metadata section in input_day_flight_data.m)
 
 ### General Folder Structure:
+Please set up your CODES and DATA folder in the following structure. The DATA folder may be located in a different folder than your general path, but must be organized as indicated, with all flights in the relevant day/location folder.
 ```bash
 .
 ├── CODES
@@ -40,13 +41,13 @@ This toolbox is currently in testing phase on the following systems:
 │ ├── helperFunctions
 ├── DATA
 │ └── YYYYMMDD_Location1
-│     ├── 01
-│     ├── 02
-│     ├── 03
+│     ├── Flight_01
+│     ├── Flight_02
+│     ├── Flight_03
 │ └── YYYYMMDD_Location2
-│     ├── 01
-│     ├── 02
-│     ├── 03
+│     ├── Flight_01
+│     ├── Flight_02
+│     ├── Flight_03
 ```
 
 ## Core Scripts
