@@ -43,10 +43,14 @@ switch answer2
         disp('For CPG: under CPG_data/origin_Torrey.mat') %% XXX
         [temp_file, temp_file_path] = uigetfile(global_dir, 'Origin grid file');
         load(fullfile(temp_file_path, temp_file)); clear temp_file*
+        if size(origin_grid)~=[1 3]
+             origin_grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
+            origin_grid = double(string(origin_grid));
+        end
     case 'No'
         origin_grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
         origin_grid = double(string(origin_grid));
-end & switch answer2
+end % switch answer2
 
 % Check latitude
 if abs(origin_grid(1)) < 90

@@ -1,42 +1,145 @@
 %% get_products
+% get_products returns extracted image pixel for coordinates of Products.
+%% Description
 %
-% Extracts image pixel for coordinates of products
+%   Inputs:
+%           global_dir (string) : global directory - where CODES and (typically) DATA  are located.
+%           day_files (structure) : folders of the days to process - requires day_files.folder and day_files.name
+%           flights (structure) : folders of the flights to process - requires flights.folder and flights.name
+%           extract_Hz (double) : extraction frame rate (Hz) - obtained from Products
+%           R (structure) : extrinsics/intrinsics information
+%                       intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
+%                       extrinsics_2d (projtform2d) : [1 x m] 2d projective transformation of m images
+%                       worldPose (rigidtform3d) : orientation and location of camera in world coordinates, based off ground control location (pose, not extrinsic)
+%                       t (datetime array) : [1 x m] datetime of images at various extraction rates in UTC
+%           Products (structure) : Data products
+%                       type (string) : 'Grid', 'xTransect', 'yTransect'
+%                       frameRate (double) : frame rate of product (Hz)
+%                       lat (double) : latitude of origin grid
+%                       lon (double): longitude of origin grid
+%                       angle (double): shorenormal angle of origid grid (degrees CW from North)
+%                       xlim (double): [1 x 2] cross-shore limits of grid (+ is offshore of origin) (m)
+%                       ylim (double) : [1 x 2] along-shore limits of grid (+ is to the right of origin looking offshore) (m)
+%                       dx (double) : Cross-shore resolution (m)
+%                       dy (double) : Along-shore resolution (m)
+%                       x (double): Cross-shore distance from origin (+ is offshore of origin) (m)
+%                       y (double): Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
+%                       z (double) : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
 %
-% If using Feature Detection (Monocular Visual Odometry)
-%   - use 2D projective transformation to warp image, and extract pixel value from full panorama image
+%   Returns:
+%           Products (structure) : Data products
+%                       type (string) : 'Grid', 'xTransect', 'yTransect'
+%                       frameRate (double) : frame rate of product (Hz)
+%                       lat (double) : latitude of origin grid
+%                       lon (double): longitude of origin grid
+%                       angle (double): shorenormal angle of origid grid (degrees CW from North)
+%                       xlim (double): [1 x 2] cross-shore limits of grid (+ is offshore of origin) (m)
+%                       ylim (double) : [1 x 2] along-shore limits of grid (+ is to the right of origin looking offshore) (m)
+%                       dx (double) : Cross-shore resolution (m)
+%                       dy (double) : Along-shore resolution (m)
+%                       x (double): Cross-shore distance from origin (+ is offshore of origin) (m)
+%                       y (double): Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
+%                       z (double) : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%                       t (datetime array) : [1 x m] datetime of images at given extraction rates in UTC
+%                       localX (double) : [y_length x x_length] x coordinates in locally-defined coordinate system
+%                       localY (double) : [y_length x x_length] y coordinates in locally-defined coordinate system
+%                       localZ (double) : [y_length x x_length] z coordinates in locally-defined coordinate system
+%                       Irgb_2d (uint8 image) : [m x y_length x x_length x 3] timeseries of pixels extracted according to dimensions of xlim and ylim
 %
-% If using SCPs (similar to QCIT F_variableExtrinsicsSolution)
-%  - project coordinates into image according to [x y z azimuth tilt roll] and extract pixel
 %
+% For each extraction frame rate:
+%       - use 2D projective transformation to warp image, and extract pixel value from full panorama image
 %
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Nov 2023
+%% Function Dependenies
+% getCoords
+%
+%% Citation Info
+% github.com/AthinaLange/UAV_automated_rectification
+% Jan 2024;
 
+%% Data
+
+if ~exist('global_dir', 'var') || ~exist('day_files', 'var') || ~isstruct(day_files) || ~isfield(day_files, 'folder') || ~isfield(day_files, 'name')
+    disp('Missing global_dir and day_files. Please load in processing_run_DD_Month_YYYY.mat that has the day folders that you would like to process. ')
+    [temp_file, temp_file_path] = uigetfile(pwd, 'processing_run_.mat file');
+    load(fullfile(temp_file_path, temp_file)); clear temp_file*
+    assert(isfolder(global_dir),['Error (get_products): ' global_dir 'doesn''t exist.']);
+
+    if ~exist('global_dir', 'var')
+        disp('Please select the global directory.')
+        global_dir = uigetdir('.', 'UAV Rectification');
+        cd(global_dir)
+    end
+    if ~exist('day_files', 'var') || ~isstruct(day_files) || ~isfield(day_files, 'folder') || ~isfield(day_files, 'name')
+        disp('Choose DATA folder.')
+        disp('For Athina: DATA')
+        data_dir = uigetdir('.', 'DATA Folder');
+
+        day_files = dir(data_dir); day_files([day_files.isdir]==0)=[]; day_files(contains({day_files.name}, '.'))=[];
+        [ind_datafiles,~] = listdlg('ListString',{day_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
+        day_files = day_files(ind_datafiles);
+    end
+end % if exist('global_dir', 'var')
+
+% check that needed files exist
+for dd = 1:length(day_files)
+    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat')),['Error (get_products): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat') ' doesn''t exist.']);
+end
+%%
 close all
 for  dd = 1 : length(day_files)
-    clearvars -except dd *_dir user_email day_files P
+    clearvars -except dd *_dir user_email day_files 
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
-    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'))
-
-    ids_grid = find(contains(extractfield(Products, 'type'), 'Grid'));
-    ids_xtransect = find(contains(extractfield(Products, 'type'), 'xTransect'));
-    ids_ytransect = find(contains(extractfield(Products, 'type'), 'yTransect'));
-
+    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'extract_Hz', 'flights')
+    assert(exist('extract_Hz', 'var'), 'Error (get_products): extract_Hz must exist and be stored in ''day_input_data.mat''.')
+    assert(isa(extract_Hz, 'double'), 'Error (get_products): extract_Hz must be a double or array of doubles.')
+    assert(exist('flights', 'var'), 'Error (get_products): flights must exist and be stored in ''day_input_data.mat''.')
+    assert(isa(flights, 'struct'), 'Error (get_products): flights must be a structure.')
+    assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (get_products): flights must have fields .folder and .name.')
 
     % repeat for each flight
     for ff = 1 : length(flights)
-
-        load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'Products')
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [day_files(dd).name '_' flights(ff).name];
         cd(odir)
+
+        load(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
+        assert(isa(Products, 'struct'), 'Error (get_products): Products must be a stucture as defined in user_input_products.')
+        assert((isfield(R, 'type') && isfield(R, 'frameRate')), 'Error (get_products): Products must be a stucture as defined in user_input_products.')
+
+        assert(isfile(fullfile(odir, 'Processed_data', [oname '_IOEO.mat'])), ['Error (get_products): ' fullfile(odir, 'Processed_data', [oname '_IOEO.mat']) 'doesn''t exist. R variable must be stored there.'])
 
         for hh = 1 : length(extract_Hz)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
             images = imageDatastore(imageDirectory);
 
             load(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz']),'R')
+            assert(exist('R', 'var'), ['Error (get_products): R must exist and be stored in ''' fullfile(odir, 'Processed_data', [oname '_IOEO.mat']) '''.'])
+            assert(isfield(R, 'intrinsics'), 'Error (get_products): R must contain a cameraIntrinsics object. Please add R.intrinsics and save before proceeding. ')
+            assert(isa(R.intrinsics, 'cameraIntrinsics'), 'Error (get_products): intrinsics must be a cameraIntrinsics object.')
+            assert(isfield(R, 'extrinsics_2d'), 'Error (get_products): R must contain the projtform2d array of extrinsics. Please run get_extrinsics to get R.extrinsics_2d before proceeding. ')
+            assert(isa(R.extrinsics_2d, 'projtform2d'), 'Error (get_products): extrinsics must be projtform2d array.')
+            assert(isfield(R, 'worldPose'), 'Error (get_products): R must contain a rigidtform3d worldPose object. Please add R.worldPose and save before proceeding. ')
+            assert(isa(R.worldPose, 'rigidtform3d'), 'Error (get_products): extrinsics must be rigidtform3d object.')
 
+            if ~isfield(R, 't')
+                load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'C', 'mov_id', 'tz')
+                assert(exist(C, 'var'), 'Error (run_extrinsics): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
+                assert(isa(C, 'table'), 'Error (run_extrinsics): C must be a table. run get_metadata.')
+                assert(exist(mov_id, 'var'), 'Error (run_extrinsics): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
+                assert(isa(mov_id, 'double'), 'Error (run_extrinsics): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
+                assert(exist(tz, 'var'), 'Error (run_extrinsics): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
+                assert(isa(tz, 'string'), 'Error (run_extrinsics): tz (timezone) must be timezone string. run [tz] = select_timezone.')
+
+                dts = 1/extract_Hz(hh);
+                to = datetime(string(C.CreateDate(mov_id(1))), 'InputFormat', 'yyyy:MM:dd HH:mm:ss', 'TimeZone', tz);
+                to.TimeZone = 'UTC';
+                to = datenum(to);
+                t = (dts./24./3600).*([1:length(images.Files)]-1)+ to;
+                R.t = datetime(t, 'ConvertFrom', 'datenum', 'TimeZone', 'UTC');
+                clear dts to C mov_id tz t
+            end %  if ~isfield(R, 't')
             [Products.t] =  deal(R.t);
 
             %% construct panorama box
@@ -122,7 +225,7 @@ for  dd = 1 : length(day_files)
                 Products(pp).t=Products(pp).t(1:extract_Hz(hh)/Products(pp).frameRate:end);
             end %  for pp = 1:length(Products)
 
-            save(fullfile(odir, 'Processed_data', [oname '_Products_' char(string(extract_Hz(hh))) 'Hz' ]),'Products', '-v7.3')
+           save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '-append')
         end % for hh = 1 : length(extract_Hz)
     end %  for ff = 1 : length(flights)
 end % for  dd = 1 : length(day_files)

@@ -10,8 +10,8 @@ function [survey_gcp, image_gcp] = select_survey_gcp(I, image_fig, main_fig, zoo
 %           zoom_fig (figure handle) : figure handle where zoomed in pointcloud will be displayed and point clicked
 %
 %   Returns:
-%          survey_gcp (array) : [3 x n] gcp coordinates for n points in pointcloud coordinate system
-%          image_gcp (array) : [2 x n] gcp coordinates for n points in image
+%          survey_gcp (double) : [3 x n] gcp coordinates for n points in pointcloud coordinate system
+%          image_gcp (double) : [2 x n] gcp coordinates for n points in image
 %
 %  If Image first: click as many GCP as you want. In pointCloud, will find the same amount
 %  If LiDAR/SfM first: set number of GCPs you want to find.
@@ -57,7 +57,10 @@ if ~exist('survey_gcp', 'var') || size(survey_gcp,2) ~= 3
             [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig);
         case 'LiDAR/SfM'
             disp('Select LiDAR/SfM GCPs.')
-            gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find?'}));
+            gcp_num = str2double(inputdlg({'How many LiDAR/SfM GCPs do you want to find? Minimum 4.'}));
+            if gcp_num < 4
+                gcp_num = 4;
+            end % if gcp_num < 4
             [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig);
 
             % plot LiDAR/SfM gcps

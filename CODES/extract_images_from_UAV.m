@@ -2,21 +2,20 @@
 % extract_images_from_UAV extracts images from video files at specified frame rates for all flights on specified processing days.
 %% Description
 %
-%   Args:
-%           images (imageDatastore) : Stores file name of m images to process
-%           intrinsics (cameraIntrinsics) : camera intrinsics object to undistort images
-%           varargin :
-%                       Method (string) : Feature type (default : 'SIFT')
-%                       mask (logical) :  binary mask (same dimensions as images). helps cut down on processing time.
+%   Inputs:
+%           global_dir (string) : global directory - where CODES and (typically) DATA  are located.
+%           day_files (structure) : folders of the days to process - requires day_files.folder and day_files.name
+%           flights (structure) : folders of the flights to process - requires flights.folder and flights.name
+%           extract_Hz (double) : extraction frame rate (Hz) - obtained from Products
+%           C (table) : Table of image/video metadata (from get_metadata)
+%           mov_id (array) : list of ids that match videos (MOV, MP4, TS) in metadata table (from find_file_format_id)
 %
-%   Returns:
-%          extrinsics (array) : [1 x m] 2D projective transformation between subsequent frames
 %
 % Requires ffmpeg (https://ffmpeg.org)
 %
 % For each extraction frame rate:
 %           - make Hz directory for images
-%           - for every movie to be extracted: extract images from video at extraction frame rate using ffmpeg (into seperate folder intially)
+%           - for every movie to be extracted: extract images from video at extraction frame rate using ffmpeg (into separate folders initially)
 %           - move images from movie folders into group folder and rename sequentially
 %% Function Dependenies
 % extract_images
@@ -32,6 +31,8 @@ if ~exist('global_dir', 'var') || ~exist('day_files', 'var') || ~isstruct(day_fi
     disp('Missing global_dir and day_files. Please load in processing_run_DD_Month_YYYY.mat that has the day folders that you would like to process. ')
     [temp_file, temp_file_path] = uigetfile(pwd, 'processing_run_.mat file');
     load(fullfile(temp_file_path, temp_file)); clear temp_file*
+    assert(isfolder(global_dir),['Error (extract_images_from_UAV): ' global_dir 'doesn''t exist.']);
+
     if ~exist('global_dir', 'var')
         disp('Please select the global directory.')
         global_dir = uigetdir('.', 'UAV Rectification');
@@ -63,9 +64,9 @@ for dd = 1:length(day_files)
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
     load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'extract_Hz', 'flights')
-    assert(exist(extract_Hz, 'var'), 'Error (extract_images_from_UAV): extract_Hz must exist and be stored in ''day_input_data.mat''.')
+    assert(exist('extract_Hz', 'var'), 'Error (extract_images_from_UAV): extract_Hz must exist and be stored in ''day_input_data.mat''.')
     assert(isa(extract_Hz, 'double'), 'Error (extract_images_from_UAV): extract_Hz must be a double or array of doubles.')
-    assert(exist(flights, 'var'), 'Error (extract_images_from_UAV): flights must exist and be stored in ''day_input_data.mat''.')
+    assert(exist('flights', 'var'), 'Error (extract_images_from_UAV): flights must exist and be stored in ''day_input_data.mat''.')
     assert(isa(flights, 'struct'), 'Error (extract_images_from_UAV): flights must be a structure.')
     assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (extract_images_from_UAV): flights must have fields .folder and .name.')
 
@@ -76,10 +77,10 @@ for dd = 1:length(day_files)
         cd(odir)
 
         load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'mov_id', 'C')
-        assert(exist(C, 'var'), 'Error (extract_images_from_UAV): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
+        assert(exist('C', 'var'), 'Error (extract_images_from_UAV): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
         assert(isa(C, 'table'), 'Error (extract_images_from_UAV): C must be a table. run get_metadata.')
-        assert(exist(mov_id, 'var'), 'Error (extract_images_from_UAV): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''})')
-        assert(isa(mov_id, 'double'), 'Error (extract_images_from_UAV): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''})')
+        assert(exist('mov_id', 'var'), 'Error (extract_images_from_UAV): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
+        assert(isa(mov_id, 'double'), 'Error (extract_images_from_UAV): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
 
         video_files = dir(fullfile(day_files(dd).folder, day_files(dd).name, flights(ff).name));
         video_files(~contains({video_files.name},  C.FileName(mov_id)))=[];
@@ -108,7 +109,7 @@ for dd = 1:length(day_files)
         if exist('options.user_email', 'var')
             sendmail(options.user_email, [oname '- Image Extraction Done'])
         end % if exist('options.user_email', 'var')
-        
+
     end % for ff = 1:length(flights)
 end % for dd = 1:length(day_files)
 clearvars -except *_dir user_email day_files

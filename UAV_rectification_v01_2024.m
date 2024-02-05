@@ -146,7 +146,7 @@ data_dir = uigetdir('.', 'DATA Folder');
 
 % Load in all days that need to be processed.
 day_files = dir(data_dir); day_files([day_files.isdir]==0)=[]; day_files(contains({day_files.name}, '.'))=[];
-[ind_datafiles,~] = listdlg('ListString',{day_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
+[ind_datafiles,~] = listdlg('ListString',{day_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?', ''});
 day_files = day_files(ind_datafiles);
 
 %% =============== Confirm update emails and get email address. =====================================================================

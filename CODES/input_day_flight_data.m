@@ -1,66 +1,91 @@
-%% user_input_data
-% User provides all required input data for UAV_automated_rectification toolbox
+%% input_day_flight_data
+% input_day_flight_data returns all user-specified required input data for the UAV_automated_rectification toolbox. 
+%% Description
 %
-% 1. Test Email Confirmation
-% 	Asks user if test email received, otherwise fix email SMTP server settings
-% 2. Day-specific Data
-%	    - check in input data already determined - and load in file if it exists.
-% 	    - determine drone type, e.g. DJI or other - will help define video name
-% 	    - determine timezone that the video was recorded in - assuming video metadata % 	   in local timezone, otherwise pick UTM
-% 	    - choose intrinsics file for camera used on that day
-% 	        if none exists, will prompt CameraCalibrator app
-% 	    - choose Products to compute
-% 		    - select from .mat file
-% 		    - define in user_input_products.m
-% 	    - determine image extraction rates based on frame rates needed for products
-% 3. Flight-specific Data
-% 	- if non-DJI, prompt for video naming convention
-% 	- use exiftool to pull metadata from images and video
-% 		convert Lat/Long to Eastings/Northings
-% 	- extract first frame to do initial calibration on
-% 	- check that distortion is correctly accounted for
-% 	- use ground control points to obtain initial camera position and pose
-% 		- Option 1: Automated with LiDAR survey
-% 		- Option 2: Manual GCP selection from LiDAR or SfM survey
-% 		- Option 3: Manual GCP selection from GoogleEarth
-% 		- Option 4: Manual GCP selection from targets (QCIT)
-% 		- Option 5: No GCP - use camera metadata
-% 	   get CIRN extrinsics and MATLAB worldPose - if more points needed, user prompted
-% 	- specify if you want to use SCPs or Feature Matching for image stabilization
-%	    - if image stabilization via Feature Matching
-% 	    - Extract images every 30sec from all videos (using VideoReader)
-% 	    - Determine how much of image area should be useable for feature matching (how much beach) - improves code speed
-% 	    - Does 2D warping for relative movement between frames (depending on how much rotation is needed, decide between 2D or 3D)
-%     - if image stabilization via SCPs (QCIT)
-% 	    - Define SCPs (using same points as GCP targets) - define radius, bright/dark, and threshold - specify elevation
-%	    - plot rectified grid products and project xTransects and yTransects into oblique image and confirm that product locations/dimensions are correct
-% 	- send email with determined information
-% 		- origin coordinates
-% 		- initial extrinsics guess
-% 		- gcp-corrected extrinsics with method note
-% 		- MATLAB worldPose and image stabilization method (2D, 3D, SCP)
-% 		- frame rate of data
-% 		- Products to produce
-% 		- images
+%   Inputs:
+%           global_dir (string) : global directory - where CODES and (typically) DATA  are located.
+%           day_files (structure) : folders of the days to process - requires day_files.folder and day_files.name
+%
+%   Returns:
+%     for each day:
+%           cameraParams* (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
+%           extract_Hz (double) : extraction frame rate (Hz) - obtained from Products
+%           flights (structure) : folders of the flights to process - requires flights.folder and flights.name
+%           drone_type (string) : drone type (e.g. DJI) - used for file prefix
+%           tz (string) : user-selected Internet Assigned Numbers Authority (IANA) time zone accepted by the datetime function
+%           Products (structure) : Data products
+%                       productType (string) : 'cBathy', 'Timestack', 'yTransect'
+%                       type (string) : 'Grid', 'xTransect', 'yTransect'
+%                       frameRate (double) : frame rate of product (Hz)
+%                       lat (double) : latitude of origin grid
+%                       lon (double): longitude of origin grid
+%                       angle (double): shorenormal angle of origid grid (degrees CW from North)
+%                       xlim (double): [1 x 2] cross-shore limits of grid (+ is offshore of origin) (m)
+%                       ylim (double) : [1 x 2] along-shore limits of grid (+ is to the right of origin looking offshore) (m)
+%                       dx (double) : Cross-shore resolution (m)
+%                       dy (double) : Along-shore resolution (m)
+%                       x (double): Cross-shore distance from origin (+ is offshore of origin) (m)
+%                       y (double): Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
+%                       z (double) : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%      
+%     for each flight:
+%           R (structure) : extrinsics/intrinsics information
+%                       intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
+%                       I (uint8 image) : undistorted initial frame
+%                       world_gcp (double) : [n x 3] ground control location in world coordinate frame (x,y,z)
+%                       image_gcp (double) : [n x 2] ground control location in inital frame
+%                       worldPose (rigidtform3d) : orientation and location of camera in world coordinates, based off ground control location (pose, not extrinsic)
+%                       mask (logical) : mask over ocean region (same dimensions as image) - used to speed up computational time (optional)
+%                       feature_method (string): feature type to use in feature detection algorithm (default: `SIFT`, must be `SIFT`, `SURF`, `BRISK`, `ORB`, `KAZE`) (optional)
 %
 %
-%
-% REQUIRES: exiftool installation (https://exiftool.org/)
-% Code dependencies:
-% 	- user_input_products
-% 	- intg2012b
-% 	- ll_to_utm
-%	    - get_noaa_lidar
-%	    - get_local_survey
-%	    - select_image_gcp
-%	    - select_target_gcp
-% 	- select_survey_gcp
-% 	- CIRN2MATLAB
-% 	- get_coarse_pose_estimation
+% Requires: exiftool (https://exiftool.org/) OR metadata .csv
 %
 %
-% (c) Athina Lange, Coastal Processes Group, Scripps Institution of Oceanography - Dec 2023
+%% Function Dependenies
+% select_timezone
+% user_input_products
+% get_metadata
+% find_file_format_id
+% select_survey_gcp
+% select_image_gcp
+% select_target_gcp
+% define_ocean_mask
+% apply_binary_mask
+% plot_grid
+% define_grid
+% plot_xtransect
+% define_xtransect
+% plot_transect
+% define_ytransect
 %
+%% Citation Info
+% github.com/AthinaLange/UAV_automated_rectification
+% Jan 2024;
+
+%% Data
+
+if ~exist('global_dir', 'var') || ~exist('day_files', 'var') || ~isstruct(day_files) || ~isfield(day_files, 'folder') || ~isfield(day_files, 'name')
+    disp('Missing global_dir and day_files. Please load in processing_run_DD_Month_YYYY.mat that has the day folders that you would like to process. ')
+    [temp_file, temp_file_path] = uigetfile(pwd, 'processing_run_.mat file');
+    load(fullfile(temp_file_path, temp_file)); clear temp_file*
+    assert(isfolder(global_dir),['Error (get_products): ' global_dir 'doesn''t exist.']);
+
+    if ~exist('global_dir', 'var')
+        disp('Please select the global directory.')
+        global_dir = uigetdir('.', 'UAV Rectification');
+        cd(global_dir)
+    end
+    if ~exist('day_files', 'var') || ~isstruct(day_files) || ~isfield(day_files, 'folder') || ~isfield(day_files, 'name')
+        disp('Choose DATA folder.')
+        disp('For Athina: DATA')
+        data_dir = uigetdir('.', 'DATA Folder');
+
+        day_files = dir(data_dir); day_files([day_files.isdir]==0)=[]; day_files(contains({day_files.name}, '.'))=[];
+        [ind_datafiles,~] = listdlg('ListString',{day_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
+        day_files = day_files(ind_datafiles);
+    end
+end % if exist('global_dir', 'var')
 
 %% ===========================testEmail=========================================
 %                  Confirm test email recieved
@@ -129,6 +154,7 @@ for dd = 1 : length(day_files)
             drone_type = string(inputdlg({'What drone system?'}));
         end % if ind_drone == 1
     end %  if ~exist('drone_type', 'var') || ~isstring(drone_type)
+    
     clear ind_drone
     %% ==========================TimeZone==========================================
     %                                        Choose timezone of video recordings
@@ -136,7 +162,7 @@ for dd = 1 : length(day_files)
     if ~exist('tz', 'var') || ~ischar(tz)
         [tz] = select_timezone;
     end %  if ~exist('tz', 'var') || ~ischar(tz)
-    %% ==========================intrinsics===========================================
+    %% ==========================intrinsics==========================================
     %                                   Choose intrinsics file for each day of flight
     %  ==============================================================================
     if  (~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var'))
@@ -175,7 +201,7 @@ for dd = 1 : length(day_files)
         end % if ~exist('cameraParams', 'var')
     end % if  (~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var'))
 
-    %% ==========================product============================================
+    %% ==========================product===========================================
     %                          DEFINE PRODUCT TYPE
     %                           - Do you already have a product file - as made from user_input_products.m
     %                               - If so, can load that in
@@ -214,7 +240,7 @@ for dd = 1 : length(day_files)
         end %  if length(z) < length(Products)
         clear z
     end % if ~exist('Products', 'var') || ~isstruct(Products)
-    %% ==========================extractionRate=======================================
+    %% ==========================extractionRate======================================
     %                          EXTRACTION FRAME RATES
     %                           - Find frame rates of products
     %                           - Find minimum sets of frame rates to satisfy product frame rates,
@@ -231,7 +257,7 @@ for dd = 1 : length(day_files)
         end % if rem(max(info_Hz), info_Hz(hh)) == 0
     end % or hh = 1:length(info_Hz)
     clear hh info_Hz ans
-    %% ==========================saveDayData========================================
+    %% ==========================saveDayData=======================================
     %                          SAVE DAY RELEVANT DATA
     %                           - Save camera intrinsics, extraction frame rates, products, flights for specific day, drone type and timezone
     %  ==============================================================================
@@ -249,6 +275,10 @@ for dd = 1 : length(day_files)
         %% ========================Housekeeping=======================================
         clearvars -except dd ff *_dir user_email day_files flights
         load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'))
+        assert(exist('extract_Hz', 'var'), 'Error (input_day_flight_data): extract_Hz must exist and be stored in ''day_input_data.mat''.')
+        assert(isa(extract_Hz, 'double'), 'Error (input_day_flight_data): extract_Hz must be a double or array of doubles.')
+        assert(exist('tz', 'var'), 'Error (input_day_flight_data): tz (timezone) must exist and be stored in ''day_input_data.mat''.')
+        assert(isa(tz, 'string'), 'Error (input_day_flight_data): tz (timezone) must be a timezone string. run [tz] = select_timezone.')
 
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [day_files(dd).name '_' flights(ff).name];
@@ -264,34 +294,54 @@ for dd = 1 : length(day_files)
         %                               - get inital camera position and pose from metadata
         %  ============================================================================
         % Determine file name prefix if necessary.
-        if contains(drone_type, 'DJI')
+        if exist('drone_type', 'var') && contains(drone_type, 'DJI')
             drone_file_name = 'DJI';
         else
-            temp_name = string(inputdlg({'What is the file prefix? Leave empty if starts with number.'}));
-            drone_file_name = temp_name(1);
-        end % if contains(drone_type, 'DJI')
+            drone_file_name = char(string(inputdlg({'What is the file prefix? Leave empty if starts with number.'})));
+        end % if exist('drone_type', 'var') && contains(drone_type, 'DJI')
 
-        % extract metadata
-        if size(drone_file_name,2) ~= 1
-            [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
+        % extract metadata % check if csv file was created with metadata - if not install exiftool
+        if  ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
+                if ~isempty(drone_file_name)
+                    [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
+                else
+                    [C] = get_metadata(odir, oname, save_dir = fullfile(odir, 'Processed_data'));
+                end % if size(drone_file_name,2) ~= 1
         else
-            [C] = get_metadata(odir, oname, save_dir = fullfile(odir, 'Processed_data'));
-        end % if size(drone_file_name,2) ~= 1
+            C=readtable(fullfile(odir, 'Processed_data', [oname '.csv']));
+        end % if  ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
 
         % check if csv file was created with metadata - if not install exiftool
         if ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
-            answer2 = questdlg('Please download and install exiftool before proceeding.', '', 'Done', 'Done');
-            [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
+            answer2 = questdlg('Please download and install exiftool before proceeding or create a metadata csv.', '', 'Done', 'Done');
+            if  ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
+                if ~isempty(drone_file_name)
+                    [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
+                else
+                    [C] = get_metadata(odir, oname, save_dir = fullfile(odir, 'Processed_data'));
+                end % if size(drone_file_name,2) ~= 1
+            else
+                C=readtable(fullfile(odir, 'Processed_data', [oname '.csv']));
+            end % if  ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
         end % if ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
 
+
         % find jpg/mov id's -> check if files loading
-        [jpg_id] = find_file_format_id(C, file_format = 'JPG');
+        [jpg_id] = find_file_format_id(C, file_format = {'JPG', 'PNG'});
         [mov_id] = find_file_format_id(C, file_format = {'MOV', 'MP4', 'TS'});
         if isempty(mov_id)
             answer2 = questdlg('Please load a video file into the folder before proceeding.', '', 'Done', 'Done');
-            [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
+            if  ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
+                if ~isempty(drone_file_name)
+                    [C] = get_metadata(odir, oname, file_prefix = drone_file_name, save_dir = fullfile(odir, 'Processed_data'));
+                else
+                    [C] = get_metadata(odir, oname, save_dir = fullfile(odir, 'Processed_data'));
+                end % if size(drone_file_name,2) ~= 1
+            else
+                C=readtable(fullfile(odir, 'Processed_data', [oname '.csv']));
+            end % if  ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
 
-            [jpg_id] = find_file_format_id(C, file_format = 'JPG');
+            [jpg_id] = find_file_format_id(C, file_format = {'JPG', 'PNG'});
             [mov_id] = find_file_format_id(C, file_format = {'MOV', 'MP4', 'TS'});
         end % if isempty(mov_id)
 
@@ -299,7 +349,6 @@ for dd = 1 : length(day_files)
         if length(jpg_id) > 1; jpg_id = jpg_id(1); end
         % if no image taken, use mov_id
         if isempty(jpg_id); jpg_id = mov_id(1); end
-
 
         % CONFIRM VIDEOS TO PROCESS
         [id, ~] = listdlg('ListString', append(string(C.FileName(mov_id)), ' - ',  string(C.Duration(mov_id))), 'SelectionMode','multiple', 'InitialValue', [1:length(mov_id)], 'PromptString', {'What movies do you want' 'to use? (command + for multiple)'});
@@ -315,6 +364,7 @@ for dd = 1 : length(day_files)
         if ~exist(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'), 'file')
             system(['ffmpeg -ss 00:00:00 -i ' char(string(C.FileName(mov_id(1)))) ' -frames:v 1 -loglevel quiet -stats -qscale:v 2 Processed_data/Initial_frame.jpg']);
         end % if ~exist(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'), 'file')
+        assert(isfile(fullfile(odir, 'Processed_data', 'Initial_frame.jpg')), 'Error (input_day_flight_data): Please install ffmpeg. Problem extracting inital frame.')
         clear C mov_id
         %% ========================distortion===========================================
         %                          CONFIRM DISTORTION
@@ -329,6 +379,9 @@ for dd = 1 : length(day_files)
         I = imread(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'));
         % if both a distorted and undistorted version of the codes exists
         if exist('cameraParams_distorted', 'var') && exist('cameraParams_undistorted', 'var')
+            assert(isa(cameraParams_distorted, 'cameraIntrinsics'), 'Error (input_day_flight_data): cameraParams_distorted must be a cameraIntrinsics object.')
+            assert(isa(cameraParams_undistorted, 'cameraIntrinsics'), 'Error (input_day_flight_data): cameraParams_undistorted must be a cameraIntrinsics object.')
+
             J1 = undistortImage(I, cameraParams_distorted);
             J2 = undistortImage(I, cameraParams_undistorted);
             hFig = figure(1);clf
@@ -351,6 +404,8 @@ for dd = 1 : length(day_files)
 
             % if only 1 cameraParams version exists
         else
+            assert(isa(cameraParams, 'cameraIntrinsics'), 'Error (input_day_flight_data): cameraParams must be a cameraIntrinsics object.')
+           
             J1 = undistortImage(I, cameraParams);
             hFig = figure(1);clf
             imshowpair(I,J1, 'montage')
@@ -458,14 +513,16 @@ for dd = 1 : length(day_files)
         close all
 
         clear image_gcp world_gcp iP worldPose ind_gcp_option iGCP wGCP hGCP ii ans
-        %% ========================Feature Detection Region===============================================
-
+        %% ========================Feature Detection Region & Method =====================
+        feature_types = {'SIFT', 'SURF', 'BRISK', 'ORB', 'KAZE'};
+        [ind_type,~] = listdlg('ListString', feature_types, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which feature types do you want to use?(default: SIFT)',''});
+        R.feature_method = feature_types(ind_type);
         [R.mask] = select_ocean_mask(R.I);
         clf
         [Itemp] = apply_binary_mask(R.I, R.mask);
         image(Itemp)
         pause(0.5)
-        clear Itemp
+        clear Itemp ind_type feature_types
         save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
         close all
         %% ========================SCP================================================
@@ -519,7 +576,7 @@ for dd = 1 : length(day_files)
         %% ========================productsCheck=======================================
         %                          CHECK PRODUCTS ON INITIAL IMAGE
         %                           - Load in all required data -
-        %                             extrinsics inital guess, intrinsics, inital frame, input data, products
+        %                             extrinsics, intrinsics, inital frame, input data, products
         %  =======================================================================5
         % =====
 
@@ -604,6 +661,9 @@ for dd = 1 : length(day_files)
 
             clearvars  gridChangeIndex answer origin_grid Product1 productCounter
         end %  if ~isempty(find(contains(extractfield(Products, 'type'), 'yTransect'), 1))
+
+        
+     
         %% ========================email===============================================
         %                         SEND EMAIL WITH INPUT DATA
         %                           - Origin of Coordinate System
@@ -612,6 +672,7 @@ for dd = 1 : length(day_files)
         %                           - Data extraction frame rates
         %                           - Products
         %  ============================================================================
+        save(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
         clear grid_text grid_plot
         load(fullfile(odir, 'Processed_data', [oname '_IOEO']))
         grid_text{1} = sprintf('Lat / Long = %.2f / %.2f, Angle = %.2f deg', Products(1).lat, Products(1).lon, Products(1).angle);

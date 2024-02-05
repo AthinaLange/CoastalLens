@@ -24,10 +24,13 @@ function [timezone] = select_timezone
 
 %% Select timezone
 
-cont_areas = [{'Africa'}, {'America'}, {'Antarctica'}, {'Arctic'}, {'Asia'}, {'Atlantic'}, {'Australia'}, {'Europe'}, {'Indian'}, {'Pacific'}, {'All'}];
+cont_areas = [{'Africa'}, {'America'}, {'Antarctica'}, {'Arctic'}, {'Asia'}, {'Atlantic'}, {'Australia'}, {'Europe'}, {'Indian'}, {'Pacific'}, {'All'}, {'UTC'}];
 [ind_area,~] = listdlg('ListString', cont_areas, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
-
-geo_areas = timezones(char(cont_areas(ind_area)));
-[ind_area,~] = listdlg('ListString', geo_areas.Name, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
-timezone = char(geo_areas.Name(ind_area));
+if ind_area == 12
+    timezone = 'UTC';
+else
+    geo_areas = timezones(char(cont_areas(ind_area)));
+    [ind_area,~] = listdlg('ListString', geo_areas.Name, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
+    timezone = char(geo_areas.Name(ind_area));
+end % ind_area == 12
 end

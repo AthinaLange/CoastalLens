@@ -7,6 +7,18 @@ function [xyz, X, Y, Z] = getCoords(Products)
 %% Description
 %   Args:
 %           Products (structure) : Single Products object. All necessary variables given in define_grid, define_xtransect, or define_ytransect
+%                       type (string) : 'Grid', 'xTransect', 'yTransect'
+%                       frameRate (double) : frame rate of product (Hz)
+%                       lat (double) : latitude of origin grid
+%                       lon (double): longitude of origin grid
+%                       angle (double): shorenormal angle of origid grid (degrees CW from North)
+%                       xlim (double): [1 x 2] cross-shore limits of grid (+ is offshore of origin) (m)
+%                       ylim (double) : [1 x 2] along-shore limits of grid (+ is to the right of origin looking offshore) (m)
+%                       dx (double) : Cross-shore resolution (m)
+%                       dy (double) : Along-shore resolution (m)
+%                       x (double): Cross-shore distance from origin (+ is offshore of origin) (m)
+%                       y (double): Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
+%                       z (double) : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
 %
 %   Returns:
 %       xyz (double) : [m x 3] (x, y, z) world coordinates for Products. Rotated according to Product.angle.

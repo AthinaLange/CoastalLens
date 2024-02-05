@@ -17,7 +17,7 @@ function [target_gcp] = select_target_gcp
 %
 %% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
+% Nov 2023; 
 
 %% Get target world coordinates from file
 
