@@ -6,7 +6,7 @@ Uncrewed aerial vehicles (UAVs) are an important tool for coastal monitoring wit
 
 ## Installation
 Requires MATLAB (min v2022b - for estworldpose function) <br />
-Requires [exiftool](https://exiftool.org) and [ffmpeg](https://ffmpeg.org/download.html). <br />
+Requires [exiftool](https://exiftool.org) and [ffmpeg](https://ffmpeg.org/download.html). See [Installation Help](https://github.com/AthinaLange/UAV_automated_rectification/wiki/installation_help) for installation guides based on your OS. <br />
 Requires XXX MATLAB toolboxes. <br />
 
 ## Getting Started
