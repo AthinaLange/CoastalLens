@@ -121,7 +121,7 @@ switch ffmpeg_answer
         disp('Please go to https://ffmpeg.org/ and install ffmpeg before proceeding.')
         system(['ffmpeg -version'])
         ffmpeg_answer = questdlg('Is ffmpeg installed now?','ffmpeg Installation', 'Yes', 'No', 'Yes');
-end
+end % switch ffmpeg_answer
 
 % Check that exiftool is installed.
 exiftool_answer = questdlg('Is exiftool installed?','exiftool Installation', 'Yes', 'No', 'Yes');
@@ -129,8 +129,11 @@ switch exiftool_answer
     case 'No'
         disp('Please go to https://exiftool.org and install exiftool before proceeding.')
         ffmpeg_answer = questdlg('Is exiftool installed now?','exiftool Installation', 'Yes', 'No', 'Yes');
-end
+end % switch exiftool_answer
 
+if isToolboxAvailable('Computer Vision Toolbox','warning')== 0
+    disp('Please install the Computer Vision Toolbox before proceeding.')
+end % if isToolboxAvailable('Computer Vision Toolbox','warning')== 0
 
 addpath(genpath(code_dir))
 clear *answer ans
