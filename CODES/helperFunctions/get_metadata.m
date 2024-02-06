@@ -1,9 +1,9 @@
 function [C] = get_metadata(odir, oname, varargin)
 %   get_metadata returns table C and saves .csv of metadata from images and videos.
 %% Syntax
-%           [C] = get_metadata('./DATA/20240101_SIO/01/', '20240101_SIO')
-%           [C] = get_metadata('./DATA/20240101_SIO/01/', '20240101_SIO', file_prefix = 'DJI')
-%           [C] = get_metadata('./DATA/20240101_SIO/01/', '20240101_SIO', save_dir = './DATA/20240101_SIO/01/Processed_data/')
+%           [C] = get_metadata('./DATA/20211215_Torrey/Flight_04/', '20211215_Torrey')
+%           [C] = get_metadata('./DATA/20211215_Torrey/Flight_04/', '20211215_Torrey', file_prefix = 'DJI')
+%           [C] = get_metadata('./DATA/20211215_Torrey/Flight_04/', '20211215_Torrey', save_dir = './DATA/20240101_SIO/01/Processed_data/')
 %
 %% Description
 %   Args:
@@ -23,7 +23,7 @@ function [C] = get_metadata(odir, oname, varargin)
 %   REQUIRES: exiftool installation (https://exiftool.org/)
 %
 %% Example 1
-%  [C] = get_metadata('./DATA/20240101_SIO/01/', '20240101_SIO', file_prefix = 'DJI')
+%  [C] = get_metadata('./DATA/20211215_Torrey/Flight_04/', '20211215_Torrey', file_prefix = 'DJI')
 %
 %% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification

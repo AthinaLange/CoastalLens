@@ -13,7 +13,7 @@ function [panorama] = plot_panorama(images, intrinsics, extrinsics)
 %           panorama (uint8 image): stitched panorama image
 %
 %% Example 1
-% imageDirectory = './DATA/20211215_Torrey/01/images_2Hz/'
+% imageDirectory = './DATA/20211215_Torrey/Flight_04/images_1Hz/'
 % images = imageDatastore(imageDirectory);
 % [extrinsics] = get_extrinsics_fd(images, R.intrinsics, mask=R.mask);
 % [panorama] = plot_panorama(images, R.intrinsics, extrinsics);
