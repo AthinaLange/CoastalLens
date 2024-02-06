@@ -25,7 +25,7 @@ function [I_mask] = apply_binary_mask(I, mask)
 %%
 assert(isa(I, 'uint8'), 'Error (apply_binary_mask): I must be an image.')
 assert(isa(mask, 'logical'), 'Error (apply_binary_mask): mask must be an binary mask.')
-assert(size(mask) == size(I, [1 2]), 'Error (apply_binary_mask): mask must be the same size as I.')
+assert(sum(size(mask) == size(I, [1 2]))==2, 'Error (apply_binary_mask): mask must be the same size as I.')
 
 %%
 I_mask = zeros(size(I),'like', I);

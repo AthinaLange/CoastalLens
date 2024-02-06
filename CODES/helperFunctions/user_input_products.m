@@ -1,10 +1,11 @@
-function [Products] = user_input_products
+function [Products] = user_input_products(global_dir)
 %   user_input_products returns structure with dimensions needed to construct cBathy-type grids, cross-shore and along-shore transects.
 %% Syntax
 %           [Products] = user_input_products
 %
 %% Description
 %   Args:
+%           global_dir (string) : global directory - where CODES and (typically) DATA  are located.
 %
 %   Returns:
 %           Products (structure) :
@@ -40,7 +41,7 @@ answer2 = questdlg('Do you have a .mat origin file?', 'Grid file', 'Yes', 'No', 
 switch answer2
     case 'Yes'
         disp('Please load in origin grid file.')
-        disp('For CPG: under CPG_data/origin_Torrey.mat') %% XXX
+        disp('For DEMO: under data_files/origin_Torrey.mat') %% XXX
         [temp_file, temp_file_path] = uigetfile(global_dir, 'Origin grid file');
         load(fullfile(temp_file_path, temp_file)); clear temp_file*
         if size(origin_grid)~=[1 3]
@@ -122,7 +123,7 @@ while productFlag == 0
         productCounter = length(Products);
     end %  if productType_ind == 1
 
-    answer2 = questdlg('Define more products?', 'Do you want to create more products?', 'Yes', 'No', 'Yes');
+    answer2 = questdlg('Do you want to create more products?', 'Define more products?', 'Yes', 'No', 'Yes');
     switch answer2
         case 'No'
             productFlag = 1;

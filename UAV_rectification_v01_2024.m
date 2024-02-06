@@ -80,7 +80,7 @@
 %                           - confirm DATA path - which day or multiple days are you processing
 %                           - get user email
 %  =====================================================================
-%% =============== Get global directory location. =====================================================================
+%% =============== Get global directory location. ============================
 clearvars
 
 if ismac
@@ -101,7 +101,7 @@ global_dir = uigetdir('.', 'Choose root folder - UAV_automated_rectification.');
 cd(global_dir)
 setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
 
-%% =============== Check that all necessary codes are loaded. =====================================================================
+%% =============== Check that all necessary codes are loaded. =================
 code_dir = fullfile(global_dir, 'CODES');
 
 % Check that basic Functions are downloaded.
@@ -115,7 +115,7 @@ end
 
 % Check that ffmpeg is installed.
 system(['ffmpeg -version'])
-ffmpeg_answer = questdlg('Is ffmpeg installed?','ffmpeg Installation', 'Yes', 'No', 'Yes');
+ffmpeg_answer = questdlg('Is ffmpeg installed? (Should have run in your Command Window.)','ffmpeg Installation', 'Yes', 'No', 'Yes');
 switch ffmpeg_answer
     case 'No'
         disp('Please go to https://ffmpeg.org/ and install ffmpeg before proceeding.')
@@ -134,8 +134,7 @@ end
 
 addpath(genpath(code_dir))
 clear *answer ans
-%% =============== Select days to process.  ===============
-% ======================================================
+%% =============== Select days to process.  =================================
 % Load which data folders are to be processed
 if ismac || isunix
     disp('Choose DATA folder.')
@@ -148,7 +147,7 @@ day_files = dir(data_dir); day_files([day_files.isdir]==0)=[]; day_files(contain
 [ind_datafiles,~] = listdlg('ListString',{day_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?', ''}, 'ListSize', [500 300]);
 day_files = day_files(ind_datafiles);
 
-%% =============== Confirm update emails and get email address. =====================================================================
+%% =============== Confirm update emails and get email address. ===============
 % Get user email
 answer = questdlg('Recieve update emails?', 'Confirmation Emails?', 'Yes', 'No', 'Yes');
 switch answer
@@ -198,4 +197,13 @@ run_extrinsics
 %                           - requires day_files and user_email (if emails wanted)
 %  =====================================================================
 get_products
-%[iDark, iBright, iTimex] = makeARGUSproducts(images, R.FullRate_OGFrame, intrinsics);
+
+%% ====================================================================
+%                           SAVE PRODUCTS
+%                           - requires day_files
+%  =====================================================================
+input_answer = questdlg('Do you want to save all the rectified images?','Save images', 'Yes', 'No', 'Yes');
+switch input_answer
+    case 'Yes'
+        save_products
+end % switch input_answer

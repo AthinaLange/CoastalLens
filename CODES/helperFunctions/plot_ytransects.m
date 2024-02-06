@@ -1,4 +1,4 @@
-function plot_ytransects(Products, I, intrinsics, extrinsics)
+function plot_ytransects(Products, I, intrinsics, worldPose)
 %  plot_ytransects plots along-shore transects on oblique image as specified output from define_ytransect.
 %% Syntax
 %           plot_ytransects(Products, I, intrinsics, worldPose)
@@ -43,7 +43,7 @@ for pp = ids_ytransect % repeat for all ytransects
     [xyz,~,~,~] = getCoords(Products(pp));
     [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
     aa=xyz-[x2 y2 0];
-    iP = round(world2img(xyz, pose2extr(extrinsics), intrinsics));
+    iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
 
     scatter(iP(:,1), iP(:,2), 25, 'filled')
     xlim([0 size(I,2)])

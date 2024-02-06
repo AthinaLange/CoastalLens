@@ -30,7 +30,7 @@ if ind_area == 12
     timezone = 'UTC';
 else
     geo_areas = timezones(char(cont_areas(ind_area)));
-    [ind_area,~] = listdlg('ListString', geo_areas.Name, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
+    [ind_area,~] = listdlg('ListString', geo_areas.Name, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'}, 'ListSize', [500 300]);
     timezone = char(geo_areas.Name(ind_area));
 end % ind_area == 12
 end
