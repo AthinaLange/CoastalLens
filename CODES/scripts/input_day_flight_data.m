@@ -136,7 +136,7 @@ for dd = 1 : length(day_files)
     % Check if user already has input file with all general drone / products information
     input_answer = questdlg('Do you have a .mat configuration file?','Config File', 'Yes - Load it', 'No - Create Now', 'No - Create Now');
     switch input_answer
-        case 'Yes'
+        case 'Yes - Load it'
             disp('Load in day input file.')
             disp('For CPG: ''day_input_data.mat'' in day files.')
             [temp_file, temp_file_path] = uigetfile(global_dir, 'Input File');
@@ -455,6 +455,7 @@ for ff = 1 : length(flights)
             disp('Didn''t click the right number of points.')
             [world_gcp] = select_target_gcp;
         end % if size(world_gcp,1) ~= size(image_gcp,1)
+        
     end % if ind_gcp_option == 1
 
     % Getting MATLAB worldPose
@@ -463,7 +464,7 @@ for ff = 1 : length(flights)
     catch % get more points
         iGCP = image_gcp; clear image_gcp
         wGCP = world_gcp; clear world_gcp
-        [ind_gcp_option2,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'Select GCP targets'}],...
+        [ind_gcp_option2,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'Select GCP targets'}, {'No more points possible'}],...
             'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Requires more GCP points'}, 'ListSize', [500 300]);
 
         if ind_gcp_option2 == 1 % manual selection from LiDAR
@@ -476,7 +477,9 @@ for ff = 1 : length(flights)
             image_fig = figure(1);clf
             [image_gcp] = select_image_gcp(R.I, image_fig);
             [world_gcp] = select_target_gcp;
-
+        elseif ind_gcp_option == 3 % no other option
+            image_gcp = [];
+            world_gcp=[];
         end % if ind_gcp_option2 == 1
 
         image_gcp = [iGCP; image_gcp];

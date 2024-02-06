@@ -60,7 +60,7 @@ if isfield(Products, 'frameRate') && isfield(Products, 't')...
         if contains(Products(pp).type, 'Grid')
             mkdir(fullfile(save_dir, 'Grid'))
             for tt = 1:size(Products(pp).Irgb_2d,1) % go through all time steps
-                image = squeeze(Products(pp).Irgb_2d(tt,:,:,:));
+                image = flipud(squeeze(Products(pp).Irgb_2d(tt,:,:,:)));
 
                 % if at millisecond rate: add extract number
                 if Products(pp).frameRate > 1

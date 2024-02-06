@@ -13,7 +13,7 @@ function [I_mask] = apply_binary_mask(I, mask)
 %
 %% Example 1
 %
-% I = readimage('DATA/20211215_Torrey/01/DJI_0001.JPG');
+% I = readimage('DATA/20211215_Torrey/Flight_04/DJI_0001.JPG');
 % [mask] = select_ocean_mask(I);
 % [I_mask] = apply_binary_mask(I, mask);
 % figure
