@@ -41,9 +41,9 @@ Product.lat = origin_grid(1);
 Product.lon = origin_grid(2);
 Product.angle = origin_grid(3);
 
-info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
+info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin, + if offshore)', ...
     'Southern Alongshore extent (m from Origin)', 'Northern Alongshore extent (m from Origin)',...
-    'dx', 'dy', 'z elevation (tide level in relevant datum)'})));
+    'dx', 'dy', 'z elevation (tide level in relevant datum)'}, 'Grid Coordinates')));
 answer = questdlg('Do you want to include a DEM?', 'DEM file', 'Yes', 'No', 'Yes');
 
 
@@ -54,7 +54,7 @@ if find(isnan(info)) ~= 8
     disp('Please fill out all boxes (except z elevation if necessary)')
     info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (+m from Origin)', 'Onshore cross-shore extent (+m from Origin)', ...
         'Southern Alongshore extent (+m from Origin)', 'Northern Alongshore extent (+m from Origin)',...
-        'dx', 'dy', 'z elevation (tide level in relevant datum)'})));
+        'dx', 'dy', 'z elevation (tide level in relevant datum)'}, 'Grid Coordinates')));
     info(1:7) = abs(info(1:7)); % making everything +meters from origin
 end % if find(isnan(info)) ~= 8
 

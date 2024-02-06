@@ -42,14 +42,14 @@ Product.angle = origin_grid(3);
 
 info = inputdlg({'Frame Rate (Hz)', 'Southern alongshore extent (m from Origin)', 'Northern alongshore extent (m from Origin)', ...
     'Cross-shore location of transects (m from Origin) - e.g. 50, 100, 200 OR [50:50:200]',...
-    'dy', 'z elevation (tide level in relevant datum - or elevation if on beach)'});
+    'dy', 'z elevation (tide level in relevant datum - or elevation if on beach)'}, 'yTransect Coordinates');
 
 % check that there's a value in all the required fields
 if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
     disp('Please fill out all boxes (except z elevation if necessary)')
     info = double(string(inputdlg({'Frame Rate (Hz)', 'Southern alongshore extent (m from Origin)', 'Northern alongshore extent (m from Origin)', ...
         'Cross-shore location of transects (m from Origin) - e.g. 50, 100, 200 OR [50:50:200]',...
-        'dy', 'z elevation (tide level in relevant datum - or elevation if on beach)'})));
+        'dy', 'z elevation (tide level in relevant datum - or elevation if on beach)'}, 'yTransect Coordinates')));
 end % if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
 
 info_num = abs(double(string(info([1 2 3 5])))); % making everything +meters from origin

@@ -40,18 +40,18 @@ Product.lon = origin_grid(2);
 Product.angle = origin_grid(3);
 
 
-info = inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (+m from Origin)', 'Onshore cross-shore extent (+m from Origin)', ...
+info = inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (+m from Origin)', 'Onshore cross-shore extent (m from Origin, + is offshore)', ...
     'Alongshore location of transects (m from Origin, looking offshore, right side +) - e.g. -100, 0, 100 OR [-100:100:100]',...
-    'dx', 'z elevation (tide level in relevant datum)'});
+    'dx', 'z elevation (tide level in relevant datum)'}, 'xTransect Coordinates');
 
 answer = questdlg('Do you want to include a DEM?', 'DEM file', 'Yes', 'No', 'Yes');
 
 % check that there's a value in all the required fields
 if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
     disp('Please fill out all boxes (except z elevation if necessary)')
-    info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin)', ...
+    info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin, + is offshore)', ...
         'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]',...
-        'dx', 'z elevation (tide level in relevant datum)'})));
+        'dx', 'z elevation (tide level in relevant datum)'}, 'xTransect Coordinates')));
 end % if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
 
 info_num = abs(double(string(info([1 2 3 5])))); % making everything +meters from origin
