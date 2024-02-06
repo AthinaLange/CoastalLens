@@ -7,7 +7,7 @@ function [Products] = user_input_products
 %   Args:
 %
 %   Returns:
-%           Products (structure) : 
+%           Products (structure) :
 %                               - productType : 'cBathy', 'Timestack', 'yTransect'
 %                               - type : 'Grid', 'xTransect', 'yTransect'
 %                               - frameRate : frame rate to process data (Hz)
@@ -21,7 +21,7 @@ function [Products] = user_input_products
 %                               - x : Cross-shore distance from origin (+ is offshore of origin) (m)
 %                               - y : Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
 %                               - z : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
-%               
+%
 % Angle: Shorenormal angle of the locally defined grid (CW from North)
 %
 %
@@ -44,7 +44,7 @@ switch answer2
         [temp_file, temp_file_path] = uigetfile(global_dir, 'Origin grid file');
         load(fullfile(temp_file_path, temp_file)); clear temp_file*
         if size(origin_grid)~=[1 3]
-             origin_grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
+            origin_grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
             origin_grid = double(string(origin_grid));
         end
     case 'No'
@@ -89,13 +89,13 @@ productCounter = 0;
 %                                   - Cross-shore extent (Offshore and Onshore in m from origin)
 %                                   - Alongshore locations of transets (in m from origin) - e.g. -100, 0, 100 OR [-100:100:100]
 %                                   - dx
-%                                   - z elevation 
+%                                   - z elevation
 %                           - yTransect
 %                                   - Frame Rate
 %                                   - Alongshore extent (Southern and Northern edge in m from origin)
 %                                   - Cross-shore locations of transets (in m from origin) - e.g. 50, 100, 200 OR [50:50:200]
 %                                   - dy
-%                                   - z elevation 
+%                                   - z elevation
 %  =====================================================================
 while productFlag == 0
     clear productType Product1 info yy xx info_num

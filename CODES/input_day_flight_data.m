@@ -134,7 +134,7 @@ for dd = 1 : length(day_files)
     %  =============================================================================
 
     % Check if user already has input file with all general drone / products information
-    input_answer = questdlg('Do you have a .mat input data file?','Input Data File', 'Yes', 'No', 'No');
+    input_answer = questdlg('Do you have a .mat configuration file?','Config File', 'Yes - Load it', 'No - Create Now', 'No - Create Now');
     switch input_answer
         case 'Yes'
             disp('Load in day input file.')
@@ -312,7 +312,7 @@ for dd = 1 : length(day_files)
         end % if  ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
 
         % check if csv file was created with metadata - if not install exiftool
-        if ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
+        if ~isfile(fullfile(odir, 'Processed_data', [oname '.csv'])) || isempty(C)
             answer2 = questdlg('Please download and install exiftool before proceeding or create a metadata csv.', '', 'Done', 'Done');
             if  ~isfile(fullfile(odir, 'Processed_data', [oname '.csv']))
                 if ~isempty(drone_file_name)

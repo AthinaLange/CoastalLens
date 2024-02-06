@@ -25,7 +25,7 @@ function [timezone] = select_timezone
 %% Select timezone
 
 cont_areas = [{'Africa'}, {'America'}, {'Antarctica'}, {'Arctic'}, {'Asia'}, {'Atlantic'}, {'Australia'}, {'Europe'}, {'Indian'}, {'Pacific'}, {'All'}, {'UTC'}];
-[ind_area,~] = listdlg('ListString', cont_areas, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?'});
+[ind_area,~] = listdlg('ListString', cont_areas, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which geographic region are you in?', ''});
 if ind_area == 12
     timezone = 'UTC';
 else

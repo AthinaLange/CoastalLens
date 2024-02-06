@@ -98,7 +98,7 @@ if ismac || isunix
     disp('Choose UAV Rectification folder.')
     disp('For Athina: UAV_automated_rectification') %% XXX
 end
-global_dir = uigetdir('.');
+global_dir = uigetdir('.', 'Choose UAV Rectification folder.');
 cd(global_dir)
 setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
 
@@ -177,8 +177,6 @@ end
 %                           - Choose camera intrinsics file (all flights for a given day must be used with the same drone)
 %                           - Grid & transect coordinates for products- can be input or from file
 %                           - GCP for initial camera pose
-%                           - define SCP (if necessary)
-%                           - requries exiftool for metadata
 %  =====================================================================
 input_day_flight_data
 
@@ -192,9 +190,7 @@ extract_images_from_UAV
 %% ====================================================================
 %                           EXTRINSICS THROUGH TIME
 %                           - requires day_files and user_email (if emails wanted)
-%                           - Option 1: Feature Detection (Monocular Visual
-%                           Odometry) - 2D projective transformation
-%                           - Option 2: Stability Control Points (requires bright/dark points)
+%                           - Feature Detection (Monocular Visual Odometry) - 2D projective transformation
 %  =====================================================================
 run_extrinsics
 

@@ -29,7 +29,7 @@ function [xyz, X, Y, Z] = getCoords(Products)
 % Jan 2024;
 
 %% Data
-assert(isa(Products, 'structure'), 'Error (getCoords): Products must be a structure.')
+assert(isa(Products, 'struct'), 'Error (getCoords): Products must be a structure.')
 assert(size(Products,2)==1, 'Error (getCoords): Products must be a single object structure. Pass as Products(pp).')
 
 %%

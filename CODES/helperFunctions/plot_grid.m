@@ -24,7 +24,7 @@ function plot_grid(Products, I, intrinsics, worldPose)
 % Nov 2023;
 
 %% Data
-assert(isa(Products, 'structure'), 'Error (plot_grid): Products must be a structure.')
+assert(isa(Products, 'struct'), 'Error (plot_grid): Products must be a structure.')
 assert(size(Products,2)==1, 'Error (plot_grid): Products must be a single object structure. Pass as Products(pp).')
 assert(isa(I, 'uint8'), 'Error (plot_grid): I must be a uint8 image.')
 assert(isa(intrinsics, 'cameraIntrinsics'), 'Error (plot_grid): intrinsics must be a cameraIntrinsics object.')

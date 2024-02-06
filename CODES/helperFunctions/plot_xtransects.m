@@ -24,7 +24,7 @@ function plot_xtransects(Products, I, intrinsics, worldPose)
 % Nov 2023;
 
 %% Data
-assert(isa(Products, 'structure'), 'Error (plot_xtransects): Products must be a structure.')
+assert(isa(Products, 'struct'), 'Error (plot_xtransects): Products must be a structure.')
 assert(isa(I, 'uint8'), 'Error (plot_xtransects): I must be a uint8 image.')
 assert(isa(intrinsics, 'cameraIntrinsics'), 'Error (plot_xtransects): intrinsics must be a cameraIntrinsics object.')
 assert(isa(worldPose, 'rigidtform3d'), 'Error (plot_xtransects): worldPose must be a rigidtform3d object.')
