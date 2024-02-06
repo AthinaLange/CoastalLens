@@ -44,7 +44,11 @@ assert(isa(options.save_dir, 'char'),'Error (get_metadata): save_dir must be a s
 assert(isfolder(options.save_dir),'Error (get_metadata): save_dir must be the path to the saving folder.');
 
 %% Use exiftool to pull metadata
-system(sprintf('/usr/local/bin/exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s* > %s', odir, options.file_prefix, fullfile(options.save_dir, [oname '.csv'])));
+if ismac
+    system(sprintf('/usr/local/bin/exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s* > %s', odir, options.file_prefix, fullfile(options.save_dir, [oname '.csv'])));
+else
+    system(sprintf('exiftool -filename -CreateDate -Duration -CameraPitch -CameraYaw -CameraRoll -AbsoluteAltitude -RelativeAltitude -GPSLatitude -GPSLongitude -csv -c "%%.20f" %s/%s* > %s', odir, options.file_prefix, fullfile(options.save_dir, [oname '.csv'])));
+end
 
 C = readtable(fullfile(options.save_dir, [oname '.csv']));
 end
