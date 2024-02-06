@@ -15,9 +15,9 @@ function combine_images(data_files, varargin)
 %
 %% Example 1
 %
-% data_files = dir('DATA/20211215_Torrey/01');
-% extract_images(data_files, frameRate = 2)
-% combine_images(data_files, imageDirectory = 'images_2Hz')
+% data_files = dir('DATA/20211215_Torrey/Flight_04');
+% extract_images(data_files, frameRate = 1)
+% combine_images(data_files, imageDirectory = 'DATA/20211215_Torrey/Flight_04/images_1Hz')
 %
 %% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification

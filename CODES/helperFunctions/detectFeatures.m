@@ -14,9 +14,14 @@ function [Points] = detectFeatures(I, Method)
 %
 %
 %% Example 1
-% I = readimage('DATA/20211215_Torrey/01/DJI_0001.JPG');
-% I = im2gray(I);
-% [Points] = detectFeatures(I, 'SIFT');
+% I = imread('DATA/20211215_Torrey/Flight_04/Processed_data/undistortImage.png');
+% [mask] = select_ocean_mask(I);
+% [I_mask] = apply_binary_mask(I, mask);
+% [Points] = detectFeatures(I_mask, 'SIFT');
+% figure
+% image(I)
+% hold on
+% plot(Points)
 %
 %% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
