@@ -6,13 +6,15 @@ Uncrewed aerial vehicles (UAVs) are an important tool for coastal monitoring wit
 
 ## Installation
 Requires MATLAB (min v2022b - for estworldpose function, see [Input Requirements](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Input-Requirements/#GCP) for an alternative if using an older MATLAB version). <br />
+Required MATLAB toolboxes:
+ - Image Processing Toolbox
+ - Computer Vision Toolbox
+ - LiDAR Toolbox (to use pointcloud). <br />
+ 
 Requires [exiftool](https://exiftool.org) (or metadata csv file : See [Input Requirements](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Input-Requirements/)) <br/>
 Requires [ffmpeg](https://ffmpeg.org/download.html). <br/>
 See [Installation Help](https://github.com/AthinaLange/UAV_automated_rectification/wiki/installation_help) for installation guides based on your OS. <br />
-Requires:
-    * Image Processing Toolbox
-    * Computer Vision Toolbox
-    * LiDAR Toolbox (to use pointcloud). <br />
+
 
 ## Getting Started
 Run 'UAV_rectification_v01_2024.m' <br />
@@ -21,8 +23,8 @@ Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 
 You can find more details, including the information you need to run this on your own data in our [wiki](https://github.com/AthinaLange/UAV_automated_rectification/wiki/)!
 
-## Demo (TBD)
-'UAV_rectification_DEMO.m' runs a demo version of the code to compare the new algorithm versus the CIRN Stability Control Points method. This method requires stability control points to be visible within the field of view. 
+## Demo
+'UAV_rectification_DEMO.m' runs a demo version of the code and can be used to compare the new algorithm versus the CIRN Stability Control Points method. This method requires stability control points to be visible within the field of view. 
 
 Data to test the code is provided in the DATA folder and the video can be downloaded [here](https://drive.google.com/file/d/1Qk1q1i75eXTYNB92fwHlcD6Yg7p0FV_W/view?usp=drive_link). Save this video in DATA/20211215_Torrey_Flight_04/.
 
