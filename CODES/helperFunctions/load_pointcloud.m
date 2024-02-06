@@ -9,6 +9,8 @@ function [pc] = load_pointcloud
 %   Returns:
 %           pc (pointcloud) : User-selected pointcloud
 % 
+% Requires: Lidar Toolbox
+%
 %% Citation Info 
 % github.com/AthinaLange/UAV_automated_rectification
 % Nov 2023; 
