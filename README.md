@@ -21,7 +21,7 @@ You can find more details, including the information you need to run this on you
 ## Demo (TBD)
 'UAV_rectification_DEMO.m' runs a demo version of the code to compare the new algorithm versus the CIRN Stability Control Points method. This method requires stability control points to be visible within the field of view. 
 
-Data to test the code is provided in the DATA folder.
+Data to test the code is provided in the DATA folder and the video can be downloaded [here](https://drive.google.com/file/d/1Qk1q1i75eXTYNB92fwHlcD6Yg7p0FV_W/view?usp=drive_link). Save this video in DATA/20211215_Torrey_Flight_04/.
 
 ## Testing
 This toolbox is currently in testing phase on the following systems:
@@ -31,9 +31,9 @@ This toolbox is currently in testing phase on the following systems:
 - DJI Drones
 
 
-
 ## General Folder Structure:
 Please set up your CODES and DATA folder in the following structure. The DATA folder may be located in a different folder than your general path, but must be organized as indicated, with all flights in the relevant day/location folder.
+
 ```bash
 .
 ├── CODES
