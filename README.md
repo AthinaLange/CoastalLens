@@ -16,6 +16,8 @@ Run 'UAV_rectification_v01_2024.m' <br />
 Will run core scripts in CODES/scripts/ <br />
 Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 
+You can find more details, including the information you need to run this on your own data in our [wiki](https://github.com/AthinaLange/UAV_automated_rectification/wiki/)!
+
 ## Demo (TBD)
 'UAV_rectification_DEMO.m' runs a demo version of the code to compare the new algorithm versus the CIRN Stability Control Points method. This method requires stability control points to be visible within the field of view. 
 
