@@ -5,7 +5,7 @@ Developed from the [CIRN Qualitative Coastal Imagining Toolbox](https://github.c
 Uncrewed aerial vehicles (UAVs) are an important tool for coastal monitoring with their relatively low-cost and rapid deployment capabilities. To generate scientific-grade image products, the UAV images/videos must be rectified into world coordinates, requiring GPS-surveyed ground and stability control points throughout the image to obtain the variable UAV extrinsics. Due to the limited stable region of coastal images suitable for control points,  the processing of  UAV-obtained videos can be time-consuming and resource-intensive. The necessity of stability control points increases the time in the field. We develop a new automated UAV rectification tool which utilizes widely available resources, such as airborne-LiDAR surveys and feature-detection algorithms, to reduce the amount of human oversight often required in these rectifications.  An automated rectification tool will allow more efficient processing of the ever-increasing coastal UAV datasets. 
 
 ## Installation
-Requires MATLAB (min v2022b - for estworldpose function, see [[Input Requirements](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Input-Requirements/#GCP) for an alternative if using an older MATLAB version). <br />
+Requires MATLAB (min v2022b - for estworldpose function, see [Input Requirements](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Input-Requirements/#GCP) for an alternative if using an older MATLAB version). <br />
 Requires [exiftool](https://exiftool.org) (or metadata csv file : See [Input Requirements](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Input-Requirements/)) <br/>
 Requires [ffmpeg](https://ffmpeg.org/download.html). <br/>
 See [Installation Help](https://github.com/AthinaLange/UAV_automated_rectification/wiki/installation_help) for installation guides based on your OS. <br />
@@ -30,13 +30,9 @@ This toolbox is currently in testing phase on the following systems:
 - Linux (Ubuntu 22.04.3 LTS), Matlab 2022b
 - DJI Drones
 
-## Recommendations
-### Flight:
-- take pre- and post-video image for additional metadata, including RTK data
-- Toggle distortion correction on
-- Video formats 'MOV', 'MP4', 'TS' (add to metadata section in input_day_flight_data.m)
 
-### General Folder Structure:
+
+## General Folder Structure:
 Please set up your CODES and DATA folder in the following structure. The DATA folder may be located in a different folder than your general path, but must be organized as indicated, with all flights in the relevant day/location folder.
 ```bash
 .
@@ -56,43 +52,31 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 ```
 
 ## Core Scripts
-
 <table>
-<colgroup>
-<col width="17%" />
-<col width="82%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Scripts</th>
-<th>Description</th>
-</tr>
-</thead>
+<colgroup><col width="17%" /><col width="82%" /></colgroup>
+<thead><tr class="header"><th>Scripts</th><th>Description</th></tr></thead>
+  
 <tbody>
-<tr class="odd">
-<td><code>UAV_rectification</code></td>
-<td>The main code. Used to rectify and generate data products for user-selected days. </td>
-</tr>
-<tr class="odd">
-<td><code>input_day_flight_data</code></td>
-<td>Requires user input. Obtains camera intrinsics and initial extrinsics and grid locations to extract products. Requires exiftool. </td>
-</tr>
-<tr class="even">
-<td><code>extract_images_from_UAV</code></td>
-<td>Extracts images from videos. Requires ffmpeg.</td>
-</tr>
-<tr class="odd">
-<td><code>run_extrinsics</code></td>
-<td>Determines changing camera projection using feature detection algorithms (default: SIFT Features). </td>
-</tr>
-<tr class="even">
-<td><code>get_products</code></td>
-<td>Extracts pixels at grid locations from camera projection to generate data products. </td>
-</tr>
+<tr class="odd"><td><code> UAV_rectification </code></td>
+<td>The main code. Used to rectify and generate data products for user-selected days. </td></tr>
+<tr class="even"><td><code>input_day_flight_data</code></td>
+<td> <code>input_day_flight_data</code> returns all user-specified required input data for the UAV_automated_rectification toolbox. </td></tr>
+
+<tr class="odd"><td><code>extract_images_from_UAV</code></td>
+<td><code>extract_images_from_UAV</code> extracts images from video files at specified frame rates for all flights on specified processing days. Requires ffmpeg.</td></tr>
+
+<tr class="even"><td><code>run_extrinsics</code></td>
+<td><code>run_extrinsics</code> returns the 2D projective transformation of the image to prove image stabilization through flight. </td></tr>
+
+<tr class="odd"><td><code>get_products</code></td>
+<td><code>get_products</code> returns extracted image pixel for coordinates of Products. </td></tr>
+
+
 </tbody>
 </table>
 
-### Data Output
+
+## Data Output
 <table>
 <colgroup>
 <col width="17%" />
@@ -109,93 +93,88 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>R</code></td>
+<td><code>R</code> (structure)</td>
 <td> </td>
-<td>Structure: extrinsics information (stored in *_IOEO_*Hz.mat) </td>
+<td>extrinsics & intrinsics information (stored in *_IOEO_*Hz.mat) </td>
 </tr>
 <tr class="even"><td> </td>
-<td><code>intrinsics</code></td>
-<td> cameraIntrinsics - from cameraCalibrator </td>
+<td><code>intrinsics</code>(cameraIntrinsics)</td>
+<td> camera intrinsic as calibrated in the cameraCalibrator tool</td>
+</tr>
+<tr class="even"><td> </td>
+<td><code>I</code> (uint8 image)</td>
+<td> undistorted initial frame </td>
 </tr>
 <tr class="odd"><td> </td>
-<td><code>image_gcp</code></td>
+<td><code>image_gcp</code> (double)</td>
 <td>[n x 2] ground control location in inital frame </td>
 </tr>
 <tr class="even"><td> </td>
-<td><code>world_gcp</code></td>
+<td><code>world_gcp</code> (double)</td>
 <td>[n x 3] ground control location in world coordinate frame (x,y,z) </td>
 </tr>
 <tr class="even"><td> </td>
-<td><code>worldPose</code></td>
-<td>rigidtform3d object - world Pose of camera, based off ground control location</td>
+<td><code>worldPose</code>(rigidtform3d)</td>
+<td>orientation and location of camera in world coordinates, based off ground control location (pose, not extrinsic)</td>
 </tr>
 <tr class="odd"><td> </td>
-<td><code>mask</code></td>
-<td> mask over ocean region - used to speed up computational time </td>
+<td><code>mask</code>(logical)</td>
+<td> mask over ocean region (same dimension as I) - used to speed up computational time (optional) </td>
 </tr>
 <tr class="odd"><td> </td>
-<td><code>extrinsics_2d</code></td>
-<td> projtform2d - 2d projective transformation of image. </td>
+<td><code>feature_method</code>(string)</td>
+<td> feature type to use in feature detection algorithm (default: `SIFT`, must be `SIFT`, `SURF`, `BRISK`, `ORB`, `KAZE`)</td>
+</tr>
+<tr class="odd"><td> </td><td><code>frameRate</code>(double)</td>
+<td> frame rate of extrinsics (Hz)</td></tr>
+<tr class="odd"><td> </td>
+<td><code>extrinsics_2d</code>(projtform2d)</td>
+<td> [1 x m] 2d projective transformation of m images. </td>
 </tr>
 
   
 <tr class="odd">
-<td><code>Products</code></td><td> </td>
-<td>Structure: Data Products (stored in *_Products_*Hz.mat)</td>
+<td><code>Products</code>(structure)</td> <td> </td>
+<td>Data Products (stored in *_Products.mat)</td>
 </tr>
+<tr class="even"><td> </td><td><code>productType</code>(string)</td>
+<td> 'cBathy' , 'Timestack', 'yTransect'</td></tr>
 
-<tr class="even"><td> </td>
-<td><code>productType</code></td>
-<td> string: 'cBathy', 'Timestack', 'yTransect' </td>
-</tr>
-<tr class="odd"><td> </td>
-<td><code>type</code></td>
-<td> string: 'Grid', 'xTransect', 'yTransect' </td>
-</tr>
-<tr class="even"><td> </td>
-<td><code>frameRate</code></td>
-<td> frame rate of product (Hz) </td>
-</tr>
-<tr class="odd"><td> </td>
-<td><code>lat</code></td>
-<td> latitude of origin grid </td>
-</tr>
-<tr class="even"><td> </td>
-<td><code>lon</code></td>
-<td> longitude of origin grid </td>
-</tr>
-<tr class="odd"><td> </td>
-<td><code>angle</code></td>
-<td> shorenormal angle of origin grid (deg CW from North) </td>
-</tr>
-<tr class="even"><td> </td>
-<td><code>t</code></td>
-<td> datetime of images at given extraction rate in UTC. </td>
-</tr>
-<tr class="odd"><td> </td>
-<td><code>xlim / ylim</code></td>
-<td>cross-/along-shore limits (+ is offshore of origin / right of origin looking offshore) (m) </td>
-</tr>
-<tr class="even"><td> </td>
-<td><code>dx/dy</code></td>
-<td> Cross-/along-shore resolution (m) </td>
-</tr>
-<tr class="odd"><td> </td>
-<td><code>x / y</code></td>
-<td> Cross-/along-shore distance from origin (m). Used for transects. </td>
-</tr>
-<tr class="even"><td> </td>
-<td><code>z</code></td>
-<td> Elevation (m in standard reference frame). Can be NaN (will be projected to 0), tide level or DEM. </td>
-</tr>
-<tr class="odd"><td> </td>
-<td><code>localX / localY / localZ</code></td>
-<td> X,Y,Z coordinates of data product in local reference frame (m) </td>
-</tr>
-<tr class="even"><td> </td>
-<td><code>Irgb_2d</code></td>
-<td> Data product</td>
-</tr>
+<tr class="odd"><td> </td><td><code>type</code> (string)</td>
+<td> 'Grid', 'xTransect', 'yTransect' </td></tr>
+
+<tr class="even"><td> </td><td><code>frameRate</code> (double) </td>
+<td> frame rate of product (Hz) </td></tr>
+
+<tr class="odd"><td> </td><td><code>lat</code> (double)</td>
+<td> latitude of origin grid </td></tr>
+
+<tr class="even"><td> </td><td><code>lon</code> (double)</td>
+<td> longitude of origin grid </td></tr>
+
+<tr class="odd"><td> </td><td><code>angle</code> (double)</td>
+<td> shorenormal angle of origin grid (deg CW from North) </td></tr>
+
+<tr class="odd"><td> </td><td><code>xlim / ylim</code> (double)</td>
+<td>cross-/along-shore limits (+ is offshore of origin / right of origin looking offshore) (m)</td></tr>
+
+<tr class="even"><td> </td><td><code>dx/dy</code> (double)</td>
+<td> Cross-/along-shore resolution (m) </td></tr>
+
+<tr class="odd"><td> </td><td><code>x / y</code> (double) </td>
+<td> Cross-/along-shore distance from origin (m). Used for transects. </td></tr>
+
+<tr class="even"><td> </td><td><code>z</code> (double)</td>
+<td> Elevation (m in standard reference f rame). Can be NaN (will be projected to 0), tide level or DEM. </td></tr>
+
+<tr class="even"><td> </td><td><code>t</code> (datetime array)</td>
+<td> [1 x m] datetime of images at given extraction rate in UTC. </td></tr>
+
+<tr class="odd"><td> </td><td><code>localX / localY / localZ</code> (double)</td>
+<td> X,Y,Z coordinates of data product in local reference frame (m) </td></tr>
+
+<tr class="even"><td> </td><td><code>Irgb_2d</code> (uint8 image)</td>
+<td> [m x y_length x x_length x 3] timeseries of pixels extracted according to dimensions of xlim and ylim</td></tr>
 
 </tbody>
 </table>
