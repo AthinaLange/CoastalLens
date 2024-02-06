@@ -56,8 +56,31 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 ```
 
 ## Core Scripts
+<table>
+<colgroup><col width="17%" /><col width="82%" /></colgroup>
+<thead><tr class="header"><th>Scripts</th><th>Description</th></tr></thead>
+  
+<tbody>
+<tr class="odd"><td><code> UAV_rectification </code></td>
+<td>The main code. Used to rectify and generate data products for user-selected days. </td></tr>
+<tr class="even"><td><code>input_day_flight_data</code></td>
+<td> <code>input_day_flight_data</code> returns all user-specified required input data for the UAV_automated_rectification toolbox. </td></tr>
+
+<tr class="odd"><td><code>extract_images_from_UAV</code></td>
+<td><code>extract_images_from_UAV</code> extracts images from video files at specified frame rates for all flights on specified processing days. Requires ffmpeg.</td></tr>
+
+<tr class="even"><td><code>run_extrinsics</code></td>
+<td><code>run_extrinsics</code> returns the 2D projective transformation of the image to prove image stabilization through flight. </td></tr>
+
+<tr class="odd"><td><code>get_products</code></td>
+<td><code>get_products</code> returns extracted image pixel for coordinates of Products. </td></tr>
 
 
+</tbody>
+</table>
+
+
+## Data Output
 <table>
 <colgroup>
 <col width="17%" />
@@ -92,52 +115,6 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 </tr>
 </tbody>
 </table>
-
-## Data Output
-<table>
-<colgroup>
-<col width="17%" />
-<col width="17%" />
-<col width="66%" />
-</colgroup>
-  
-<thead>
-<tr class="header">
-<th>Variable</th>
-<th> Fields </th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>R</code></td>
-<td> </td>
-<td>Structure: extrinsics information (stored in *_IOEO_*Hz.mat) </td>
-</tr>
-<tr class="even"><td> </td>
-<td><code>intrinsics</code></td>
-<td> cameraIntrinsics - from cameraCalibrator </td>
-</tr>
-<tr class="odd"><td> </td>
-<td><code>image_gcp</code></td>
-<td>[n x 2] ground control location in inital frame </td>
-</tr>
-<tr class="even"><td> </td>
-<td><code>world_gcp</code></td>
-<td>[n x 3] ground control location in world coordinate frame (x,y,z) </td>
-</tr>
-<tr class="even"><td> </td>
-<td><code>worldPose</code></td>
-<td>rigidtform3d object - world Pose of camera, based off ground control location</td>
-</tr>
-<tr class="odd"><td> </td>
-<td><code>mask</code></td>
-<td> mask over ocean region - used to speed up computational time </td>
-</tr>
-<tr class="odd"><td> </td>
-<td><code>extrinsics_2d</code></td>
-<td> projtform2d - 2d projective transformation of image. </td>
-</tr>
 
   
 <tr class="odd">
