@@ -53,25 +53,41 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 
 ## Core Scripts
 <table>
-<colgroup><col width="17%" /><col width="82%" /></colgroup>
-<thead><tr class="header"><th>Scripts</th><th>Description</th></tr></thead>
-  
+<colgroup>
+<col width="17%" />
+<col width="82%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Scripts</th>
+<th>Description</th>
+</tr>
+</thead>
 <tbody>
-<tr class="odd"><td><code> UAV_rectification </code></td>
-<td>The main code. Used to rectify and generate data products for user-selected days. </td></tr>
-<tr class="even"><td><code>input_day_flight_data</code></td>
-<td> <code>input_day_flight_data</code> returns all user-specified required input data for the UAV_automated_rectification toolbox. </td></tr>
-
-<tr class="odd"><td><code>extract_images_from_UAV</code></td>
-<td><code>extract_images_from_UAV</code> extracts images from video files at specified frame rates for all flights on specified processing days. Requires ffmpeg.</td></tr>
-
-<tr class="even"><td><code>run_extrinsics</code></td>
-<td><code>run_extrinsics</code> returns the 2D projective transformation of the image to prove image stabilization through flight. </td></tr>
-
-<tr class="odd"><td><code>get_products</code></td>
-<td><code>get_products</code> returns extracted image pixel for coordinates of Products. </td></tr>
-
-
+<tr class="odd">
+<td><code> UAV_rectification </code></td>
+<td>The main code. Used to rectify and generate data products for user-selected days. </td>
+</tr>
+<tr class="odd">
+<td><code>input_day_flight_data</code></td>
+<td> <code>input_day_flight_data</code> returns all user-specified required input data for the UAV_automated_rectification toolbox. </td>
+</tr>
+<tr class="even">
+<td><code>extract_images_from_UAV</code></td>
+<td><code>extract_images_from_UAV</code> extracts images from video files at specified frame rates for all flights on specified processing days. Requires ffmpeg.</td>
+</tr>
+<tr class="odd">
+<td><code>run_extrinsics</code></td>
+<td><code>run_extrinsics</code> returns the 2D projective transformation of the image to prove image stabilization through flight. </td>
+</tr>
+<tr class="even">
+<td><code>get_products</code></td>
+<td><code>get_products</code> returns extracted image pixel for coordinates of Products and saves Timex, Brightest and Darkest image products. </td>
+</tr>
+<tr class="odd">
+<td><code>save_products</code></td>
+<td><code>save_products</code> saves rectified image products from Products in Rectified_images folder. </td>
+</tr>
 </tbody>
 </table>
 
