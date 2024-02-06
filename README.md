@@ -30,13 +30,9 @@ This toolbox is currently in testing phase on the following systems:
 - Linux (Ubuntu 22.04.3 LTS), Matlab 2022b
 - DJI Drones
 
-## Recommendations
-### Flight:
-- take pre- and post-video image for additional metadata, including RTK data
-- Toggle distortion correction on
-- Video formats 'MOV', 'MP4', 'TS' (add to metadata section in input_day_flight_data.m)
 
-### General Folder Structure:
+
+## General Folder Structure:
 Please set up your CODES and DATA folder in the following structure. The DATA folder may be located in a different folder than your general path, but must be organized as indicated, with all flights in the relevant day/location folder.
 ```bash
 .
