@@ -5,7 +5,7 @@ function plot_xtransects(Products, I, intrinsics, worldPose)
 %
 %% Description
 %   Args:
-%           Products (structure) : Single Products object. All necessary variables given in define_xtransect.
+%           Products (structure) : Products object. All necessary variables given in define_xtransect.
 %           I (uint8 image) : Oblique image
 %           intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
 %           worldPose (rigidtform3d) : worldPose of oblique image
@@ -17,7 +17,7 @@ function plot_xtransects(Products, I, intrinsics, worldPose)
 %       ll_to_utm
 %
 %% Example 1
-% plot_xtransects(Products(1), R.I, R.intrinsics, R.worldPose)
+% plot_xtransects(Products, R.I, R.intrinsics, R.worldPose)
 %
 %% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
@@ -50,7 +50,8 @@ for pp = ids_xtransect % repeat for all xtransects
     ylim([0 size(I,1)])
 
     le{jj}= [Products(pp).type ' - x = ' char(string(Products(pp).y)) 'm'];
-
+    
+    set(gca, 'FontSize', 20)
 end % for pp = ids_xtransect 
 legend(le)
 end

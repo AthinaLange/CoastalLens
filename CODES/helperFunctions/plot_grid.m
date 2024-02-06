@@ -38,8 +38,9 @@ iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
 
 %% Plot
 figure(1);clf
-image(I)
+imshow(I)
 hold on
+title('Grid')
 scatter(iP(:,1), iP(:,2), 25, 'filled')
 xlim([0 size(I,2)])
 ylim([0 size(I,1)])
