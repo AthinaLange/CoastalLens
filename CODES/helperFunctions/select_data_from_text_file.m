@@ -19,7 +19,12 @@ function [selected_data] = select_data_from_text_file
 [temp_file, temp_file_path] = uigetfile({'*.txt'}, 'Data File');
 data = load(fullfile(temp_file_path, temp_file)); clear temp_file_path
 
+if ismac
+    Prompt = {'Select data to use', '(command + for multiple)'};
+elseif ispc || isunix
+    Prompt = {'Select data to use', '(Control for multiple)'};
+end
 [selected_ids,~] = listdlg('ListString', arrayfun(@num2str, [1:size(data,1)], 'UniformOutput', false), ...
-    'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Select data to use', '(command + for multiple)'}, 'ListSize', [500 300]);
+    'SelectionMode','multiple', 'InitialValue',1, 'PromptString', Prompt, 'ListSize', [500 300]);
 selected_data = data(selected_ids, :);
 end

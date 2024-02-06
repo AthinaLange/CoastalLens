@@ -231,7 +231,7 @@ if ~exist('Products', 'var') || ~isstruct(Products)
     clear answer
 
 else % if products already defined. Confirm z
-    z = [Products.z];
+    z = extractfield(Products, 'z');
     if length(z) < length(Products) % if not all fields have an elevation, or its empty
         z = double(string(inputdlg({'What projection elevation do you want to use (e.g. tide level)? Set to 0 if tide level unknown, or empty if you want to include a DEM.'}, 'Elevation',1, {num2str(0)})));
         if isnan(z)
@@ -591,7 +591,7 @@ for ff = 1 : length(flights)
     %                           - Projects grid onto inital frame
     %                           - If unhappy, can reinput grid data
     %  ============================================================================
-    ids_grid = find(ismember(string({Products.type}), 'Grid'));
+    ids_grid = find(contains(extractfield(Products, 'type'), 'Grid'));
     for pp = ids_grid % repeat for all grids
         gridChangeIndex = 0; % check grid
         while gridChangeIndex == 0
@@ -617,7 +617,7 @@ for ff = 1 : length(flights)
     %                           - Projects all xTransects onto inital frame
     %                           - If unhappy, can reinput transect data
     %  ============================================================================
-    if ~isempty(find(ismember(string({Products.type}), 'xTransect')))
+    if ~isempty(find(contains(extractfield(Products, 'type'), 'xTransect'), 1))
         gridChangeIndex = 0; % check grid
         while gridChangeIndex == 0
             plot_xtransects(Products, R.I, R.intrinsics, R.worldPose)
@@ -637,13 +637,13 @@ for ff = 1 : length(flights)
         print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_xTransects.png' ]))
 
         clearvars  gridChangeIndex answer origin_grid Product1 productCounter
-    end % if ~isempty(ffind(ismember(string({Products.type}), 'xTransect')))
+    end % if ~isempty(find(contains(extractfield(Products, 'type'), 'xTransect'), 1))
     %% ========================yTransects==========================================
     %                         yTransects
     %                           - Projects all yTransects onto inital frame
     %                           - If unhappy, can reinput transect data
     %  ============================================================================
-    if ~isempty(find(ismember(string({Products.type}), 'yTransect')))
+    if ~isempty(find(contains(extractfield(Products, 'type'), 'yTransect'), 1))
         gridChangeIndex = 0; % check grid
         while gridChangeIndex == 0
             plot_ytransects(Products, R.I, R.intrinsics, R.worldPose)
@@ -663,7 +663,7 @@ for ff = 1 : length(flights)
         print(gcf,'-dpng',fullfile(odir, 'Processed_data', [oname '_yTransects.png' ]))
 
         clearvars  gridChangeIndex answer origin_grid Product1 productCounter
-    end %  if ~isempty(find(ismember(string({Products.type}), 'yTransect')))
+    end %  if ~isempty(find(contains(extractfield(Products, 'type'), 'yTransect'), 1))
 
 
 
@@ -686,9 +686,9 @@ for ff = 1 : length(flights)
 
     %grid_plot{1} = fullfile(odir ,'Processed_data', 'undistortImage.png');
     grid_plot{1} = fullfile(odir ,'Processed_data', 'gcp.png');
-    ids_grid = find(ismember(string({Products.type}), 'Grid'));
-    ids_xtransect = find(ismember(string({Products.type}), 'xTransect'));
-    ids_ytransect = find(ismember(string({Products.type}), 'yTransect'));
+    ids_grid = find(contains(extractfield(Products, 'type'), 'Grid'));
+    ids_xtransect = find(contains(extractfield(Products, 'type'), 'xTransect'));
+    ids_ytransect = find(contains(extractfield(Products, 'type'), 'yTransect'));
 
     for pp = ids_grid
         grid_text{length(grid_text)+1} = sprintf('Type = %s, frameRate = %i Hz, xlim = [%i %i], ylim = [%i %i], (dx,dy) = [%.1f %.1f] m', Products(pp).type, Products(pp).frameRate, Products(pp).xlim(1), Products(pp).xlim(2), Products(pp).ylim(1), Products(pp).ylim(2), Products(pp).dx, Products(pp).dy);

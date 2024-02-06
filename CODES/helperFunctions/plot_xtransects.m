@@ -30,7 +30,7 @@ assert(isa(intrinsics, 'cameraIntrinsics'), 'Error (plot_xtransects): intrinsics
 assert(isa(worldPose, 'rigidtform3d'), 'Error (plot_xtransects): worldPose must be a rigidtform3d object.')
 
 %% Get coordinates and pixel location
-ids_xtransect = find(contains(extractfield(Products, 'type'), 'xTransect'));
+ids_xtransect = find(ismember(string({Products.type}), 'xTransect'));
 
 figure(5);clf
 hold on
