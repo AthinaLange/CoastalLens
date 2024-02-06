@@ -95,10 +95,9 @@ end
 disp(platform)
 
 if ismac || isunix
-    disp('Choose UAV Rectification folder.')
-    disp('For Athina: UAV_automated_rectification') %% XXX
+    disp('Choose root folder - UAV_automated_rectification.')
 end
-global_dir = uigetdir('.', 'Choose UAV Rectification folder.');
+global_dir = uigetdir('.', 'Choose root folder - UAV_automated_rectification.');
 cd(global_dir)
 setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
 
