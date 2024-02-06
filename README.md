@@ -9,7 +9,7 @@ Requires MATLAB (min v2022b - for estworldpose function, see [[Input Requirement
 Requires [exiftool](https://exiftool.org) (or metadata csv file : See [Input Requirements](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Input-Requirements/)) <br/>
 Requires [ffmpeg](https://ffmpeg.org/download.html). <br/>
 See [Installation Help](https://github.com/AthinaLange/UAV_automated_rectification/wiki/installation_help) for installation guides based on your OS. <br />
-Requires XXX MATLAB toolboxes. <br />
+Requires LiDAR MATLAB toolboxes. <br />
 
 ## Getting Started
 Run 'UAV_rectification_v01_2024.m' <br />
