@@ -82,7 +82,7 @@ if ~exist('global_dir', 'var') || ~exist('day_files', 'var') || ~isstruct(day_fi
         data_dir = uigetdir('.', 'DATA Folder');
 
         day_files = dir(data_dir); day_files([day_files.isdir]==0)=[]; day_files(contains({day_files.name}, '.'))=[];
-        [ind_datafiles,~] = listdlg('ListString',{day_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'});
+        [ind_datafiles,~] = listdlg('ListString',{day_files.name}, 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'Which days would you like to process?'}, 'ListSize', [500 300]);
         day_files = day_files(ind_datafiles);
     end
 end % if exist('global_dir', 'var')
@@ -147,7 +147,7 @@ for dd = 1 : length(day_files)
     %                                                    Choose drone system
     %  =============================================================================
     if ~exist('drone_type', 'var') || ~isstring(drone_type)
-        [ind_drone, ~] = listdlg('ListString',[{'DJI'}, {'Other'}], 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'What drone platform was used?'});
+        [ind_drone, ~] = listdlg('ListString',[{'DJI'}, {'Other'}], 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'What drone platform was used?'}, 'ListSize', [500 300]);
         if ind_drone == 1
             drone_type = "DJI";
         else
@@ -351,7 +351,7 @@ for dd = 1 : length(day_files)
         if isempty(jpg_id); jpg_id = mov_id(1); end
 
         % CONFIRM VIDEOS TO PROCESS
-        [id, ~] = listdlg('ListString', append(string(C.FileName(mov_id)), ' - ',  string(C.Duration(mov_id))), 'SelectionMode','multiple', 'InitialValue', [1:length(mov_id)], 'PromptString', {'What movies do you want' 'to use? (command + for multiple)'});
+        [id, ~] = listdlg('ListString', append(string(C.FileName(mov_id)), ' - ',  string(C.Duration(mov_id))), 'SelectionMode','multiple', 'InitialValue', [1:length(mov_id)], 'PromptString', {'What movies do you want' 'to use? (command + for multiple)'}, 'ListSize', [500 300]);
         mov_id = mov_id(id);
 
         save(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C', 'tz')
@@ -390,7 +390,7 @@ for dd = 1 : length(day_files)
             text(3/6, 0.95, 'Distortion Correction OFF', 'FontSize', 14, 'Units', 'normalized', 'HorizontalAlignment','center', 'BackgroundColor', [0.8 0.8 0.8])
             text(5/6, 0.95, 'Distortion Correction ON', 'FontSize', 14, 'Units', 'normalized', 'HorizontalAlignment','center', 'BackgroundColor', [0.8 0.8 0.8])
 
-            [ind_distortion,tf] = listdlg('ListString',[{'Distorted (Off)'}, {'Undistorted (On)'}, {'Recalibrate Camera'}], 'SelectionMode','single', 'InitialValue',2, 'PromptString', {'Distortion correction On/Off?'});
+            [ind_distortion,tf] = listdlg('ListString',[{'Distorted (Off)'}, {'Undistorted (On)'}, {'Recalibrate Camera'}], 'SelectionMode','single', 'InitialValue',2, 'PromptString', {'Distortion correction On/Off?'}, 'ListSize', [500 300]);
             if ind_distortion == 1
                 cameraParams = cameraParams_distorted;
                 clf;imshow(J1); imwrite(J1, fullfile(odir, 'Processed_data', 'undistortImage.png'), 'png')
@@ -410,7 +410,7 @@ for dd = 1 : length(day_files)
             hFig = figure(1);clf
             imshowpair(I,J1, 'montage')
 
-            [ind_distortion,tf] = listdlg('ListString',[{'Correctly calibrated'}, {'Recalibrate Camera'}], 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Is the camera corrected calibrated?'});
+            [ind_distortion,tf] = listdlg('ListString',[{'Correctly calibrated'}, {'Recalibrate Camera'}], 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Is the camera corrected calibrated?'}, 'ListSize', [500 300]);
             if ind_distortion == 1
                 clf;imshow(J1); imwrite(J1, fullfile(odir, 'Processed_data', 'undistortImage.png'), 'png')
             elseif ind_distortion == 2
@@ -436,7 +436,7 @@ for dd = 1 : length(day_files)
         close all
 
         [ind_gcp_option,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'Select GCP targets'}],...
-            'SelectionMode','single', 'InitialValue',2, 'PromptString', {'Initial GCP Method'});
+            'SelectionMode','single', 'InitialValue',2, 'PromptString', {'Initial GCP Method'}, 'ListSize', [500 300]);
 
         if ind_gcp_option == 1 % manual selection from LiDAR
             image_fig = figure(1);clf
@@ -461,7 +461,7 @@ for dd = 1 : length(day_files)
             iGCP = image_gcp; clear image_gcp
             wGCP = world_gcp; clear world_gcp
             [ind_gcp_option2,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'Select GCP targets'}],...
-                'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Requires more GCP points'});
+                'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Requires more GCP points'}, 'ListSize', [500 300]);
 
             if ind_gcp_option2 == 1 % manual selection from LiDAR
                 image_fig = figure(1);clf

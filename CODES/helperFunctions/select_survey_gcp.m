@@ -35,7 +35,7 @@ switch answer2
         [temp_file, temp_file_path] = uigetfile(pwd, 'LiDAR/SfM GCP template');
         load(fullfile(temp_file_path, temp_file)); clear temp_file*
 
-        [ind_survey_pts,~] = listdlg('ListString', arrayfun(@num2str, [1:size(survey_gcp,1)], 'UniformOutput', false), 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'What survey points' 'did you use? (command + for multiple)'});
+        [ind_survey_pts,~] = listdlg('ListString', arrayfun(@num2str, [1:size(survey_gcp,1)], 'UniformOutput', false), 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'What survey points' 'did you use? (command + for multiple)', ''}, 'ListSize', [500 300]);
         aa = survey_gcp(ind_survey_pts,:); clear survey_gcp;
         survey_gcp = aa;
 end % switch answer2
