@@ -57,6 +57,7 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 
 ## Core Scripts
 
+
 <table>
 <colgroup>
 <col width="17%" />
@@ -70,28 +71,27 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>UAV_rectification</code></td>
+<td><code> UAV_rectification </code></td>
 <td>The main code. Used to rectify and generate data products for user-selected days. </td>
 </tr>
 <tr class="odd">
 <td><code>input_day_flight_data</code></td>
-<td>Requires user input. Obtains camera intrinsics and initial extrinsics and grid locations to extract products. Requires exiftool. </td>
+<td> <code>input_day_flight_data</code> returns all user-specified required input data for the UAV_automated_rectification toolbox. </td>
 </tr>
 <tr class="even">
 <td><code>extract_images_from_UAV</code></td>
-<td>Extracts images from videos. Requires ffmpeg.</td>
+<td><code>extract_images_from_UAV</code> extracts images from video files at specified frame rates for all flights on specified processing days. Requires ffmpeg.</td>
 </tr>
 <tr class="odd">
 <td><code>run_extrinsics</code></td>
-<td>Determines changing camera projection using feature detection algorithms (default: SIFT Features). </td>
+<td><code>run_extrinsics</code> returns the 2D projective transformation of the image to prove image stabilization through flight. </td>
 </tr>
 <tr class="even">
 <td><code>get_products</code></td>
-<td>Extracts pixels at grid locations from camera projection to generate data products. </td>
+<td><code>get_products</code> returns extracted image pixel for coordinates of Products. </td>
 </tr>
 </tbody>
 </table>
-
 ### Data Output
 <table>
 <colgroup>
