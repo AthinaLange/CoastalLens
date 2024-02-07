@@ -133,8 +133,7 @@ for dd = 1 : length(day_files)
                 [extrinsics] = get_extrinsics_fd(images, R.intrinsics);
             end %  if isfield(R, 'mask') && ~isfield(R, 'feature_method')
             % Create the panorama.
-            images.Files = images.Files(1:extract_Hz(hh):end);
-            [panorama] = plot_panorama(images, R.intrinsics, extrinsics(1:extract_Hz(hh):end));
+            [panorama] = plot_panorama(images, R.intrinsics, extrinsics);
             %  Save File
             figure(1);clf
             imshow(panorama)
