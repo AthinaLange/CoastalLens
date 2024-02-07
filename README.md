@@ -17,7 +17,7 @@ See [Installation Help](https://github.com/AthinaLange/UAV_automated_rectificati
 
 
 ## Getting Started
-Run 'UAV_rectification_v01_2024.m' <br />
+Run 'UAV_rectification.m' <br />
 Will run core scripts in CODES/scripts/ <br />
 Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 
