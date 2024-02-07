@@ -686,7 +686,7 @@ for dd = 2 : length(day_files)
         %                           - Products
         %  ============================================================================
         info = double(string(inputdlg({ 'z elevation (tide level in relevant datum)'}, 'Tide elevation')));
-        [Products.z]=deal(info);
+        [Products.tide]=deal(info);
         save(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
         
         clear grid_text grid_plot
