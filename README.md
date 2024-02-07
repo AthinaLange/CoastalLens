@@ -24,7 +24,7 @@ Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 You can find more details, including the information you need to run this on your own data in our [wiki](https://github.com/AthinaLange/UAV_automated_rectification/wiki/)!
 
 ## Demo
-'UAV_rectification_DEMO.m' runs a demo version of the code and can be used to compare the new algorithm versus the CIRN Stability Control Points method. This method requires stability control points to be visible within the field of view. 
+'UAV_rectification_DEMO.m' runs a demo version of the code and can also be used to compare the new algorithm versus the CIRN Stability Control Points method. This method requires stability control points to be visible within the field of view. 
 
 Data to test the code is provided in the DATA folder and the video can be downloaded [here](https://drive.google.com/file/d/1Qk1q1i75eXTYNB92fwHlcD6Yg7p0FV_W/view?usp=drive_link). Save this video in DATA/20211215_Torrey_Flight_04/.
 
