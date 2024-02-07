@@ -186,7 +186,10 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 <td> Cross-/along-shore distance from origin (m). Used for transects. </td></tr>
 
 <tr class="even"><td> </td><td><code>z</code> (double)</td>
-<td> Elevation (m in standard reference f rame). Can be NaN (will be projected to 0), tide level or DEM. </td></tr>
+<td> Elevation (m in standard reference frame). Can be NaN (will be projected to 0)or DEM. </td></tr>
+
+<tr class="even"><td> </td><td><code>tide</code> (double)</td>
+<td> Tide level (m in standard reference frame). </td></tr>
 
 <tr class="even"><td> </td><td><code>t</code> (datetime array)</td>
 <td> [1 x m] datetime of images at given extraction rate in UTC. </td></tr>
