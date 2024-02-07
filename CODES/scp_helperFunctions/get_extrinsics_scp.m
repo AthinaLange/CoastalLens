@@ -1,6 +1,5 @@
 function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, extrinsics, intrinsics, t, cameraParams)
-%
-%  get camera extrinsics using stability control points (following CIRN F)
+%  get_extrinsics_scp returns camera extrinsics using stability control points (following CIRN F)
 %
 %% Syntax
 % 
@@ -24,9 +23,6 @@ function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, 
 %
 %  computes change in [x y z azimuth tilt and roll] for every image based
 %  on least-squares optimization of scp location shifts between frames. 
-%
-%
-%% Example 1
 %
 %% Citation Info 
 % github.com/AthinaLange/UAV_automated_rectification
@@ -218,14 +214,6 @@ function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, 
                 end
                 print(f2, '-dpng', fullfile(odir, 'Processed_data', ['scp_time_' char(string(extract_Hz)) 'Hz.png']))
 
-
-
-% function pauseLoop(src, ~)
-% if strcmp(get(src, 'UserData'), 'pause')
-%     set(src, 'UserData', 'resume', 'String', 'Pause');
-% else
-%     set(src, 'UserData', 'pause', 'String', 'Resume');
-% end
 end
 
 

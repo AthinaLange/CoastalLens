@@ -1,5 +1,4 @@
 %% UAV_automated_rectification toolbox
-%
 %   1. Housekeeping
 %           Global Directory Selection: Asks the user to choose the root directory for UAV rectification.
 %           Directory Checking: Checks if required code directories and MATLAB toolboxes exist, prompting the user to download them if not. Adds required code directories to MATLAB's search path
@@ -17,6 +16,59 @@
 %           ARGUS Products: Create Timex, Bright, Dark products
 %   6. Save Products (optional)
 %           Save all rectified images as PNGs.
+%
+%% Description
+%
+%   Returns:
+%           R (structure) : extrinsics/intrinsics information
+%                       intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
+%                       I (uint8 image) : undistorted initial frame
+%                       world_gcp (double) : [n x 3] ground control location in world coordinate frame (x,y,z)
+%                       image_gcp (double) : [n x 2] ground control location in inital frame
+%                       worldPose (rigidtform3d) : orientation and location of camera in world coordinates, based off ground control location (pose, not extrinsic)
+%                       mask (logical) : mask over ocean region (same dimensions as image) - used to speed up computational time (optional)
+%                       feature_method (string): feature type to use in feature detection algorithm (default: `SIFT`, must be `SIFT`, `SURF`, `BRISK`, `ORB`, `KAZE`) (optional)
+%                       frameRate (double) : frame rate of extrinsics (Hz)
+%                       t (datetime array) : [1 x m] datetime of images at various extraction rates in UTC
+%                       extrinsics_2d (projtform2d) : [1 x m] 2d projective transformation of m images
+%           Products (structure) : Data products
+%                       type (string) : 'Grid', 'xTransect', 'yTransect'
+%                       frameRate (double) : frame rate of product (Hz)
+%                       lat (double) : latitude of origin grid
+%                       lon (double): longitude of origin grid
+%                       angle (double): shorenormal angle of origid grid (degrees CW from North)
+%                       xlim (double): [1 x 2] cross-shore limits of grid (+ is offshore of origin) (m)
+%                       ylim (double) : [1 x 2] along-shore limits of grid (+ is to the right of origin looking offshore) (m)
+%                       dx (double) : Cross-shore resolution (m)
+%                       dy (double) : Along-shore resolution (m)
+%                       x (double): Cross-shore distance from origin (+ is offshore of origin) (m)
+%                       y (double): Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
+%                       z (double) : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%                       t (datetime array) : [1 x m] datetime of images at given extraction rates in UTC
+%                       localX (double) : [y_length x x_length] x coordinates in locally-defined coordinate system
+%                       localY (double) : [y_length x x_length] y coordinates in locally-defined coordinate system
+%                       localZ (double) : [y_length x x_length] z coordinates in locally-defined coordinate system
+%                       Irgb_2d (uint8 image) : [m x y_length x x_length x 3] timeseries of pixels extracted according to dimensions of xlim and ylim
+%
+%
+%% Function Dependenies
+% input_day_flight_data
+% extract_images_from_UAV
+% run_extrinsics
+% get_products
+% save_products
+%
+%% Required Toolbox
+%   - Image Processing Toolbox
+%   - Computer Vision Toolbox
+%   - Lidar Toolbox (for pointcloud option)
+%
+%   - ffmpeg (https://ffmpeg.org)
+%   - exiftool (https://exiftool.org)
+%
+%% Citation Info
+% github.com/AthinaLange/UAV_automated_rectification
+% Jan 2024;
 
 %% ====================================================================
 %                          Housekeeping
