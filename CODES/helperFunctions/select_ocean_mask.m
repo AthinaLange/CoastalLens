@@ -20,7 +20,7 @@ function [mask] = select_ocean_mask(I)
 assert(isa(I, 'uint8'), 'Error (select_ocean_mask): I must be an image.')
 %%
 [m,n,~]=size(I);
-hFig = figure(1);clf
+figure(1);clf
 image(I)
 xticks([])
 yticks([])
@@ -32,7 +32,7 @@ a = drawpoint();
 zoom out
 pointhandles(1,:) = a.Position;
 delete(rec1)
-rec1 = rectangle('Position', [n-n/20 1 n/20 m], 'EdgeColor', 'red', 'LineWidth', 3);
+rectangle('Position', [n-n/20 1 n/20 m], 'EdgeColor', 'red', 'LineWidth', 3);
 a = drawpoint();
 zoom out
 pointhandles(2,:) = a.Position;

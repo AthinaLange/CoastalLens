@@ -33,7 +33,7 @@ rank = zeros(1, nfiles);
 for i=1:nfiles
 	if (ios == 0)
 
-         	if (xlat <= glamx(i) & xlat >= glamn(i) & xlon <= glomx(i) & xlon >= glomn(i) )
+         	if (xlat <= glamx(i) && xlat >= glamn(i) && xlon <= glomx(i) && xlon >= glomn(i) )
 
 			%% - At this point, we're Inside a grid
 	
@@ -65,20 +65,36 @@ for i=1:nfiles
           		end
           
           		%%%if(.not.ne .and. .not.se .and. .not.we .and. .not.ee)then
-          		if (~ne & ~se & ~we & ~ee)
+          		if (~ne && ~se && ~we && ~ee)
             			k = i;
             			return;
           		end
          
 			%% - Set the rank of this file, based on edge-logic
-          		if (ne & ~we & ~ee) rank(i) = 2; end
-          		if (se & ~we & ~ee) rank(i) = 2; end
-          		if (we & ~ne & ~se) rank(i) = 2; end
-          		if (ee & ~ne & ~se) rank(i) = 2; end
-          		if (ne & we) rank(i) = 1; end
-          		if (se & we) rank(i) = 1; end
-          		if (se & ee) rank(i) = 1; end
-          		if (ne & ee) rank(i) = 1; end
+          		if (ne && ~we && ~ee)
+                    rank(i) = 2;
+                end
+          		if (se && ~we && ~ee)
+                    rank(i) = 2; 
+                end
+          		if (we && ~ne && ~se)
+                    rank(i) = 2; 
+                end
+          		if (ee && ~ne && ~se)
+                    rank(i) = 2; 
+                end
+          		if (ne && we)
+                    rank(i) = 1; 
+                end
+          		if (se && we)
+                    rank(i) = 1; 
+                end
+          		if (se && ee)
+                    rank(i) = 1; 
+                end
+          		if (ne && ee)
+                    rank(i) = 1; 
+                end
 
         	end
 
@@ -93,14 +109,14 @@ end
 %% - had a rank of 3.  So now, see if we have any rank 2
 %% - or rank 1 files to use.
 for i=1:nfiles
-       	if (ios == 0 & rank(i) == 2)
+       	if (ios == 0 && rank(i) == 2)
           	k = i;
           	return;
 	end
 end
 
 for i=1:nfiles
-       	if (ios == 0 & rank(i) == 1)
+       	if (ios == 0 && rank(i) == 1)
           	k = i;
           	return;
         end

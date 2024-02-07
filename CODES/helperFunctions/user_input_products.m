@@ -43,8 +43,8 @@ switch answer2
         disp('Please load in origin grid file.')
         disp('For DEMO: under data_files/origin_Torrey.mat') %% XXX
         [temp_file, temp_file_path] = uigetfile(global_dir, 'Origin grid file');
-        load(fullfile(temp_file_path, temp_file)); clear temp_file*
-        if size(origin_grid)~=[1 3]
+        load(fullfile(temp_file_path, temp_file), 'origin_grid'); clear temp_file*
+        if length(origin_grid,2) ~= 3
             origin_grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
             origin_grid = double(string(origin_grid));
         end
@@ -101,7 +101,7 @@ productCounter = 0;
 while productFlag == 0
     clear productType Product1 info yy xx info_num
     productCounter = productCounter + 1;
-    [productType_ind,tf] = listdlg('ListString',{'Grid (cBathy/Rectified Image)', 'xTransect (Timestack)', 'yTransect', 'Other (Not recommended)'}, 'SelectionMode','single', 'InitialValue',[1], 'Name', 'What product do you want to create?', 'ListSize', [500 300]);
+    [productType_ind,~] = listdlg('ListString',{'Grid (cBathy/Rectified Image)', 'xTransect (Timestack)', 'yTransect', 'Other (Not recommended)'}, 'SelectionMode','single', 'InitialValue',1, 'Name', 'What product do you want to create?', 'ListSize', [500 300]);
 
     % ============================== GRID =======================================
     if productType_ind == 1
@@ -137,5 +137,6 @@ switch answer4
         info = inputdlg({'Filename to be saved'});
         disp('Location where Products file to be saved.')
         temp_file_path = uigetdir(global_dir, 'Products file save location');
+        [Products.z] = deal([]);
         save(fullfile(temp_file_path, [info{1} '.mat']), 'Products', 'origin_grid')
 end % switch answer4

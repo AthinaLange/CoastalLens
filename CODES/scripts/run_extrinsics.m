@@ -116,7 +116,7 @@ for dd = 1 : length(day_files)
             to = datetime(string(C.CreateDate(mov_id(1))), 'InputFormat', 'yyyy:MM:dd HH:mm:ss', 'TimeZone', tz);
             to.TimeZone = 'UTC';
             to = datenum(to);
-            t = (dts./24./3600).*([1:length(images.Files)]-1)+ to;
+            t = (dts./24./3600).*((1:length(images.Files))-1)+ to;
             R.t = datetime(t, 'ConvertFrom', 'datenum', 'TimeZone', 'UTC');
 
             %% GET EXTRINSICS

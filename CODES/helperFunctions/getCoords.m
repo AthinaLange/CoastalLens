@@ -57,13 +57,13 @@ if contains(Products.type, 'Grid')
 elseif contains(Products.type, 'xTransect')
     ixlim = x2 - Products.xlim;
     iy = y2 + Products.y;
-    X = [ixlim(1):Products.dx:ixlim(2)]';
+    X = (ixlim(1):Products.dx:ixlim(2))';
     Y = X.*0+iy;
 elseif contains(Products.type, 'yTransect')
     if Products.x < 0; Products.x = -Products.x; end
     ix = x2 - Products.x;
     iylim = y2 + Products.ylim;
-    Y = [iylim(1):Products.dy:iylim(2)]';
+    Y = (iylim(1):Products.dy:iylim(2))';
     X = Y.*0 + ix;
 end % if contains(Products.type, 'Grid')
 

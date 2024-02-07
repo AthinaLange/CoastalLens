@@ -67,8 +67,8 @@ zgeoid = -1*ones(1, npts);
 
 for m=1:nfiles
 	df = find(kval == m);
-   if (length(df) > 0)
-      fprintf(1, '%d points to find geoid value...\n', length(df));
+   if ~isempty(df)
+       fprintf(1, '%d points to find geoid value...\n', length(df));
 %		[C, nc] = fread(lin(k), 'float32'); %Old GEOID99 version
 		[C, nc] = fread(lin(k), 'float32','l');
 		[Cr] = reshape(C, nlo(k), nla(k));

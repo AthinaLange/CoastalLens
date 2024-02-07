@@ -184,12 +184,12 @@ for dd = 1 : length(day_files)
                         cameraParams = cameraIntrinsics([intrinsics(5) intrinsics(6)], [intrinsics(3) intrinsics(4)], [intrinsics(2) intrinsics(1)], 'RadialDistortion', [intrinsics(7) intrinsics(8) intrinsics(9)], 'TangentialDistortion', [intrinsics(10) intrinsics(11)]);
                     else % otherwise check that class is cameraIntrinsics
                         if exist('cameraParams', 'var')
-                            assert(isa(cameraParams,'cameraParameters') || isa(cameraParams, 'cameraIntrinsics'), 'Error (input_day_flight_data): Please install the Computer Vision Toolbox and rerun.'
+                            assert(isa(cameraParams,'cameraParameters') || isa(cameraParams, 'cameraIntrinsics'), 'Error (input_day_flight_data): Please install the Computer Vision Toolbox and rerun.')
                             if isa(cameraParams, 'cameraParameters')
                                 cameraParams = cameraParams.Intrinsics;
                             end %  if isa(cameraParams, 'cameraParameters')
                         else
-                            assert(isa(cameraParams_undistorted, 'cameraParameters') || isa(cameraParams_undistorted,'cameraIntrinsics'), 'Error (input_day_flight_data): Please install the Computer Vision Toolbox and rerun.'
+                            assert(isa(cameraParams_undistorted, 'cameraParameters') || isa(cameraParams_undistorted,'cameraIntrinsics'), 'Error (input_day_flight_data): Please install the Computer Vision Toolbox and rerun.')
                             if isa(cameraParams_undistorted, 'cameraParameters')
                                 cameraParams_undistorted = cameraParams_undistorted.Intrinsics;
                             end %  if isa(cameraParams_undistorted, 'cameraParameters')

@@ -33,9 +33,9 @@ switch answer2
     case 'Yes'
         disp('Load in LiDAR/SfM gcp template.')
         [temp_file, temp_file_path] = uigetfile(pwd, 'LiDAR/SfM GCP template');
-        load(fullfile(temp_file_path, temp_file)); clear temp_file*
+        load(fullfile(temp_file_path, temp_file), 'survey_gcp'); clear temp_file*
 
-        [ind_survey_pts,~] = listdlg('ListString', arrayfun(@num2str, [1:size(survey_gcp,1)], 'UniformOutput', false), 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'What survey points' 'did you use? (command + for multiple)', ''}, 'ListSize', [500 300]);
+        [ind_survey_pts,~] = listdlg('ListString', arrayfun(@num2str, 1:size(survey_gcp,1), 'UniformOutput', false), 'SelectionMode','multiple', 'InitialValue',1, 'PromptString', {'What survey points' 'did you use? (command + for multiple)', ''}, 'ListSize', [500 300]);
         aa = survey_gcp(ind_survey_pts,:); clear survey_gcp;
         survey_gcp = aa;
 end % switch answer2
@@ -64,10 +64,10 @@ if ~exist('survey_gcp', 'var') || size(survey_gcp,2) ~= 3
             [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig);
 
             % plot LiDAR/SfM gcps
-            main_fig
+            main_fig;
             ptCloudOut = pcdownsample(pc, 'random', 50000/pc.Count);
 
-            ax=pcshow(ptCloudOut);
+            pcshow(ptCloudOut);
             hold on
             colorbar
             clim([0 20])

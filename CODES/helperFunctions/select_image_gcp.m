@@ -44,19 +44,6 @@ while true
     end % if (floor(a.Position(1)) == 0 || floor(a.Position(1)) == size(I,2) || floor(a.Position(2)) == 0 || floor(a.Position(2)) == size(I,1))
 end % while true
 pointhandles(1,:)=[];
-if size(pointhandles,1) < 4
-    while true
-        zoom on
-        % Wait for user to click a point
-        a = drawpoint(ax);
-        zoom out
-        if (floor(a.Position(1)) == 0 || floor(a.Position(1)) == size(I,2) || floor(a.Position(2)) == 0 || floor(a.Position(2)) == size(I,1))
-            break;  % Exit the loop when Enter is pressed
-        else
-            pointhandles(end+1,:) = a.Position;
-        end % if (floor(a.Position(1)) == 0 || floor(a.Position(1)) == size(I,2) || floor(a.Position(2)) == 0 || floor(a.Position(2)) == size(I,1))
-    end % while true
-end % if size(pointhandles,1) < 4
 
 clear h
 cla(ax)

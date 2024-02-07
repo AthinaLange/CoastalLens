@@ -35,7 +35,6 @@ function [extrinsics] = get_extrinsics_fd( images, intrinsics, varargin)
 assert(strcmp(class(images), 'matlab.io.datastore.ImageDatastore'), 'Error (get_extrinsics_fd): images must be a ImageDatastore object.')
 assert(isa(intrinsics, 'cameraIntrinsics'), 'Error (get_extrinsics_fd): intrinsics must be a cameraIntrinsics object.')
 
-viewId = 1;
 I = im2gray(undistortImage(readimage(images, 1), intrinsics));
 [m, n, ~] = size(I);
 
@@ -66,7 +65,6 @@ for viewId = 2:length(images.Files)
     I = im2gray(undistortImage(readimage(images, viewId), intrinsics));
 
     [I] = apply_binary_mask(I, options.mask);
-    imageSize(viewId,:) = size(I);
 
     % Detect and extract SURF features for I(n).
     [currPoints] = detectFeatures(I, options.Method);

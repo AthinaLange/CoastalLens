@@ -47,7 +47,7 @@ info = inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (+m from Origin
 answer = questdlg('Do you want to include a DEM?', 'DEM file', 'Yes', 'No', 'Yes');
 
 % check that there's a value in all the required fields
-if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
+if ~isempty(find(isnan(double(string(info([1 2 3 5])))), 1))
     disp('Please fill out all boxes (except z elevation if necessary)')
     info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin, + is offshore)', ...
         'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]',...
@@ -80,7 +80,7 @@ switch answer
     case 'No'
         Z = repmat(double(string(info(6))), length(yy),1);
     case 'Yes'
-        X_line = -[Product.xlim(1):Product.dx:Product.xlim(2)];
+        X_line = -(Product.xlim(1):Product.dx:Product.xlim(2));
         Y_line = yy;
         [X,Y] = meshgrid(X_line,Y_line);
 

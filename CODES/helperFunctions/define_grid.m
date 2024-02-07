@@ -76,8 +76,8 @@ switch answer
     case 'No'
         Product.z = info(8);
     case 'Yes'
-        X_line = [Product.xlim(1):-Product.dx:Product.xlim(2)];
-        Y_line = [Product.ylim(1):Product.dy:Product.ylim(2)];
+        X_line = Product.xlim(1):-Product.dx:Product.xlim(2);
+        Y_line = Product.ylim(1):Product.dy:Product.ylim(2);
         [X,Y] = meshgrid(X_line,Y_line);
 
         disp('Load in DEM file')

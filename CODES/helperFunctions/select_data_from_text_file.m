@@ -24,7 +24,7 @@ if ismac
 elseif ispc || isunix
     Prompt = {'Select data to use', '(Control for multiple)'};
 end
-[selected_ids,~] = listdlg('ListString', arrayfun(@num2str, [1:size(data,1)], 'UniformOutput', false), ...
+[selected_ids,~] = listdlg('ListString', arrayfun(@num2str, 1:size(data,1), 'UniformOutput', false), ...
     'SelectionMode','multiple', 'InitialValue',1, 'PromptString', Prompt, 'ListSize', [500 300]);
 selected_data = data(selected_ids, :);
 end

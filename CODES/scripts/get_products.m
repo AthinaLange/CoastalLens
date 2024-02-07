@@ -136,7 +136,7 @@ for  dd = 1 : length(day_files)
                 to = datetime(string(C.CreateDate(mov_id(1))), 'InputFormat', 'yyyy:MM:dd HH:mm:ss', 'TimeZone', tz);
                 to.TimeZone = 'UTC';
                 to = datenum(to);
-                t = (dts./24./3600).*([1:length(images.Files)]-1)+ to;
+                t = (dts./24./3600).*((1:length(images.Files))-1)+ to;
                 R.t = datetime(t, 'ConvertFrom', 'datenum', 'TimeZone', 'UTC');
                 clear dts to C mov_id tz t
             end %  if ~isfield(R, 't')
@@ -167,7 +167,9 @@ for  dd = 1 : length(day_files)
             clear imageSize xlim ylim xMin xMax yMin yMax width height xLimits yLimits
             %% =========================== Products ==================================
             for viewId = 1:length(images.Files)
-                viewId
+                if rem(viewId, 30/(1/extract_Hz(hh))) == 0 % show viewId every 30 sec
+                    fprintf('viewId = %i\n', viewId)
+                end % if rem(viewId, 30/(1/extract_Hz(hh))) == 0
                 I = imwarp(undistortImage(readimage(images, viewId), R.intrinsics), R.extrinsics_2d(viewId), 'OutputView', panoramaView);
                 for pp = 1:length(Products)
                     if extract_Hz(hh)== Products(pp).frameRate || rem(extract_Hz(hh),Products(pp).frameRate) == 0 % if sampleRate = frameRate or can be subsampled from frameRate
@@ -237,23 +239,23 @@ for  dd = 1 : length(day_files)
                     iTimex=uint8(iTimex./length(images.Files));
                 end
 
-        end % for viewId = 1:length(images.Files)
-        imwrite(iTimex, fullfile(odir, 'Processed_data', 'Timex.png'))
-        imwrite(iBright, fullfile(odir, 'Processed_data', 'Brightest.png'))
-        imwrite(iDark, fullfile(odir, 'Processed_data', 'Darkest.png'))
-        Products = rmfield(Products, 'iP');
+            end % for viewId = 1:length(images.Files)
+            imwrite(iTimex, fullfile(odir, 'Processed_data', 'Timex.png'))
+            imwrite(iBright, fullfile(odir, 'Processed_data', 'Brightest.png'))
+            imwrite(iDark, fullfile(odir, 'Processed_data', 'Darkest.png'))
+            Products = rmfield(Products, 'iP');
 
-        for pp = 1:length(Products)
-            Products(pp).Irgb_2d=Products(pp).Irgb_2d(1:extract_Hz(hh)/Products(pp).frameRate:end,:,:,:);
-            % Products(pp).Irgb_scp=Products(pp).Irgb_scp(1:extract_Hz(hh)/Products(pp).frameRate:end,:,:,:);
-            Products(pp).t=Products(pp).t(1:extract_Hz(hh)/Products(pp).frameRate:end);
-        end %  for pp = 1:length(Products)
+            for pp = 1:length(Products)
+                Products(pp).Irgb_2d=Products(pp).Irgb_2d(1:extract_Hz(hh)/Products(pp).frameRate:end,:,:,:);
+                % Products(pp).Irgb_scp=Products(pp).Irgb_scp(1:extract_Hz(hh)/Products(pp).frameRate:end,:,:,:);
+                Products(pp).t=Products(pp).t(1:extract_Hz(hh)/Products(pp).frameRate:end);
+            end %  for pp = 1:length(Products)
 
-        save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '-append')
+            save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '-append')
 
 
-    end % for hh = 1 : length(extract_Hz)
-end %  for ff = 1 : length(flights)
+        end % for hh = 1 : length(extract_Hz)
+    end %  for ff = 1 : length(flights)
 end % for  dd = 1 : length(day_files)
 %%
 

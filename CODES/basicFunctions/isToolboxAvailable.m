@@ -21,7 +21,7 @@ if nargin < 1 || nargin > 2
     error('usage: isToolboxAvailable(toolboxName,action)');
 elseif nargin == 1
     action = 'warning';
-end;
+end
 %% Find the toolbox and give proper output
 v_=ver;
 [installedToolboxes{1:length(v_)}] = deal(v_.Name);

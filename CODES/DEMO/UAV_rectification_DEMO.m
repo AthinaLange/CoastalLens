@@ -181,7 +181,7 @@ end
 %                           - Grid & transect coordinates for products- can be input or from file
 %                           - GCP for initial camera pose
 %  =====================================================================
-input_day_flight_data
+input_day_flight_data_DEMO
 
 %% ====================================================================
 %                           EXTRACT IMAGES
@@ -195,13 +195,13 @@ extract_images_from_UAV
 %                           - requires day_files and user_email (if emails wanted)
 %                           - Feature Detection (Monocular Visual Odometry) - 2D projective transformation
 %  =====================================================================
-run_extrinsics
+run_extrinsics_DEMO
 
 %% ====================================================================
 %                           EXTRACT PRODUCTS
 %                           - requires day_files and user_email (if emails wanted)
 %  =====================================================================
-get_products
+get_products_DEMO
 
 %% ====================================================================
 %                           SAVE PRODUCTS
@@ -210,5 +210,5 @@ get_products
 input_answer = questdlg('Do you want to save all the rectified images?','Save images', 'Yes', 'No', 'Yes');
 switch input_answer
     case 'Yes'
-        save_products
+        save_products_DEMO
 end % switch input_answer

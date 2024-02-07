@@ -31,19 +31,7 @@ assert(length(gcp_num) == 1, 'Error (select_pointcloud_gcp): gcp_num must be a s
 assert(strcmp(class(main_fig), 'matlab.ui.Figure'), 'Error (select_pointcloud_gcp): main_fig must be a figure handle.')
 assert(strcmp(class(zoom_fig), 'matlab.ui.Figure'), 'Error (select_pointcloud_gcp): zoom_fig must be a figure handle.')
 
-%% Get pointcloud points
-Points = pc.Location;
-if ~isempty(pc.Color)
-    cPoints = pc.Color;
-    if contains(class(cPoints), 'uint16')
-        cPoints = double(cPoints) / 65535;
-    end %  if contains(class(cPoints), 'uint16')
-else
-    cPoints = Points(:,3);
-end % if ~isempty(pc.Color)
-
 %% Select GCP points from pointcloud
-
 ptCloudOut = pcdownsample(pc, 'random', 50000/pc.Count); % downsample to avoid computer crashing
 
 ax2 = axes('Parent', main_fig);
@@ -56,7 +44,7 @@ for ii = 1:gcp_num % repeat for all gcps
     % find smaller region for specific gcp
     figure(main_fig)
     zoom on
-    c = uicontrol('String','Continue','Callback','uiresume(main_fig)');
+    uicontrol('String','Continue','Callback','uiresume(main_fig)');
     draw(h)
     disp('Place cuboid over area of GCP and click ''Continue''.')
     uiwait(main_fig)
@@ -73,11 +61,11 @@ for ii = 1:gcp_num % repeat for all gcps
     while contains(answer , 'Reselect')
         figure(zoom_fig)
         [selectedPoint, zoom_fig] = select_pcshow_point(pc_small, zoom_fig);
-        pcshow(pc_small);hold on
-        scatter3(selectedPoint(1), selectedPoint(2), selectedPoint(3), 100, 'r', 'filled')
-        set(gca, 'Xlim', [selectedPoint(1)-25 selectedPoint(1)+25], 'Ylim', [selectedPoint(2)-25 selectedPoint(2)+25])
+        pcshow(pc_small, 'Parent', ax3);hold on
+        scatter3(selectedPoint(1), selectedPoint(2), selectedPoint(3), 100, 'r', 'filled', 'Parent', ax3)
+        set(ax3, 'Xlim', [selectedPoint(1)-25 selectedPoint(1)+25], 'Ylim', [selectedPoint(2)-25 selectedPoint(2)+25])
         disp('Check if GCP is in the correct position. After rotating click ''See GCP?''.')
-        c2 = uicontrol('String','See GCP?','Callback','uiresume(zoom_fig)');
+        uicontrol('String','See GCP?','Callback','uiresume(zoom_fig)');
         uiwait(zoom_fig)
         answer = questdlg('Are you happy with the point or do you want to reselect?','Happy with point', 'Yes', 'Reselect', 'Yes');
     end % while contains(answer , 'Reselect')
@@ -88,7 +76,7 @@ end % for ii = 1:gcp_num
 %close(main_fig)
 close(zoom_fig)
 %%
-main_fig
+main_fig;
 pcshow(ptCloudOut, 'Parent', ax2);
 hold on
 scatter3(selectedPoints(:,1), selectedPoints(:,2), selectedPoints(:,3), 100, 'r', 'filled', 'Parent', ax2)
