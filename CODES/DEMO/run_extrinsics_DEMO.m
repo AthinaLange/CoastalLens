@@ -13,6 +13,9 @@
 %                       intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
 %                       mask (logical) : mask over ocean region (same dimensions as image) - used to speed up computational time (optional)
 %                       feature_method (string): feature type to use in feature detection algorithm (default: `SIFT`, must be `SIFT`, `SURF`, `BRISK`, `ORB`, `KAZE`) (optional)
+%                       intrinsics_CIRN (double): [1 x 11] array of camera intrinisc parameters as defined in the CIRN convention ()
+%                       extrinsics_scp (double): [1 x 6] (x y z aximuth tilt roll) arry of initial camera extrinsic parameters as defined in the CIRN convention ()
+%                       scp (structure): stability control points - including radius, threshold, bright/dark flag and pixel coordinates
 %
 %   Returns:
 %           R (structure) : extrinsics/intrinsics information
@@ -22,6 +25,7 @@
 %                       frameRate (double) : frame rate of extrinsics (Hz)
 %                       t (datetime array) : [1 x m] datetime of images at various extraction rates in UTC
 %                       extrinsics_2d (projtform2d) : [1 x m] 2d projective transformation of m images
+%                       extrinsics_scp (double) : [m x 6] evolving camera extrinsics (from SCPs)
 %
 %
 % For each extraction frame rate:
@@ -143,18 +147,18 @@ for dd = 1 : length(day_files)
 
             %% ========================SCPs=====================================================
             %
-            % if exist('user_email', 'var')
-            %     sendmail(user_email{2}, [oname '- Please start extrinsics through time with SCPs.'])
-            % end
-            % answer = questdlg('Ready to start SCPs?', ...
-            %     'SCPs begin',...
-            %     'Yes', 'Yes');
-            %
-            % load(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
-            % R.intrinsics_CIRN = intrinsics_CIRN;
-            % [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, R.scp, R.extrinsics_scp, R.intrinsics_CIRN, t, R.intrinsics);
-            % R.extrinsics_scp = extrinsics;
-            % save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R','-append')
+            if R.scp_flag == 1
+                clear extrinsics
+                if exist('user_email', 'var')
+                    sendmail(user_email{2}, [oname '- Please start extrinsics through time with SCPs.'])
+                end % if exist('user_email', 'var')
+                answer = questdlg('Ready to start SCPs?', 'SCPs begin', 'Yes', 'Yes');
+    
+                load(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
+                [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, R.scp, R.extrinsics_scp, R.intrinsics_CIRN, t, R.intrinsics);
+                R.extrinsics_scp = extrinsics;
+                save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R','-append')
+            end % if R.scp_flag == 1
 
         end % for hh = 1 : length(extract_Hz)
         if exist('user_email', 'var')

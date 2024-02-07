@@ -1,4 +1,4 @@
-%% input_day_flight_data
+%% input_day_flight_data_DEMO
 % input_day_flight_data returns all user-specified required input data for the UAV_automated_rectification toolbox.
 %% Description
 %
@@ -37,9 +37,12 @@
 %                       worldPose (rigidtform3d) : orientation and location of camera in world coordinates, based off ground control location (pose, not extrinsic)
 %                       mask (logical) : mask over ocean region (same dimensions as image) - used to speed up computational time (optional)
 %                       feature_method (string): feature type to use in feature detection algorithm (default: `SIFT`, must be `SIFT`, `SURF`, `BRISK`, `ORB`, `KAZE`) (optional)
+%                       intrinsics_CIRN (double): [1 x 11] array of camera intrinisc parameters as defined in the CIRN convention ()
+%                       extrinsics_scp (double): [1 x 6] (x y z aximuth tilt roll) arry of initial camera extrinsic parameters as defined in the CIRN convention ()
+%                       scp (structure): stability control points - including radius, threshold, bright/dark flag and pixel coordinates
 %
 %
-% Requires: exiftool (https://exiftool.org/) OR metadata .csv
+% Requires: exiftool (https://exiftool.org/)
 %
 %
 %% Function Dependenies
@@ -58,6 +61,7 @@
 % define_xtransect
 % plot_transect
 % define_ytransect
+% define_scp
 %
 %% Citation Info
 % github.com/AthinaLange/UAV_automated_rectification
@@ -533,52 +537,57 @@ for ff = 1 : length(flights)
     save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
     close all
     %% ========================SCP================================================
+    input_answer = questdlg('Do you have to also run with stabilty control points method - requires bright or dark targets in the field of view?','SCP', 'Yes - compare methods', 'No - only demo', 'No - only demo');
+    switch input_answer
+        case 'No - only demo'
+            R.scp_flag = 0;
+        case 'Yes - compare methods'
+            R.scp_flag = 1;
+            disp('Please make sure to have downloaded the CIRN QCIT Toolbox.')
+            cirn_dir = uigetdir('.', 'Choose CIRN QCIT Toolbox directory.');
+            addpath(genpath(cirn_dir))
 
-    % load(fullfile(odir, 'Processed_data', 'Inital_coordinates.mat'))
-    %
-    % % saving in CIRN format
-    % intrinsics_CIRN(1) =  R.intrinsics.ImageSize(2);            % Number of pixel columns
-    % intrinsics_CIRN(2) = R.intrinsics.ImageSize(1);            % Number of pixel rows
-    % intrinsics_CIRN(3) = R.intrinsics.PrincipalPoint(1);         % U component of principal point
-    % intrinsics_CIRN(4) = R.intrinsics.PrincipalPoint(2);          % V component of principal point
-    % intrinsics_CIRN(5) = R.intrinsics.FocalLength(1);         % U components of focal lengths (in pixels)
-    % intrinsics_CIRN(6) = R.intrinsics.FocalLength(2);         % V components of focal lengths (in pixels)
-    % intrinsics_CIRN(7) = R.intrinsics.RadialDistortion(1);         % Radial distortion coefficient
-    % intrinsics_CIRN(8) = R.intrinsics.RadialDistortion(2);         % Radial distortion coefficient
-    % if length(R.intrinsics.RadialDistortion) == 3
-    %     intrinsics_CIRN(9) = R.intrinsics.RadialDistortion(3);         % Radial distortion coefficient
-    % else
-    %     intrinsics_CIRN(9) = 0;         % Radial distortion coefficient
-    % end
-    % intrinsics_CIRN(10) = R.intrinsics.TangentialDistortion(1);        % Tangential distortion coefficients
-    % intrinsics_CIRN(11) = R.intrinsics.TangentialDistortion(2);        % Tangential distortion coefficients
-    %
-    % % Getting CIRN extrinsics
-    % % pull RTK-GPS coordinates from image and change to Eastings/Northings
-    % % requires intg2012b and ll_to_utm codes (in basic_codes)
-    % load(fullfile(odir, 'Processed_data', [oname '.csv'], 'C', 'jpg_id', 'mov_id')
-    % lat = char(C.GPSLatitude(jpg_id));
-    % lat = str2double(lat(1:10));
-    % long = char(C.GPSLongitude(jpg_id));
-    % if long(end) == 'W'
-    %     long = str2double(['-' long(1:11)]);
-    % else
-    %     long = str2double(long(1:11));
-    % end
-    % [zgeoid_offset] = intg2012b(code_dir, lat,long);
-    % [UTMNorthing, UTMEasting, UTMZone] = ll_to_utm(lat, long);
-    % extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
-    %
-    % extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
-    %
-    % R.intrinsics_CIRN = intrinsics_CIRN;
-    %
-    % [extrinsics, extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag);
-    % R.extrinsics_scp = extrinsics;
-    % [scp] = define_SCP(R.I, R.image_gcp, R.intrinsics_CIRN);
-    % R.scp = scp;
-    %
-    % save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
+            % CIRN format intrinsics
+            R.intrinsics_CIRN(1) =  R.intrinsics.ImageSize(2);                       % Number of pixel columns
+            R.intrinsics_CIRN(2) = R.intrinsics.ImageSize(1);                        % Number of pixel rows
+            R.intrinsics_CIRN(3) = R.intrinsics.PrincipalPoint(1);                   % U component of principal point
+            R.intrinsics_CIRN(4) = R.intrinsics.PrincipalPoint(2);                   % V component of principal point
+            R.intrinsics_CIRN(5) = R.intrinsics.FocalLength(1);                     % U components of focal lengths (in pixels)
+            R.intrinsics_CIRN(6) = R.intrinsics.FocalLength(2);                     % V components of focal lengths (in pixels)
+            R.intrinsics_CIRN(7) = R.intrinsics.RadialDistortion(1);                % Radial distortion coefficient
+            R.intrinsics_CIRN(8) = R.intrinsics.RadialDistortion(2);                % Radial distortion coefficient
+            if length(R.intrinsics.RadialDistortion) == 3
+                R.intrinsics_CIRN(9) = R.intrinsics.RadialDistortion(3);            % Radial distortion coefficient
+            else
+                R.intrinsics_CIRN(9) = 0;                                                           % Radial distortion coefficient
+            end
+            R.intrinsics_CIRN(10) = R.intrinsics.TangentialDistortion(1);        % Tangential distortion coefficients
+            R.intrinsics_CIRN(11) = R.intrinsics.TangentialDistortion(2);        % Tangential distortion coefficients
+
+            % CIRN extrinsics
+            load(fullfile(odir, 'Processed_data', 'Initial_coordinates.mat'), 'C', 'jpg_id', 'mov_id')
+            lat = char(C.GPSLatitude(jpg_id));
+            lat = str2double(lat(1:10));
+            long = char(C.GPSLongitude(jpg_id));
+            if long(end) == 'W'
+                long = str2double(['-' long(1:11)]);
+            else
+                long = str2double(long(1:11));
+            end
+            [zgeoid_offset] = intg2012b(code_dir, lat,long);
+            [UTMNorthing, UTMEasting, ~] = ll_to_utm(lat, long);
+            extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
+            extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
+            [extrinsics, ~]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag);
+            R.extrinsics_scp = extrinsics;
+
+            % defining SCP
+            [scp] = define_SCP(R.I, R.image_gcp, R.intrinsics_CIRN);
+            R.scp = scp;
+
+    end
+   
+    save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
 
     %% ========================productsCheck=======================================
     %                          CHECK PRODUCTS ON INITIAL IMAGE
