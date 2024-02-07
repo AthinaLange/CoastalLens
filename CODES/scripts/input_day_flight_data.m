@@ -125,7 +125,7 @@ end
 %                               - specify ocean mask to reduce processing time
 %                               - check products
 %  ===============================================================================
-for dd = 1 : length(day_files)
+for dd = 2 : length(day_files)
     %% ==========================Housekeeping======================================
     clearvars -except dd *_dir user_email day_files
     cd([day_files(dd).folder '/' day_files(dd).name])
@@ -635,6 +635,7 @@ for dd = 1 : length(day_files)
                         gridChangeIndex = 1;
                     case 'No - redefine'
                         disp('Please change transects.')
+                        ids_xtransect = find(ismember(string({Products.type}), 'xTransect'), 1);
                         origin_grid = [Products(ids_xtransect(1)).lat Products(ids_xtransect(1)).lon, Products(ids_xtransect(1)).angle];
                         Products(ids_xtransect) = [];
                         productCounter = length(Products);
@@ -661,6 +662,7 @@ for dd = 1 : length(day_files)
                         gridChangeIndex = 1;
                     case 'No'
                         disp('Please change transects.')
+                        ids_ytransect = find(ismember(string({Products.type}), 'yTransect'), 1);
                         origin_grid = [Products(ids_ytransect(1)).lat Products(ids_ytransect(1)).lon, Products(ids_ytransect(1)).angle];
                         Products(ids_ytransect) = [];
                         productCounter = length(Products);
@@ -683,7 +685,10 @@ for dd = 1 : length(day_files)
         %                           - Data extraction frame rates
         %                           - Products
         %  ============================================================================
+        info = double(string(inputdlg({ 'z elevation (tide level in relevant datum)'}, 'Tide elevation')));
+        [Products.z]=deal(info);
         save(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
+        
         clear grid_text grid_plot
         load(fullfile(odir, 'Processed_data', [oname '_IOEO']))
         grid_text{1} = sprintf('Lat / Long = %.2f / %.2f, Angle = %.2f deg', Products(1).lat, Products(1).lon, Products(1).angle);

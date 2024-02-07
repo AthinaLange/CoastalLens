@@ -44,7 +44,7 @@ switch answer2
         disp('For DEMO: under data_files/origin_Torrey.mat') %% XXX
         [temp_file, temp_file_path] = uigetfile(global_dir, 'Origin grid file');
         load(fullfile(temp_file_path, temp_file), 'origin_grid'); clear temp_file*
-        if length(origin_grid,2) ~= 3
+        if length(origin_grid) ~= 3
             origin_grid = inputdlg({'Latitude of Origin', 'Longitude of Origin', 'Angle (CC degrees from North)'});
             origin_grid = double(string(origin_grid));
         end

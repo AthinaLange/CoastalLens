@@ -95,7 +95,9 @@ if ismac || isunix
 end
 global_dir = uigetdir('.', 'Choose root folder - UAV_automated_rectification.');
 cd(global_dir)
-setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
+if ismac
+    setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
+end
 
 %% =============== Check that all necessary codes are loaded. =================
 code_dir = fullfile(global_dir, 'CODES');
