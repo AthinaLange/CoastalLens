@@ -51,6 +51,9 @@ assert(sum(size(options.mask) == size(I, [1 2]))==2, 'Error (get_extrinsics_fd):
 
 %% Find features in 1st image
 [I] = apply_binary_mask(I, options.mask);
+if size(I,3) == 3 % still rgb
+    I = im2gray(I);
+end % if size(I,3) == 3
 [prevPoints] = detectFeatures(I, options.Method);
 [prevFeatures, prevPoints] = extractFeatures(I, prevPoints);
 
@@ -75,6 +78,7 @@ for viewId = 2:length(images.Files)
 
     matchedPoints = currPoints(indexPairs(:,1), :);
     matchedPointsPrev = prevPoints(indexPairs(:,2), :);
+
 
     % Estimate the transformation between I(n) and I(n-1).
     tforms(viewId) = estgeotform2d(matchedPoints, matchedPointsPrev,...

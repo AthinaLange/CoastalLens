@@ -133,13 +133,14 @@ for dd = 1 : length(day_files)
                 [extrinsics] = get_extrinsics_fd(images, R.intrinsics);
             end %  if isfield(R, 'mask') && ~isfield(R, 'feature_method')
             % Create the panorama.
-            [panorama] = plot_panorama(images, R.intrinsics, extrinsics);
+            [panorama, panoramaView] = plot_panorama(images, R.intrinsics, extrinsics);
             %  Save File
             figure(1);clf
             imshow(panorama)
             saveas(gca, fullfile(odir, 'Processed_data', [oname '_Panorama.png']))
             R.extrinsics_2d = extrinsics;
-            save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
+            R.panoramaView = panoramaView;
+            save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(round(extract_Hz(hh)))) 'Hz' ]),'R')
 
             %% ========================SCPs=====================================================
             %

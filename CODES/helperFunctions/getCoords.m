@@ -18,7 +18,8 @@ function [xyz, X, Y, Z] = getCoords(Products)
 %                       dy (double) : Along-shore resolution (m)
 %                       x (double): Cross-shore distance from origin (+ is offshore of origin) (m)
 %                       y (double): Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
-%                       z (double) : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%                       z (double) : Elevation - can be empty or array of DEM values (NAVD88 m)
+%                       tide (double) : Tide level (NAVD88 m)
 %
 %   Returns:
 %       xyz (double) : [m x 3] (x, y, z) world coordinates for Products. Rotated according to Product.angle.
@@ -45,9 +46,9 @@ if ~isempty(Products.ylim)
     if Products.ylim(2) < 0; Products.ylim(2) = -Products.ylim(2); end
 end % if ~isempty(Products.ylim)
 if isempty(Products.z) || isnan(Products.z)
-    iz=0; 
+    iz=Products.tide; 
 else
-    iz = Products.z; 
+    iz = Products.z + Products.tide; %% SOMETHIGN DEM 
 end % if isempty(Products.z) || isnan(Products.z)
 
 if contains(Products.type, 'Grid')

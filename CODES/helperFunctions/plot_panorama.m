@@ -1,4 +1,4 @@
-function [panorama] = plot_panorama(images, intrinsics, extrinsics)
+function [panorama, panoramaView] = plot_panorama(images, intrinsics, extrinsics)
 %   plot_panorama returns a panorama image from image sequence and corresponding extrinsics.
 %% Syntax
 %           [panorama] = plot_panorama(images, intrinsics, extrinsics)

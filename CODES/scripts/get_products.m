@@ -24,7 +24,8 @@
 %                       dy (double) : Along-shore resolution (m)
 %                       x (double): Cross-shore distance from origin (+ is offshore of origin) (m)
 %                       y (double): Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
-%                       z (double) : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%                       z (double) : Elevation - can be empty or array of DEM values (NAVD88 m)
+%                       tide (double) : Tide level (NAVD88 m)
 %
 %   Returns:
 %           Products (structure) : Data products
@@ -39,7 +40,8 @@
 %                       dy (double) : Along-shore resolution (m)
 %                       x (double): Cross-shore distance from origin (+ is offshore of origin) (m)
 %                       y (double): Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
-%                       z (double) : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%                       z (double) : Elevation - can be empty or array of DEM values (NAVD88 m)
+%                       tide (double) : Tide level (NAVD88 m)
 %                       t (datetime array) : [1 x m] datetime of images at given extraction rates in UTC
 %                       localX (double) : [y_length x x_length] x coordinates in locally-defined coordinate system
 %                       localY (double) : [y_length x x_length] y coordinates in locally-defined coordinate system
