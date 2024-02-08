@@ -13,7 +13,7 @@ Required MATLAB toolboxes:
  
 Requires [exiftool](https://exiftool.org) (or metadata csv file : See [Input Requirements](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Input-Requirements/)) <br/>
 Requires [ffmpeg](https://ffmpeg.org/download.html). <br/>
-See [Installation Help](https://github.com/AthinaLange/UAV_automated_rectification/wiki/installation_help) for installation guides based on your OS. <br />
+See [Installation Help](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Installation-Help) for installation guides based on your OS. <br />
 
 
 ## Running the Toolbox
