@@ -1,4 +1,4 @@
-function [xyz, X, Y, Z] = getCoords(Products)
+function [xyz, ep, np, Z] = getCoords(Products)
 %   getCoords returns the (x,y,z) world coordinates for the dimensions
 %   specified in Products.
 %% Syntax
@@ -72,8 +72,8 @@ Z = X.*0 + iz;
 
 
 %% Rotation
-ep=X-x2;
-np=Y-y2;
+ep=X - x2;
+np=Y - y2;
 
 Xout=ep.*cosd(Products.angle-270)+np.*sind(Products.angle-270);
 Yout=np.*cosd(Products.angle-270)-ep.*sind(Products.angle-270);

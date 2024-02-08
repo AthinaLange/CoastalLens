@@ -179,7 +179,7 @@ for  dd = 1 : length(day_files)
                             %% FD
                             if viewId == 1
                                 [xyz, X, Y, Z] = getCoords(Products(pp));
-                                Products(pp).localX = X;
+                                Products(pp).localX = -X;
                                 Products(pp).localY = Y;
                                 Products(pp).localZ = Z;
                                 %find orientation of original image in panoramaView

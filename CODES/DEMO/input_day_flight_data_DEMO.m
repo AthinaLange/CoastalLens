@@ -578,7 +578,7 @@ for ff = 1 : length(flights)
             [UTMNorthing, UTMEasting, ~] = ll_to_utm(lat, long);
             extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
             extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
-            [extrinsics, ~]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag);
+            [extrinsics, ~]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag, R.intrinsics_CIRN,R.image_gcp,R.world_gcp);
             R.extrinsics_scp = extrinsics;
 
             % defining SCP

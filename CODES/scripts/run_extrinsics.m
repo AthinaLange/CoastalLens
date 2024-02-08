@@ -140,7 +140,7 @@ for dd = 1 : length(day_files)
             saveas(gca, fullfile(odir, 'Processed_data', [oname '_Panorama.png']))
             R.extrinsics_2d = extrinsics;
             R.panoramaView = panoramaView;
-            save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
+            save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz.mat' ]),'R')
 
             %% ========================SCPs=====================================================
             %
@@ -155,7 +155,7 @@ for dd = 1 : length(day_files)
             % R.intrinsics_CIRN = intrinsics_CIRN;
             % [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, R.scp, R.extrinsics_scp, R.intrinsics_CIRN, t, R.intrinsics);
             % R.extrinsics_scp = extrinsics;
-            % save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R','-append')
+            % save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz.mat' ]),'R','-append')
 
         end % for hh = 1 : length(extract_Hz)
         if exist('user_email', 'var')

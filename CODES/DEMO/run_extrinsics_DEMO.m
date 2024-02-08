@@ -157,7 +157,7 @@ for dd = 1 : length(day_files)
                 load(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
                 [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, R.scp, R.extrinsics_scp, R.intrinsics_CIRN, t, R.intrinsics);
                 R.extrinsics_scp = extrinsics;
-                save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R','-append')
+                save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz.mat' ]),'R','-append')
             end % if R.scp_flag == 1
 
         end % for hh = 1 : length(extract_Hz)
