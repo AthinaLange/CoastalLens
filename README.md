@@ -197,6 +197,9 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 <tr class="odd"><td> </td><td><code>localX / localY / localZ</code> (double)</td>
 <td> X,Y,Z coordinates of data product in local reference frame (m) </td></tr>
 
+<tr class="odd"><td> </td><td><code>Eastings / Northings </code> (double)</td>
+<td> Eastings and Northings coordinates of data product (m) </td></tr>
+
 <tr class="even"><td> </td><td><code>Irgb_2d</code> (uint8 image)</td>
 <td> [m x y_length x x_length x 3] timeseries of pixels extracted according to dimensions of xlim and ylim</td></tr>
 
