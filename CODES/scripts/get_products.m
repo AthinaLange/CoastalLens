@@ -127,12 +127,12 @@ for  dd = 1 : length(day_files)
 
             if ~isfield(R, 't')
                 load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'C', 'mov_id', 'tz')
-                assert(exist(C, 'var'), 'Error (run_extrinsics): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
+                assert(exist('C', 'var'), 'Error (run_extrinsics): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
                 assert(isa(C, 'table'), 'Error (run_extrinsics): C must be a table. run get_metadata.')
-                assert(exist(mov_id, 'var'), 'Error (run_extrinsics): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
+                assert(exist('mov_id', 'var'), 'Error (run_extrinsics): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
                 assert(isa(mov_id, 'double'), 'Error (run_extrinsics): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
-                assert(exist(tz, 'var'), 'Error (run_extrinsics): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
-                assert(isa(tz, 'string'), 'Error (run_extrinsics): tz (timezone) must be timezone string. run [tz] = select_timezone.')
+                assert(exist('tz', 'var'), 'Error (run_extrinsics): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
+                assert(isa(tz, 'string') || isa(tz, 'char'), 'Error (run_extrinsics): tz (timezone) must be timezone string. run [tz] = select_timezone.')
 
                 dts = 1/extract_Hz(hh);
                 to = datetime(string(C.CreateDate(mov_id(1))), 'InputFormat', 'yyyy:MM:dd HH:mm:ss', 'TimeZone', tz);
@@ -245,7 +245,9 @@ for  dd = 1 : length(day_files)
             imwrite(iTimex, fullfile(odir, 'Processed_data', 'Timex.png'))
             imwrite(iBright, fullfile(odir, 'Processed_data', 'Brightest.png'))
             imwrite(iDark, fullfile(odir, 'Processed_data', 'Darkest.png'))
-            Products = rmfield(Products, 'iP');
+            if isfield(Products, 'iP')
+                Products = rmfield(Products, 'iP');
+            end % if isfield(Products, 'iP')
 
             for pp = 1:length(Products)
                 Products(pp).Irgb_2d=Products(pp).Irgb_2d(1:extract_Hz(hh)/Products(pp).frameRate:end,:,:,:);

@@ -109,7 +109,7 @@ for dd = 1 : length(day_files)
             assert(exist('mov_id', 'var'), 'Error (run_extrinsics): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
             assert(isa(mov_id, 'double'), 'Error (run_extrinsics): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
             assert(exist('tz', 'var'), 'Error (run_extrinsics): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
-            assert(isa(tz, 'char'), 'Error (run_extrinsics): tz (timezone) must be timezone character string. run [tz] = select_timezone.')
+            assert(isa(tz, 'char') || isa(tz, 'string'), 'Error (run_extrinsics): tz (timezone) must be timezone character string. run [tz] = select_timezone.')
 
             R.frameRate = extract_Hz(hh);
             dts = 1/extract_Hz(hh);
@@ -140,7 +140,7 @@ for dd = 1 : length(day_files)
             saveas(gca, fullfile(odir, 'Processed_data', [oname '_Panorama.png']))
             R.extrinsics_2d = extrinsics;
             R.panoramaView = panoramaView;
-            save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(round(extract_Hz(hh)))) 'Hz' ]),'R')
+            save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
 
             %% ========================SCPs=====================================================
             %
