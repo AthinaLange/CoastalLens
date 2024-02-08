@@ -22,6 +22,8 @@ Run 'UAV_rectification.m' <br />
 Will run core scripts in CODES/scripts/ <br />
 Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 
+Running <code>ver</code> in the Command Window will show your MATLAB version and installed toolboxes. <br/>
+
 You can find more details, including the information you need to run this on your own data in our [wiki](https://github.com/AthinaLange/UAV_automated_rectification/wiki/)!
 
 ## Demo / Getting Started
