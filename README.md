@@ -16,17 +16,17 @@ Requires [ffmpeg](https://ffmpeg.org/download.html). <br/>
 See [Installation Help](https://github.com/AthinaLange/UAV_automated_rectification/wiki/installation_help) for installation guides based on your OS. <br />
 
 
-## Getting Started
+## Running the Toolbox
 Run 'UAV_rectification.m' <br />
 Will run core scripts in CODES/scripts/ <br />
 Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 
 You can find more details, including the information you need to run this on your own data in our [wiki](https://github.com/AthinaLange/UAV_automated_rectification/wiki/)!
 
-## Demo
+## Demo / Getting Started
 'UAV_rectification_DEMO.m' runs a demo version of the code and can also be used to compare the new algorithm versus the CIRN Stability Control Points method. This method requires stability control points to be visible within the field of view. 
 
-Data to test the code is provided in the DATA folder and the video can be downloaded [here](https://drive.google.com/file/d/1Qk1q1i75eXTYNB92fwHlcD6Yg7p0FV_W/view?usp=drive_link). Save this video in DATA/20211215_Torrey_Flight_04/.
+Data to test the code is provided in the DATA folder and the video can be downloaded [here](https://drive.google.com/file/d/1Qk1q1i75eXTYNB92fwHlcD6Yg7p0FV_W/view?usp=drive_link) (716MB). Save this video in DATA/20211215_Torrey/Flight_04/.
 
 ## Testing
 This toolbox is currently in testing phase on the following systems:
