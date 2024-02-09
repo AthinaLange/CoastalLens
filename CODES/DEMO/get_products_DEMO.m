@@ -12,8 +12,6 @@
 %                       extrinsics_2d (projtform2d) : [1 x m] 2d projective transformation of m images
 %                       worldPose (rigidtform3d) : orientation and location of camera in world coordinates, based off ground control location (pose, not extrinsic)
 %                       t (datetime array) : [1 x m] datetime of images at various extraction rates in UTC
-%                       intrinsics_CIRN (double): [1 x 11] array of camera intrinisc parameters as defined in the CIRN convention ()
-%                       extrinsics_scp (double): [1 x 6] (x y z aximuth tilt roll) arry of initial camera extrinsic parameters as defined in the CIRN convention ()
 %           Products (structure) : Data products
 %                       type (string) : 'Grid', 'xTransect', 'yTransect'
 %                       frameRate (double) : frame rate of product (Hz)
@@ -26,7 +24,8 @@
 %                       dy (double) : Along-shore resolution (m)
 %                       x (double): Cross-shore distance from origin (+ is offshore of origin) (m)
 %                       y (double): Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
-%                       z (double) : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%                       z (double) : Elevation - can be empty or array of DEM values (NAVD88 m)
+%                       tide (double) : Tide level (NAVD88 m)
 %
 %   Returns:
 %           Products (structure) : Data products
@@ -41,13 +40,15 @@
 %                       dy (double) : Along-shore resolution (m)
 %                       x (double): Cross-shore distance from origin (+ is offshore of origin) (m)
 %                       y (double): Along-shore distance from origin (+ is to the right of the origin looking offshore) (m)
-%                       z (double) : Elevation - can be empty, assigned to tide level, or array of DEM values (NAVD88 m)
+%                       z (double) : Elevation - can be empty or array of DEM values (NAVD88 m)
+%                       tide (double) : Tide level (NAVD88 m)
 %                       t (datetime array) : [1 x m] datetime of images at given extraction rates in UTC
-%                       localX (double) : [y_length x x_length] x coordinates in locally-defined coordinate system
-%                       localY (double) : [y_length x x_length] y coordinates in locally-defined coordinate system
+%                       localX (double) : [y_length x x_length] x coordinates in locally-defined coordinate system (+x is offshore, m)
+%                       localY (double) : [y_length x x_length] y coordinates in locally-defined coordinate system (+y is right of origin, m)
 %                       localZ (double) : [y_length x x_length] z coordinates in locally-defined coordinate system
-%                       Irgb_2d (uint8 image) : [m x y_length x x_length x 3] timeseries of pixels extracted according to dimensions of xlim and ylim (using feature detection)
-%                       Irgb_scp (uint8 image) : [m x y_length x x_length x 3] timeseries of pixels extracted according to dimensions of xlim and ylim (using SCPs)
+%                       Eastings (double) : [y x x] Eastings coordinates (m)
+%                       Northings (double) : [y x x] Northings coordinates (m)
+%                       Irgb_2d (uint8 image) : [m x y_length x x_length x 3] timeseries of pixels extracted according to dimensions of xlim and ylim
 %
 %
 % For each extraction frame rate:
@@ -86,7 +87,7 @@ end % if exist('global_dir', 'var')
 
 % check that needed files exist
 for dd = 1:length(day_files)
-    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat')),['Error (get_products): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat') ' doesn''t exist.']);
+    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat')),['Error (get_products): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat') ' doesn''t exist.']);
 end
 %%
 close all
@@ -94,10 +95,10 @@ for  dd = 1 : length(day_files)
     clearvars -except dd *_dir user_email day_files
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
-    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'extract_Hz', 'flights')
-    assert(exist('extract_Hz', 'var'), 'Error (get_products): extract_Hz must exist and be stored in ''day_input_data.mat''.')
+    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'extract_Hz', 'flights')
+    assert(exist('extract_Hz', 'var'), 'Error (get_products): extract_Hz must exist and be stored in ''day_config_file.mat''.')
     assert(isa(extract_Hz, 'double'), 'Error (get_products): extract_Hz must be a double or array of doubles.')
-    assert(exist('flights', 'var'), 'Error (get_products): flights must exist and be stored in ''day_input_data.mat''.')
+    assert(exist('flights', 'var'), 'Error (get_products): flights must exist and be stored in ''day_config_file.mat''.')
     assert(isa(flights, 'struct'), 'Error (get_products): flights must be a structure.')
     assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (get_products): flights must have fields .folder and .name.')
 
@@ -128,18 +129,18 @@ for  dd = 1 : length(day_files)
 
             if ~isfield(R, 't')
                 load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'C', 'mov_id', 'tz')
-                assert(exist(C, 'var'), 'Error (run_extrinsics): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
+                assert(exist('C', 'var'), 'Error (run_extrinsics): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
                 assert(isa(C, 'table'), 'Error (run_extrinsics): C must be a table. run get_metadata.')
-                assert(exist(mov_id, 'var'), 'Error (run_extrinsics): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
+                assert(exist('mov_id', 'var'), 'Error (run_extrinsics): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
                 assert(isa(mov_id, 'double'), 'Error (run_extrinsics): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
-                assert(exist(tz, 'var'), 'Error (run_extrinsics): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
-                assert(isa(tz, 'string'), 'Error (run_extrinsics): tz (timezone) must be timezone string. run [tz] = select_timezone.')
+                assert(exist('tz', 'var'), 'Error (run_extrinsics): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
+                assert(isa(tz, 'string') || isa(tz, 'char'), 'Error (run_extrinsics): tz (timezone) must be timezone string. run [tz] = select_timezone.')
 
                 dts = 1/extract_Hz(hh);
                 to = datetime(string(C.CreateDate(mov_id(1))), 'InputFormat', 'yyyy:MM:dd HH:mm:ss', 'TimeZone', tz);
                 to.TimeZone = 'UTC';
                 to = datenum(to);
-                t = (dts./24./3600).*([1:length(images.Files)]-1)+ to;
+                t = (dts./24./3600).*((1:length(images.Files))-1)+ to;
                 R.t = datetime(t, 'ConvertFrom', 'datenum', 'TimeZone', 'UTC');
                 clear dts to C mov_id tz t
             end %  if ~isfield(R, 't')
@@ -170,23 +171,23 @@ for  dd = 1 : length(day_files)
             clear imageSize xlim ylim xMin xMax yMin yMax width height xLimits yLimits
             %% =========================== Products ==================================
             for viewId = 1:length(images.Files)
-                viewId
+                if rem(viewId, 30/(1/extract_Hz(hh))) == 0 % show viewId every 30 sec
+                    fprintf('viewId = %i\n', viewId)
+                end % if rem(viewId, 30/(1/extract_Hz(hh))) == 0
                 I = imwarp(undistortImage(readimage(images, viewId), R.intrinsics), R.extrinsics_2d(viewId), 'OutputView', panoramaView);
                 for pp = 1:length(Products)
                     if extract_Hz(hh)== Products(pp).frameRate || rem(extract_Hz(hh),Products(pp).frameRate) == 0 % if sampleRate = frameRate or can be subsampled from frameRate
                         if rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0 % if subsampled framerate
                             %% FD
                             if viewId == 1
-                                [xyz, X, Y, Z] = getCoords(Products(pp));
-                                Products(pp).localX = X;
-                                Products(pp).localY = Y;
+                                [xyz, localX, localY, Z, Eastings, Northings] = getCoords(Products(pp));
+                                Products(pp).localX = localX;
+                                Products(pp).localY = localY;
+                                Products(pp).Eastings = Eastings;
+                                Products(pp).Northings = Northings;
                                 Products(pp).localZ = Z;
-                                %find orientation of original image in panoramaView
-                                % mask = imwarp(true(size(I,1),size(I,2)), R.extrinsics_2d(viewId), 'OutputView', panoramaView);
-                                % BW = boundarymask(mask);
-                                % [row, col] = find(BW == 1, 1,'first');
 
-                                Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics));%+[col row];
+                                Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics));
                             end %  if viewId == 1
 
                             clear Irgb_temp
@@ -206,14 +207,13 @@ for  dd = 1 : length(day_files)
 
                             %% SCP
                             if R.scp_flag == 1
-                                [IrIndv, ~,~,~] = getPixels(Products(pp), R.extrinsics_scp(viewId,:), R.intrinsics_CIRN, I);
+                                [IrIndv, ~,~,~,~,~] = getPixels(Products(pp), R.extrinsics_scp(viewId,:), R.intrinsics_CIRN, I);
                                 if contains(Products(pp).type, 'Grid')
                                     Products(pp).Irgb_scp(viewId, :,:,:) = IrIndv;
                                 else
                                     Products(pp).Irgb_scp(viewId, :,:) = permute(IrIndv,[2 1 3]);
                                 end % if contains(Products(pp).type, 'Grid')
                             end % if R.scp_flag == 1
-
                         end %  if rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0
                     end % if extract_Hz(hh)== Products(pp).frameRate || rem(extract_Hz(hh),Products(pp).frameRate) == 0
 
@@ -243,88 +243,22 @@ for  dd = 1 : length(day_files)
             imwrite(iTimex, fullfile(odir, 'Processed_data', 'Timex.png'))
             imwrite(iBright, fullfile(odir, 'Processed_data', 'Brightest.png'))
             imwrite(iDark, fullfile(odir, 'Processed_data', 'Darkest.png'))
-            Products = rmfield(Products, 'iP');
+            if isfield(Products, 'iP')
+                Products = rmfield(Products, 'iP');
+            end % if isfield(Products, 'iP')
 
             for pp = 1:length(Products)
                 Products(pp).Irgb_2d=Products(pp).Irgb_2d(1:extract_Hz(hh)/Products(pp).frameRate:end,:,:,:);
+                % Products(pp).Irgb_scp=Products(pp).Irgb_scp(1:extract_Hz(hh)/Products(pp).frameRate:end,:,:,:);
                 Products(pp).t=Products(pp).t(1:extract_Hz(hh)/Products(pp).frameRate:end);
-                if R.scp_flag == 1
-                    Products(pp).Irgb_scp=Products(pp).Irgb_scp(1:extract_Hz(hh)/Products(pp).frameRate:end,:,:,:);
-                end % if R.scp_flag == 1
             end %  for pp = 1:length(Products)
 
             save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '-append')
-
-
         end % for hh = 1 : length(extract_Hz)
+        if exist('user_email', 'var')
+            sendmail(user_email{2}, [oname '- Rectifying Products DONE'])
+        end % if exist('user_email', 'var')
     end %  for ff = 1 : length(flights)
 end % for  dd = 1 : length(day_files)
-%%
-
-%% FUNCTIONS
-function [IrIndv, Xout, Yout, Z] = getPixels(Products, extrinsics, intrinsics, I)
-
-[xyz, Xout, Yout, Z] = getCoords(Products);
-
-[P, ~, R, IC] = intrinsicsExtrinsics2P(intrinsics, extrinsics);
-
-% Find the Undistorted UV Coordinates atributed to each xyz point.
-UV = P*[xyz'; ones(1,size(xyz,1))];
-UV = UV./repmat(UV(3,:),3,1);  % Make Homogenenous
-
-% So the camera image we are going to pull pixel values from is distorted.
-% Our P matrix transformation assumes no distortion. We have to correct for
-% this. So we distort our undistorted UV coordinates to pull the correct
-% pixel values from the distorted image. Flag highlights invalid points
-% (=0) using intrinsic criteria.
-[~,~,flag] = distortUV(UV(1,:),UV(2,:),intrinsics);
-
-% Find Negative Zc Camera Coordinates. Adds invalid point to flag (=0).
-xyzC = R*IC*[xyz'; ones(1,size(xyz,1))];
-bind= xyzC (3,:)<=0;
-flag(bind)=0;
-
-% Make into a singular matrix for use in the non-linear solver
-UVd = [UV(1,:)' UV(2,:)'];
-%UVd = [Ud; Vd];
-
-
-%UVd = reshape(UVd,[],2);
-s=size(Xout);
-Ud=(reshape(UVd(:,1),s(1),s(2)));
-Vd=(reshape(UVd(:,2),s(1),s(2)));
-
-% Round UVd coordinates so it cooresponds to matrix indicies in image I
-Ud=round(Ud);
-Vd=round(Vd);
-
-% Utalize Flag to remove invalid points. See xyzDistUV and distortUV to see
-% what is considered an invalid point.
-Ud(flag==0)=nan;
-Vd(flag==0)=nan;
-
-% dimension for rgb values.
-ir=nan(s(1),s(2),3);
-
-% Pull rgb pixel intensities for each point in XYZ
-for kk=1:s(1)
-    for j=1:s(2)
-        % Make sure not a bad coordinate
-        if isnan(Ud(kk,j))==0 & isnan(Vd(kk,j))==0
-            if Ud(kk,j) > 0 && Ud(kk,j) < size(I,2) && Vd(kk,j) > 0 && Vd(kk,j) < size(I,1)
-
-            % Note how Matlab organizes images, V coordinate corresponds to
-            % rows, U to columns. V is 1 at top of matrix, and grows as it
-            % goes down. U is 1 at left side of matrix and grows from left
-            % to right.
-            ir(kk,j,:)=I(Vd(kk,j),Ud(kk,j),:);
-            end
-        end
-    end
-end
-
-% Save Rectifications from Each Camera into A Matrix
-IrIndv=uint8(ir);
-
-end
-
+close all
+cd(global_dir)

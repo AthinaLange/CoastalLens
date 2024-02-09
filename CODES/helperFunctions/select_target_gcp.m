@@ -23,7 +23,6 @@ function [target_gcp] = select_target_gcp
 
 % assuming that gps_northings in world coordinates and not in local grid system
 disp('Load in target GCP coordinates file.')
-disp('For DEMO: Under the individual day. GCP_coordinates.txt')
 [target_gcp] = select_data_from_text_file;
 target_gcp = target_gcp(:, 2:4);
 

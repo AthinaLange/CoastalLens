@@ -91,7 +91,7 @@ end
 disp(platform)
 
 if ismac || isunix
-    disp('Choose root folder - UAV_automated_rectification.')
+    disp('Choose global (repository) folder - ''UAV_automated_rectification''.')
 end
 global_dir = uigetdir('.', 'Choose global (repository) folder - ''UAV_automated_rectification''.');
 cd(global_dir)
@@ -101,19 +101,21 @@ end
 
 %% =============== Check that all necessary codes are loaded. =================
 code_dir = fullfile(global_dir, 'CODES');
-
+% Check that scripts are downloaded.
+if ~exist(fullfile(code_dir, 'scripts'), 'dir')
+    disp('Please download scripts folder from GitHub.')
+end
 % Check that basic Functions are downloaded.
 if ~exist(fullfile(code_dir, 'basicFunctions'), 'dir')
-    disp('Please download basicFunctions codes from GitHub.')
+    disp('Please download basicFunctions folder from GitHub.')
 end
 % Check that helper Functions are downloaded.
 if ~exist(fullfile(code_dir, 'helperFunctions'), 'dir')
-    disp('Please download helperFunctions codes from GitHub.')
+    disp('Please download helperFunctions folder from GitHub.')
 end
 
 % Check that ffmpeg is installed.
-system(['ffmpeg -version'])
-ffmpeg_answer = questdlg('Is ffmpeg installed? (Should have run in your Command Window.)','ffmpeg Installation', 'Yes', 'No', 'Yes');
+ffmpeg_answer = questdlg('Is ffmpeg installed? ','ffmpeg Installation', 'Yes', 'No', 'Yes');
 switch ffmpeg_answer
     case 'No'
         disp('Please go to https://ffmpeg.org/ and install ffmpeg before proceeding.')
@@ -139,13 +141,16 @@ if isToolboxAvailable('Computer Vision Toolbox','warning')== 0
     disp('Please install the Computer Vision Toolbox before proceeding.')
 end % if isToolboxAvailable('Computer Vision Toolbox','warning')== 0
 
+if isToolboxAvailable('Lidar Toolbox','warning')== 0
+    disp('Please install the Lidar Toolbox before proceeding.')
+end % if isToolboxAvailable('Computer Vision Toolbox','warning')== 0
+
 
 clear *answer ans
 %% =============== Select days to process.  =================================
 % Load which data folders are to be processed
 if ismac || isunix
     disp('Choose DATA folder.')
-    disp('For Athina: DATA') %% XXX
 end
 data_dir = uigetdir('.', 'DATA Folder');
 

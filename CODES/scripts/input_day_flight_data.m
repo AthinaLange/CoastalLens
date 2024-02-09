@@ -78,7 +78,6 @@ if ~exist('global_dir', 'var') || ~exist('day_files', 'var') || ~isstruct(day_fi
     end
     if ~exist('day_files', 'var') || ~isstruct(day_files) || ~isfield(day_files, 'folder') || ~isfield(day_files, 'name')
         disp('Choose DATA folder.')
-        disp('For Athina: DATA')
         data_dir = uigetdir('.', 'DATA Folder');
 
         day_files = dir(data_dir); day_files([day_files.isdir]==0)=[]; day_files(contains({day_files.name}, '.'))=[];
@@ -91,7 +90,7 @@ end % if exist('global_dir', 'var')
 %                  Confirm test email recieved
 %                   - TODO Change setting for SMTP server
 %  =====================================================================
-answer = questdlg('Did you get the test email?','Test email check', 'Yes / Don''t want it', 'No', 'Yes / Don''t want it');
+answer = questdlg('Did you get the test email?','Test email check', 'Yes', 'No', ' Don''t want it', 'Yes');
 switch answer
     case 'No'
         disp('Please check email settings to proceed.')
@@ -134,11 +133,11 @@ for dd = 1 : length(day_files)
     %  =============================================================================
 
     % Check if user already has input file with all general drone / products information
-    input_answer = questdlg('Do you have a .mat configuration file?','Config File', 'Yes - Load it', 'No - Create Now', 'No - Create Now');
+    disp('This day-specific configuration file is typically saved under DATA/YYYYMMDD_Location/day_config_file.mat.')
+    input_answer = questdlg('Do you have a ''day_config_file.mat'' configuration file?','Config File', 'Yes - Load it', 'No - Create Now', 'No - Create Now');
     switch input_answer
         case 'Yes - Load it'
-            disp('Load in day input file.')
-            disp('For CPG: ''day_input_data.mat'' in day files.')
+            disp('Load in day configuration file.')
             [temp_file, temp_file_path] = uigetfile(global_dir, 'Input File');
             load(fullfile(temp_file_path, temp_file)); clear temp_file*
     end % switch input_answer
@@ -171,14 +170,20 @@ for dd = 1 : length(day_files)
             switch answer
                 case 'Yes'
                     disp('Load in camera calibration file.')
-                    disp('For DEMO: under DATA/cameraParams_whitecap.mat') %% XXX
                     [temp_file, temp_file_path] = uigetfile(global_dir, 'Camera Parameters');
                     load(fullfile(temp_file_path, temp_file)); clear temp_file*
 
                     % If CIRN intrinsics used as input
-                    if ~exist('cameraParams', 'var') && (~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var'))
+                    if (~exist('cameraParams', 'var') && ~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var')) && exist('intrinsics', 'var')
                         cameraParams = cameraIntrinsics([intrinsics(5) intrinsics(6)], [intrinsics(3) intrinsics(4)], [intrinsics(2) intrinsics(1)], 'RadialDistortion', [intrinsics(7) intrinsics(8) intrinsics(9)], 'TangentialDistortion', [intrinsics(10) intrinsics(11)]);
-                    else % otherwise check that class is cameraIntrinsics
+                    elseif (~exist('cameraParams', 'var') && ~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var')) && ~exist('intrinsics', 'var')
+                        disp('Load in camera calibration file.')
+                        [temp_file, temp_file_path] = uigetfile(global_dir, 'Camera Parameters');
+                        load(fullfile(temp_file_path, temp_file)); clear temp_file*
+                    end % if (~exist('cameraParams', 'var') && ~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var')) && exist('intrinsics', 'var')
+
+                    if exist('cameraParams', 'var') || (exist('cameraParams_undistorted', 'var') && exist('cameraParams_distorted', 'var'))
+                        % otherwise check that class is cameraIntrinsics
                         if exist('cameraParams', 'var')
                             assert(isa(cameraParams,'cameraParameters') || isa(cameraParams, 'cameraIntrinsics'), 'Error (input_day_flight_data): Please install the Computer Vision Toolbox and rerun.')
                             if isa(cameraParams, 'cameraParameters')
@@ -193,7 +198,7 @@ for dd = 1 : length(day_files)
                                 cameraParams_distorted = cameraParams_distorted.Intrinsics;
                             end % if isa(cameraParams_distorted, 'cameraParameters')
                         end %  if exist('cameraParams', 'var')
-                    end % if ~exist('cameraParams', 'var') && (~exist('cameraParams_undistorted', 'var') && ~exist('cameraParams_distorted', 'var'))
+                    end % if exist('cameraParams', 'var') || (exist('cameraParams_undistorted', 'var') && exist('cameraParams_distorted', 'var'))
                 case 'No'
                     disp('Please calibrate camera to proceed.')
                     cameraCalibrator
@@ -211,18 +216,14 @@ for dd = 1 : length(day_files)
     %  ==============================================================================
     if ~exist('Products', 'var') || ~isstruct(Products)
         answer = questdlg('Do you have a .mat Products file?', 'Product file', 'Yes', 'No', 'Yes');
-
         switch answer
             case 'Yes'
                 disp('Please select file of products you want to load in.')
-                disp('For DEMO: DATA/products_Torrey.mat') %% XXX
                 [temp_file, temp_file_path] = uigetfile(global_dir, 'Product file');
                 load(fullfile(temp_file_path, temp_file)); clear temp_file*
 
                 if ~exist('Products', 'var')
                     disp('Please create Products file.')
-                    disp('For CPG: construct DEM for appropriate day')
-
                     [Products] = user_input_products(global_dir);
                 end % if ~exist('Products', 'var')
             case 'No'
@@ -230,17 +231,6 @@ for dd = 1 : length(day_files)
         end % switch answer
         clear answer
 
-    else % if products already defined. Confirm z
-        z = [Products.z];
-        if length(z) < length(Products) % if not all fields have an elevation, or its empty
-            z = double(string(inputdlg({'What projection elevation do you want to use (e.g. tide level)? Set to 0 if tide level unknown, or empty if you want to include a DEM.'}, 'Elevation',1, {num2str(0)})));
-            if isnan(z)
-                % DEM Stuff XXX
-            else
-                [Products.z] = deal(z);
-            end % if isnan(z)
-        end %  if length(z) < length(Products)
-        clear z
     end % if ~exist('Products', 'var') || ~isstruct(Products)
     %% ==========================extractionRate======================================
     %                          EXTRACTION FRAME RATES
@@ -265,7 +255,7 @@ for dd = 1 : length(day_files)
     %  ==============================================================================
     flights = dir(fullfile(day_files(dd).folder, day_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
 
-    save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
+    save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
 
     %% =============================================================================
     %                          PROCESS EACH FLIGHT
@@ -273,7 +263,7 @@ for dd = 1 : length(day_files)
     for ff = 1 : length(flights)
         %% ========================Housekeeping=======================================
         clearvars -except dd ff *_dir user_email day_files flights
-        load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'))
+        load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'))
         assert(exist('extract_Hz', 'var'), 'Error (input_day_flight_data): extract_Hz must exist and be stored in ''day_input_data.mat''.')
         assert(isa(extract_Hz, 'double'), 'Error (input_day_flight_data): extract_Hz must be a double or array of doubles.')
         assert(exist('tz', 'var'), 'Error (input_day_flight_data): tz (timezone) must exist and be stored in ''day_input_data.mat''.')
@@ -435,9 +425,7 @@ for dd = 1 : length(day_files)
         %                           - Option 2: Manual from GCP targets
         %  ============================================================================
         % whichever method generates image_gcp (N x 2) and world_gcp (N x 3)
-        % use process_ig8_output_athina to get gps_northings.txt
         close all
-
         [ind_gcp_option,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'Select GCP targets'}],...
             'SelectionMode','single', 'InitialValue',2, 'PromptString', {'Initial GCP Method'}, 'ListSize', [500 300]);
 
@@ -455,6 +443,7 @@ for dd = 1 : length(day_files)
                 [i_gcp] = select_image_gcp(R.I, image_fig);
                 image_gcp = [image_gcp; i_gcp];
             end
+
             [world_gcp] = select_target_gcp;
             if size(world_gcp,1) ~= size(image_gcp,1)
                 disp('Didn''t click the right number of points.')
@@ -525,10 +514,14 @@ for dd = 1 : length(day_files)
 
         clear image_gcp world_gcp iP worldPose ind_gcp_option iGCP wGCP hGCP ii ans
         %% ========================Feature Detection Region & Method =====================
+
+        disp('We highly recommend SIFT features, but other options are included for completness.')
         feature_types = {'SIFT', 'SURF', 'BRISK', 'ORB', 'KAZE'};
         [ind_type,~] = listdlg('ListString', feature_types, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which feature types do you want to use?(default: SIFT)',''}, 'ListSize',[500 300]);
         R.feature_method = feature_types{ind_type};
 
+        disp('Click on beach points within the prompted red zone.')
+        disp('This masks out the ocean and improves processing time.')
         [R.mask] = select_ocean_mask(R.I);
         clf
         [Itemp] = apply_binary_mask(R.I, R.mask);
@@ -537,54 +530,6 @@ for dd = 1 : length(day_files)
         clear Itemp ind_type feature_types
         save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
         close all
-        %% ========================SCP================================================
-
-        % load(fullfile(odir, 'Processed_data', 'Inital_coordinates.mat'))
-        %
-        % % saving in CIRN format
-        % intrinsics_CIRN(1) =  R.intrinsics.ImageSize(2);            % Number of pixel columns
-        % intrinsics_CIRN(2) = R.intrinsics.ImageSize(1);            % Number of pixel rows
-        % intrinsics_CIRN(3) = R.intrinsics.PrincipalPoint(1);         % U component of principal point
-        % intrinsics_CIRN(4) = R.intrinsics.PrincipalPoint(2);          % V component of principal point
-        % intrinsics_CIRN(5) = R.intrinsics.FocalLength(1);         % U components of focal lengths (in pixels)
-        % intrinsics_CIRN(6) = R.intrinsics.FocalLength(2);         % V components of focal lengths (in pixels)
-        % intrinsics_CIRN(7) = R.intrinsics.RadialDistortion(1);         % Radial distortion coefficient
-        % intrinsics_CIRN(8) = R.intrinsics.RadialDistortion(2);         % Radial distortion coefficient
-        % if length(R.intrinsics.RadialDistortion) == 3
-        %     intrinsics_CIRN(9) = R.intrinsics.RadialDistortion(3);         % Radial distortion coefficient
-        % else
-        %     intrinsics_CIRN(9) = 0;         % Radial distortion coefficient
-        % end
-        % intrinsics_CIRN(10) = R.intrinsics.TangentialDistortion(1);        % Tangential distortion coefficients
-        % intrinsics_CIRN(11) = R.intrinsics.TangentialDistortion(2);        % Tangential distortion coefficients
-        %
-        % % Getting CIRN extrinsics
-        % % pull RTK-GPS coordinates from image and change to Eastings/Northings
-        % % requires intg2012b and ll_to_utm codes (in basic_codes)
-        % load(fullfile(odir, 'Processed_data', [oname '.csv'], 'C', 'jpg_id', 'mov_id')
-        % lat = char(C.GPSLatitude(jpg_id));
-        % lat = str2double(lat(1:10));
-        % long = char(C.GPSLongitude(jpg_id));
-        % if long(end) == 'W'
-        %     long = str2double(['-' long(1:11)]);
-        % else
-        %     long = str2double(long(1:11));
-        % end
-        % [zgeoid_offset] = intg2012b(code_dir, lat,long);
-        % [UTMNorthing, UTMEasting, UTMZone] = ll_to_utm(lat, long);
-        % extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
-        %
-        % extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
-        %
-        % R.intrinsics_CIRN = intrinsics_CIRN;
-        %
-        % [extrinsics, extrinsicsError]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag);
-        % R.extrinsics_scp = extrinsics;
-        % [scp] = define_SCP(R.I, R.image_gcp, R.intrinsics_CIRN);
-        % R.scp = scp;
-        %
-        % save(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R', '-append')
-
         %% ========================productsCheck=======================================
         %                          CHECK PRODUCTS ON INITIAL IMAGE
         %                           - Load in all required data -
@@ -592,10 +537,10 @@ for dd = 1 : length(day_files)
         %  ============================================================================
 
         load(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R')
-        load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'Products')
+        load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'Products')
         info = double(string(inputdlg({ 'z elevation (tide level in relevant datum)'}, 'Tide elevation')));
         [Products.tide]=deal(info);
-        
+
         %% ========================grid================================================
         %                          GRID
         %                           - Projects grid onto inital frame
@@ -627,22 +572,22 @@ for dd = 1 : length(day_files)
         %                           - Projects all xTransects onto inital frame
         %                           - If unhappy, can reinput transect data
         %  ============================================================================
-        if ~isempty(find(ismember(string({Products.type}), 'xTransect'), 1))
+        if ~isempty(find(ismember(string({Products.type}), 'xTransect')))
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
                 plot_xtransects(Products, R.I, R.intrinsics, R.worldPose)
-                answer = questdlg('Happy with grid projection?', 'Grid projection', 'Yes', 'No - redefine', 'Yes');
+                answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No', 'Yes');
                 switch answer
                     case 'Yes'
                         gridChangeIndex = 1;
                     case 'No - redefine'
                         disp('Please change transects.')
-                        ids_xtransect = find(ismember(string({Products.type}), 'xTransect'), 1);
+                        ids_xtransect = find(ismember(string({Products.type}), 'xTransect'));
                         origin_grid = [Products(ids_xtransect(1)).lat Products(ids_xtransect(1)).lon, Products(ids_xtransect(1)).angle];
                         Products(ids_xtransect) = [];
                         productCounter = length(Products);
                         [Product1] = define_xtransect(origin_grid);
-                        Products(productCounter:productCounter+length(Product1))=Product1;
+                        Products(productCounter+1:productCounter+length(Product1))=Product1;
                 end % switch answer
             end % while gridChangeIndex == 0
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_xTransects.png' ]))
@@ -654,30 +599,28 @@ for dd = 1 : length(day_files)
         %                           - Projects all yTransects onto inital frame
         %                           - If unhappy, can reinput transect data
         %  ============================================================================
-        if ~isempty(find(ismember(string({Products.type}), 'yTransect'), 1))
+        if ~isempty(find(ismember(string({Products.type}), 'yTransect')))
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
                 plot_ytransects(Products, R.I, R.intrinsics, R.worldPose)
-                answer = questdlg('Happy with rough transect numbers?', 'Transect Numbers', 'Yes', 'No', 'Yes');
+                answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No', 'Yes');
                 switch answer
                     case 'Yes'
                         gridChangeIndex = 1;
                     case 'No'
                         disp('Please change transects.')
-                        ids_ytransect = find(ismember(string({Products.type}), 'yTransect'), 1);
+                        ids_ytransect = find(ismember(string({Products.type}), 'yTransect'));
                         origin_grid = [Products(ids_ytransect(1)).lat Products(ids_ytransect(1)).lon, Products(ids_ytransect(1)).angle];
                         Products(ids_ytransect) = [];
                         productCounter = length(Products);
                         [Product1] = define_ytransect(origin_grid);
-                        Products(productCounter:productCounter+length(Product1))=Product1;
+                        Products(productCounter+1:productCounter+length(Product1))=Product1;
                 end % switch answer
             end % while gridChangeIndex == 0
             print(gcf,'-dpng',fullfile(odir, 'Processed_data', [oname '_yTransects.png' ]))
 
             clearvars  gridChangeIndex answer origin_grid Product1 productCounter
         end %  if ~isempty(find(ismember(string({Products.type}), 'yTransect')))
-
-
 
         %% ========================email===============================================
         %                         SEND EMAIL WITH INPUT DATA
@@ -688,7 +631,7 @@ for dd = 1 : length(day_files)
         %                           - Products
         %  ============================================================================
         save(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
-        
+
         clear grid_text grid_plot
         load(fullfile(odir, 'Processed_data', [oname '_IOEO']))
         grid_text{1} = sprintf('Lat / Long = %.2f / %.2f, Angle = %.2f deg', Products(1).lat, Products(1).lon, Products(1).angle);

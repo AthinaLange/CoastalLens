@@ -61,7 +61,7 @@ end
 %% save products
 close all
 for  dd = 1 : length(day_files)
-    clearvars -except dd *_dir user_email day_files 
+    clearvars -except dd *_dir user_email day_files
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
     load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'extract_Hz', 'flights')
@@ -74,12 +74,18 @@ for  dd = 1 : length(day_files)
         oname = [day_files(dd).name '_' flights(ff).name];
         cd(odir)
         save_dir = fullfile(odir, 'Rectified_images');
-         if ~exist(save_dir, 'dir')
+        if ~exist(save_dir, 'dir')
             mkdir(save_dir)
-         end % if ~exist(save_dir, 'dir')
-         load(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
-         save_rectified_image(oname, save_dir, Products)
-         if exist('user_email', 'var')
+        end % if ~exist(save_dir, 'dir')
+        load(fullfile(odir, 'Processed_data', [oname '_IOEO.mat']), 'R')
+        load(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
+        if R.scp_flag == 1 % with SCP
+            save_rectified_image_DEMO(oname, save_dir, Products)
+        else
+            save_rectified_image(oname, save_dir, Products)
+        end % if R.scp_flag == 1 % with SCP
+
+        if exist('user_email', 'var')
             sendmail(user_email{2}, [oname '- Save image products DONE'])
         end % if exist('user_email', 'var')
     end % for ff = 1 : length(flights)

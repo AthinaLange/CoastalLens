@@ -13,9 +13,6 @@
 %                       intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
 %                       mask (logical) : mask over ocean region (same dimensions as image) - used to speed up computational time (optional)
 %                       feature_method (string): feature type to use in feature detection algorithm (default: `SIFT`, must be `SIFT`, `SURF`, `BRISK`, `ORB`, `KAZE`) (optional)
-%                       intrinsics_CIRN (double): [1 x 11] array of camera intrinisc parameters as defined in the CIRN convention ()
-%                       extrinsics_scp (double): [1 x 6] (x y z aximuth tilt roll) arry of initial camera extrinsic parameters as defined in the CIRN convention ()
-%                       scp (structure): stability control points - including radius, threshold, bright/dark flag and pixel coordinates
 %
 %   Returns:
 %           R (structure) : extrinsics/intrinsics information
@@ -25,7 +22,6 @@
 %                       frameRate (double) : frame rate of extrinsics (Hz)
 %                       t (datetime array) : [1 x m] datetime of images at various extraction rates in UTC
 %                       extrinsics_2d (projtform2d) : [1 x m] 2d projective transformation of m images
-%                       extrinsics_scp (double) : [m x 6] evolving camera extrinsics (from SCPs)
 %
 %
 % For each extraction frame rate:
@@ -69,8 +65,8 @@ end % if exist('global_dir', 'var')
 
 % check that needed files exist
 for dd = 1:length(day_files)
-    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat')),['Error (run_extrinsics): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat') ' doesn''t exist.']);
-    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'flights')
+    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat')),['Error (run_extrinsics): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat') ' doesn''t exist.']);
+    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights')
     for ff = 1:length(flights)
         assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat')), ['Error (run_extrinsics): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat') ' doesn''t exist.']);
     end
@@ -81,10 +77,10 @@ for dd = 1 : length(day_files)
     clearvars -except dd *_dir user_email day_files
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
-    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'extract_Hz', 'flights')
-    assert(exist('extract_Hz', 'var'), 'Error (run_extrinsics): extract_Hz must exist and be stored in ''day_input_data.mat''.')
+    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'extract_Hz', 'flights')
+    assert(exist('extract_Hz', 'var'), 'Error (run_extrinsics): extract_Hz must exist and be stored in ''day_config_file.mat''.')
     assert(isa(extract_Hz, 'double'), 'Error (run_extrinsics): extract_Hz must be a double or array of doubles.')
-    assert(exist('flights', 'var'), 'Error (run_extrinsics): flights must exist and be stored in ''day_input_data.mat''.')
+    assert(exist('flights', 'var'), 'Error (run_extrinsics): flights must exist and be stored in ''day_config_file.mat''.')
     assert(isa(flights, 'struct'), 'Error (run_extrinsics): flights must be a structure.')
     assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (run_extrinsics): flights must have fields .folder and .name.')
 
@@ -113,14 +109,14 @@ for dd = 1 : length(day_files)
             assert(exist('mov_id', 'var'), 'Error (run_extrinsics): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
             assert(isa(mov_id, 'double'), 'Error (run_extrinsics): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
             assert(exist('tz', 'var'), 'Error (run_extrinsics): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
-            assert(isa(tz, 'char'), 'Error (run_extrinsics): tz (timezone) must be timezone character string. run [tz] = select_timezone.')
+            assert(isa(tz, 'char') || isa(tz, 'string'), 'Error (run_extrinsics): tz (timezone) must be timezone character string. run [tz] = select_timezone.')
 
             R.frameRate = extract_Hz(hh);
             dts = 1/extract_Hz(hh);
             to = datetime(string(C.CreateDate(mov_id(1))), 'InputFormat', 'yyyy:MM:dd HH:mm:ss', 'TimeZone', tz);
             to.TimeZone = 'UTC';
             to = datenum(to);
-            t = (dts./24./3600).*([1:length(images.Files)]-1)+ to;
+            t = (dts./24./3600).*((1:length(images.Files))-1)+ to;
             R.t = datetime(t, 'ConvertFrom', 'datenum', 'TimeZone', 'UTC');
 
             %% GET EXTRINSICS
@@ -137,29 +133,28 @@ for dd = 1 : length(day_files)
                 [extrinsics] = get_extrinsics_fd(images, R.intrinsics);
             end %  if isfield(R, 'mask') && ~isfield(R, 'feature_method')
             % Create the panorama.
-            [panorama] = plot_panorama(images, R.intrinsics, extrinsics);
+            [panorama, panoramaView] = plot_panorama(images, R.intrinsics, extrinsics);
             %  Save File
             figure(1);clf
             imshow(panorama)
             saveas(gca, fullfile(odir, 'Processed_data', [oname '_Panorama.png']))
             R.extrinsics_2d = extrinsics;
-            save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
+            R.panoramaView = panoramaView;
+            save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz.mat' ]),'R')
 
             %% ========================SCPs=====================================================
-            %
             if R.scp_flag == 1
-                clear extrinsics
                 if exist('user_email', 'var')
                     sendmail(user_email{2}, [oname '- Please start extrinsics through time with SCPs.'])
-                end % if exist('user_email', 'var')
+                end
                 answer = questdlg('Ready to start SCPs?', 'SCPs begin', 'Yes', 'Yes');
-    
+
                 load(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
+                R.intrinsics_CIRN = intrinsics_CIRN;
                 [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, R.scp, R.extrinsics_scp, R.intrinsics_CIRN, t, R.intrinsics);
                 R.extrinsics_scp = extrinsics;
                 save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz.mat' ]),'R','-append')
             end % if R.scp_flag == 1
-
         end % for hh = 1 : length(extract_Hz)
         if exist('user_email', 'var')
             sendmail(user_email{2}, [oname '- Extrinsics through time DONE'])

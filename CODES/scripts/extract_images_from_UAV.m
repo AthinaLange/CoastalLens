@@ -51,8 +51,8 @@ end % if exist('global_dir', 'var')
 
 % check that needed files exist
 for dd = 1:length(day_files)
-    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat')),['Error (extract_images_from_UAV): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat') ' doesn''t exist.']);
-    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'flights')
+    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat')),['Error (extract_images_from_UAV): ' fullfile(day_files(dd).folder, day_files(dd).name, 'config_file.mat') ' doesn''t exist.']);
+    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights')
     for ff = 1:length(flights)
         assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat')), ['Error (extract_images_from_UAV): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat') ' doesn''t exist.']);
     end
@@ -63,10 +63,10 @@ for dd = 1:length(day_files)
     clearvars -except dd *_dir user_email day_files
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
-    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'extract_Hz', 'flights')
-    assert(exist('extract_Hz', 'var'), 'Error (extract_images_from_UAV): extract_Hz must exist and be stored in ''day_input_data.mat''.')
+    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'extract_Hz', 'flights')
+    assert(exist('extract_Hz', 'var'), 'Error (extract_images_from_UAV): extract_Hz must exist and be stored in ''day_config_file.mat''.')
     assert(isa(extract_Hz, 'double'), 'Error (extract_images_from_UAV): extract_Hz must be a double or array of doubles.')
-    assert(exist('flights', 'var'), 'Error (extract_images_from_UAV): flights must exist and be stored in ''day_input_data.mat''.')
+    assert(exist('flights', 'var'), 'Error (extract_images_from_UAV): flights must exist and be stored in ''day_config_file.mat''.')
     assert(isa(flights, 'struct'), 'Error (extract_images_from_UAV): flights must be a structure.')
     assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (extract_images_from_UAV): flights must have fields .folder and .name.')
 

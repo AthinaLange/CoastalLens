@@ -37,6 +37,15 @@ function [xyz, localX, localY, Z, Eastings, Northings] = getCoords(Products)
 %% Data
 assert(isa(Products, 'struct'), 'Error (getCoords): Products must be a structure.')
 assert(size(Products,2)==1, 'Error (getCoords): Products must be a single object structure. Pass as Products(pp).')
+assert(isfield(Products, 'lat'), 'Error (getCoords): Products must have lat field.')
+assert(isfield(Products, 'lon'), 'Error (getCoords): Products must have lon field.')
+assert(isfield(Products, 'angle'), 'Error (getCoords): Products must have angle field.')
+assert(isfield(Products, 'tide'), 'Error (getCoords): Products must have tide field.')
+assert(isfield(Products, 'xlim'), 'Error (getCoords): Products must have xlim field.')
+assert(isfield(Products, 'ylim'), 'Error (getCoords): Products must have ylim field.')
+assert(isfield(Products, 'type'), 'Error (getCoords): Products must have type field.')
+assert(isfield(Products, 'x'), 'Error (getCoords): Products must have x field.')
+assert(isfield(Products, 'y'), 'Error (getCoords): Products must have y field.')
 
 %%
 % Get origin coordinates

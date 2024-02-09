@@ -31,7 +31,7 @@ function [Products] = define_xtransect(origin_grid)
 assert(isa(origin_grid, 'double'), 'Error (define_xtransect): origin_grid must be an array of doubles.')
 assert(length(origin_grid)==3, 'Error (define_xtransect): origin_grid must contain 3 values.')
 %%
-Product = struct('productType',[], 'type',[],  'frameRate',[],  'lat', [], 'lon',[],  'angle',[], 'xlim',[],  'ylim',[],  'dx',[],  'dy', [], 'x', [], 'y',[],  'z',[]);
+Product = struct('productType',[], 'type',[],  'frameRate',[],  'lat', [], 'lon',[],  'angle',[], 'xlim',[],  'ylim',[],  'dx',[],  'dy', [], 'x', [], 'y',[],  'z',[], 'tide', []);
 
 Product.productType = 'Timestack';
 Product.type = 'xTransect';

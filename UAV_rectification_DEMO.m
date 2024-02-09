@@ -91,22 +91,27 @@ end
 disp(platform)
 
 if ismac || isunix
-    disp('Choose root folder - UAV_automated_rectification.')
+    disp('Choose global (repository) folder - ''UAV_automated_rectification''.')
 end
-global_dir = uigetdir('.', 'Choose root folder - UAV_automated_rectification.');
+global_dir = uigetdir('.', 'Choose global (repository) folder - ''UAV_automated_rectification''.');
 cd(global_dir)
-setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
+if ismac
+    setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
+end
 
 %% =============== Check that all necessary codes are loaded. =================
 code_dir = fullfile(global_dir, 'CODES');
-
+% Check that scripts are downloaded.
+if ~exist(fullfile(code_dir, 'scripts'), 'dir')
+    disp('Please download scripts folder from GitHub.')
+end
 % Check that basic Functions are downloaded.
 if ~exist(fullfile(code_dir, 'basicFunctions'), 'dir')
-    disp('Please download basicFunctions codes from GitHub.')
+    disp('Please download basicFunctions folder from GitHub.')
 end
 % Check that helper Functions are downloaded.
 if ~exist(fullfile(code_dir, 'helperFunctions'), 'dir')
-    disp('Please download helperFunctions codes from GitHub.')
+    disp('Please download helperFunctions folder from GitHub.')
 end
 
 % Check that ffmpeg is installed.
@@ -143,7 +148,7 @@ clear *answer ans
 % Load which data folders are to be processed
 if ismac || isunix
     disp('Choose DATA folder.')
-    disp('For Athina: DATA') %% XXX
+    disp('For DEMO: ''DATA'' ')
 end
 data_dir = uigetdir('.', 'DATA Folder');
 

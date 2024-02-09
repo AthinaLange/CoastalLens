@@ -65,8 +65,8 @@ end % if exist('global_dir', 'var')
 
 % check that needed files exist
 for dd = 1:length(day_files)
-    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat')),['Error (run_extrinsics): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat') ' doesn''t exist.']);
-    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'flights')
+    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat')),['Error (run_extrinsics): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat') ' doesn''t exist.']);
+    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights')
     for ff = 1:length(flights)
         assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat')), ['Error (run_extrinsics): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat') ' doesn''t exist.']);
     end
@@ -77,10 +77,10 @@ for dd = 1 : length(day_files)
     clearvars -except dd *_dir user_email day_files
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
-    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'extract_Hz', 'flights')
-    assert(exist('extract_Hz', 'var'), 'Error (run_extrinsics): extract_Hz must exist and be stored in ''day_input_data.mat''.')
+    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'extract_Hz', 'flights')
+    assert(exist('extract_Hz', 'var'), 'Error (run_extrinsics): extract_Hz must exist and be stored in ''day_config_file.mat''.')
     assert(isa(extract_Hz, 'double'), 'Error (run_extrinsics): extract_Hz must be a double or array of doubles.')
-    assert(exist('flights', 'var'), 'Error (run_extrinsics): flights must exist and be stored in ''day_input_data.mat''.')
+    assert(exist('flights', 'var'), 'Error (run_extrinsics): flights must exist and be stored in ''day_config_file.mat''.')
     assert(isa(flights, 'struct'), 'Error (run_extrinsics): flights must be a structure.')
     assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (run_extrinsics): flights must have fields .folder and .name.')
 
@@ -141,21 +141,6 @@ for dd = 1 : length(day_files)
             R.extrinsics_2d = extrinsics;
             R.panoramaView = panoramaView;
             save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz.mat' ]),'R')
-
-            %% ========================SCPs=====================================================
-            %
-            % if exist('user_email', 'var')
-            %     sendmail(user_email{2}, [oname '- Please start extrinsics through time with SCPs.'])
-            % end
-            % answer = questdlg('Ready to start SCPs?', ...
-            %     'SCPs begin',...
-            %     'Yes', 'Yes');
-            %
-            % load(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz' ]),'R')
-            % R.intrinsics_CIRN = intrinsics_CIRN;
-            % [extrinsics] = get_extrinsics_scp(odir, oname, extract_Hz(hh), images, R.scp, R.extrinsics_scp, R.intrinsics_CIRN, t, R.intrinsics);
-            % R.extrinsics_scp = extrinsics;
-            % save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz.mat' ]),'R','-append')
 
         end % for hh = 1 : length(extract_Hz)
         if exist('user_email', 'var')

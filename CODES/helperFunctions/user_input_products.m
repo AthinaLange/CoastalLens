@@ -1,7 +1,7 @@
 function [Products] = user_input_products(global_dir)
 %   user_input_products returns structure with dimensions needed to construct cBathy-type grids, cross-shore and along-shore transects.
 %% Syntax
-%           [Products] = user_input_products
+%           [Products] = user_input_products(global_dir)
 %
 %% Description
 %   Args:
@@ -41,7 +41,7 @@ answer2 = questdlg('Do you have a .mat origin file?', 'Grid file', 'Yes', 'No', 
 switch answer2
     case 'Yes'
         disp('Please load in origin grid file.')
-        disp('For DEMO: under data_files/origin_Torrey.mat') %% XXX
+        disp('For DEMO: under demo_files/origin_Torrey.mat')
         [temp_file, temp_file_path] = uigetfile(global_dir, 'Origin grid file');
         load(fullfile(temp_file_path, temp_file), 'origin_grid'); clear temp_file*
         if length(origin_grid) ~= 3
@@ -101,7 +101,7 @@ productCounter = 0;
 while productFlag == 0
     clear productType Product1 info yy xx info_num
     productCounter = productCounter + 1;
-    [productType_ind,~] = listdlg('ListString',{'Grid (cBathy/Rectified Image)', 'xTransect (Timestack)', 'yTransect''}, 'SelectionMode','single', 'InitialValue',1, 'Name', 'What product do you want to create?', 'ListSize', [500 300]);
+    [productType_ind,~] = listdlg('ListString',{'Grid (cBathy/Rectified Image)', 'xTransect (Timestack)', 'yTransect'}, 'SelectionMode','single', 'InitialValue',1, 'Name', 'What product do you want to create?', 'ListSize', [500 300]);
 
     % ============================== GRID =======================================
     if productType_ind == 1
