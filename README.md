@@ -31,6 +31,8 @@ You can find more details, including the information you need to run this on you
 
 Data to test the code is provided in the DATA folder and the video can be downloaded [here](https://drive.google.com/file/d/1Qk1q1i75eXTYNB92fwHlcD6Yg7p0FV_W/view?usp=drive_link) (716MB). Save this video in DATA/20211215_Torrey/Flight_04/.
 
+See [DEMO_info.csv]() for relevant input information. We recommend making a similar table to keep track of all the necessary information for your own drone flights. 
+
 User prompts/direction is printed in the Command Window. 
 
 ## Testing
