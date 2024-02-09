@@ -43,15 +43,14 @@ Product.angle = origin_grid(3);
 
 info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin, + if offshore)', ...
     'Southern Alongshore extent (m from Origin)', 'Northern Alongshore extent (m from Origin)',...
-    'dx', 'dy'}, 'Grid Coordinates')));
-answer = questdlg('Do you want to include a DEM?', 'DEM file', 'Yes', 'No', 'Yes');
+    'dx (Cross-shore Resolution m)', 'dy (Along-shore Resolution m)'}, 'Grid Coordinates')));
 
 % check that there's a value in all the required fields
 if find(isnan(info)) ~= 7
     disp('Please fill out all boxes (except z elevation if necessary)')
     info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin, + if offshore)', 'Onshore cross-shore extent (m from Origin, + if offshore)', ...
         'Southern Alongshore extent (+m from Origin)', 'Northern Alongshore extent (+m from Origin)',...
-        'dx', 'dy'}, 'Grid Coordinates')));
+        'dx (Cross-shore Resolution m)', 'dy (Along-shore Resolution m)'}, 'Grid Coordinates')));
 end % if find(isnan(info)) ~= 7
 
 if info(1) > 30
@@ -69,10 +68,4 @@ end % if origin_grid(3) < 180 % East Coast
 Product.dx = abs(info(6));
 Product.dy = abs(info(7));
 
-switch answer
-    case 'No'
-        Product.z = [];
-    case 'Yes'
-       
-end % switch answer
 end

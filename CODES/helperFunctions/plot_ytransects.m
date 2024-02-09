@@ -40,7 +40,7 @@ title('yTransect')
 jj=0;
 for pp = ids_ytransect % repeat for all ytransects
     jj=jj+1;
-    [xyz,~,~,~] = getCoords(Products(pp));
+    [xyz,~,~,~,~,~] = getCoords(Products(pp));
     iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
 
     scatter(iP(:,1), iP(:,2), 25, 'filled')

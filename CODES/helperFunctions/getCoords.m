@@ -1,4 +1,4 @@
-function [xyz, ep, np, Z] = getCoords(Products)
+function [xyz, localX, localY, Z, Eastings, Northings] = getCoords(Products)
 %   getCoords returns the (x,y,z) world coordinates for the dimensions
 %   specified in Products.
 %% Syntax
@@ -23,6 +23,11 @@ function [xyz, ep, np, Z] = getCoords(Products)
 %
 %   Returns:
 %       xyz (double) : [m x 3] (x, y, z) world coordinates for Products. Rotated according to Product.angle.
+%       localX (double) : [y x x] local X coordinates (+x is offshore, m)
+%       localY (double) : [y x x] local Y coordinates (+y is right of origin, m)
+%       Z (double) : [y x x] Z coordinate - tide level       
+%       Eastings (double) : [y x x] Eastings coordinates (m)
+%       Northings (double) : [y x x] Northings coordinates (m)
 %
 %
 %% Citation Info
@@ -72,13 +77,19 @@ Z = X.*0 + iz;
 
 
 %% Rotation
-ep=X - x2;
-np=Y - y2;
+localX=X - x2;
+localY=Y - y2;
 
-Xout=ep.*cosd(Products.angle-270)+np.*sind(Products.angle-270);
-Yout=np.*cosd(Products.angle-270)-ep.*sind(Products.angle-270);
+Xout=localX.*cosd(Products.angle-270)+localY.*sind(Products.angle-270);
+Yout=localY.*cosd(Products.angle-270)-localX.*sind(Products.angle-270);
 
 xyz = [Xout(:) Yout(:) Z(:)];
 xyz = xyz+[x2 y2 0];
+
+localX = -localX;
+
+Eastings = Xout + x2;
+Northings = Yout + y2;
+
 end
 

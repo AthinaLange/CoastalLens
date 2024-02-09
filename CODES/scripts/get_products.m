@@ -43,9 +43,11 @@
 %                       z (double) : Elevation - can be empty or array of DEM values (NAVD88 m)
 %                       tide (double) : Tide level (NAVD88 m)
 %                       t (datetime array) : [1 x m] datetime of images at given extraction rates in UTC
-%                       localX (double) : [y_length x x_length] x coordinates in locally-defined coordinate system
-%                       localY (double) : [y_length x x_length] y coordinates in locally-defined coordinate system
+%                       localX (double) : [y_length x x_length] x coordinates in locally-defined coordinate system (+x is offshore, m)
+%                       localY (double) : [y_length x x_length] y coordinates in locally-defined coordinate system (+y is right of origin, m)
 %                       localZ (double) : [y_length x x_length] z coordinates in locally-defined coordinate system
+%                       Eastings (double) : [y x x] Eastings coordinates (m)
+%                       Northings (double) : [y x x] Northings coordinates (m)
 %                       Irgb_2d (uint8 image) : [m x y_length x x_length x 3] timeseries of pixels extracted according to dimensions of xlim and ylim
 %
 %
@@ -178,16 +180,14 @@ for  dd = 1 : length(day_files)
                         if rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0 % if subsampled framerate
                             %% FD
                             if viewId == 1
-                                [xyz, X, Y, Z] = getCoords(Products(pp));
-                                Products(pp).localX = -X;
-                                Products(pp).localY = Y;
+                                [xyz, localX, localY, Z, Eastings, Northings] = getCoords(Products(pp));
+                                Products(pp).localX = localX;
+                                Products(pp).localY = localY;
+                                Products(pp).Eastings = Eastings;
+                                Products(pp).Northings = Northings;
                                 Products(pp).localZ = Z;
-                                %find orientation of original image in panoramaView
-                                % mask = imwarp(true(size(I,1),size(I,2)), R.extrinsics_2d(viewId), 'OutputView', panoramaView);
-                                % BW = boundarymask(mask);
-                                % [row, col] = find(BW == 1, 1,'first');
 
-                                Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics));%+[col row];
+                                Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics));
                             end %  if viewId == 1
 
                             clear Irgb_temp
@@ -206,10 +206,8 @@ for  dd = 1 : length(day_files)
                             end % if contains(Products(pp).type, 'Grid')
 
                             %% SCP
-                            % [IrIndv, Xout, Yout, Z] = getPixels(Products(pp), R.extrinsics_scp(viewId,:), R.intrinsics_CIRN, I);
-                            % Products(pp).localX = Xout;
-                            % Products(pp).localY = Yout;
-                            % Products(pp).localZ = Z;
+                            % [IrIndv, ~,~,~,~,~] = getPixels(Products(pp), R.extrinsics_scp(viewId,:), R.intrinsics_CIRN, I);
+                           
                             % if contains(Products(pp).type, 'Grid')
                             %     Products(pp).Irgb_scp(viewId, :,:,:) = IrIndv;
                             % else
@@ -259,14 +257,17 @@ for  dd = 1 : length(day_files)
 
 
         end % for hh = 1 : length(extract_Hz)
+        if exist('user_email', 'var')
+            sendmail(user_email{2}, [oname '- Rectifying Products DONE'])
+        end % if exist('user_email', 'var')
     end %  for ff = 1 : length(flights)
 end % for  dd = 1 : length(day_files)
 %%
 
 %% FUNCTIONS
-% function [IrIndv, Xout, Yout, Z] = getPixels(Products, extrinsics, intrinsics, I)
+% function [IrIndv, Xout, Yout, Z, Eastings, Northings] = getPixels(Products, extrinsics, intrinsics, I)
 %
-% [xyz, Xout, Yout, Z] = getCoords(Products);
+% [xyz, Xout, Yout, Z,Eastings, Northings] = getCoords(Products);
 %
 % %[y2,x2, ~] = ll_to_utm(Products.lat, Products.lon);
 % %localExtrinsics = localTransformExtrinsics([x2 y2], Products.angle-270, 1, extrinsics);

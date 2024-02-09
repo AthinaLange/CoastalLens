@@ -93,7 +93,7 @@ disp(platform)
 if ismac || isunix
     disp('Choose root folder - UAV_automated_rectification.')
 end
-global_dir = uigetdir('.', 'Choose root folder - UAV_automated_rectification.');
+global_dir = uigetdir('.', 'Choose global (repository) folder - ''UAV_automated_rectification''.');
 cd(global_dir)
 if ismac
     setenv('PATH', [getenv('PATH') ':/usr/local/bin']);

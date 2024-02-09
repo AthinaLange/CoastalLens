@@ -25,7 +25,7 @@ image(I)
 xticks([])
 yticks([])
 pan on
-title('Click point in ocean where mask should start (within red box).')
+title('Click point at beach/ocean interface where mask should start (within red box).')
 rec1 = rectangle('Position', [1 1 n/20 m], 'EdgeColor', 'red', 'LineWidth', 3);
 
 a = drawpoint();

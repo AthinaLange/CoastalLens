@@ -101,7 +101,7 @@ productCounter = 0;
 while productFlag == 0
     clear productType Product1 info yy xx info_num
     productCounter = productCounter + 1;
-    [productType_ind,~] = listdlg('ListString',{'Grid (cBathy/Rectified Image)', 'xTransect (Timestack)', 'yTransect', 'Other (Not recommended)'}, 'SelectionMode','single', 'InitialValue',1, 'Name', 'What product do you want to create?', 'ListSize', [500 300]);
+    [productType_ind,~] = listdlg('ListString',{'Grid (cBathy/Rectified Image)', 'xTransect (Timestack)', 'yTransect''}, 'SelectionMode','single', 'InitialValue',1, 'Name', 'What product do you want to create?', 'ListSize', [500 300]);
 
     % ============================== GRID =======================================
     if productType_ind == 1

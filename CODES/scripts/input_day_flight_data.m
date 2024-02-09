@@ -125,7 +125,7 @@ end
 %                               - specify ocean mask to reduce processing time
 %                               - check products
 %  ===============================================================================
-for dd = 2 : length(day_files)
+for dd = 1 : length(day_files)
     %% ==========================Housekeeping======================================
     clearvars -except dd *_dir user_email day_files
     cd([day_files(dd).folder '/' day_files(dd).name])
@@ -593,7 +593,9 @@ for dd = 2 : length(day_files)
 
         load(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R')
         load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_input_data.mat'), 'Products')
-
+        info = double(string(inputdlg({ 'z elevation (tide level in relevant datum)'}, 'Tide elevation')));
+        [Products.tide]=deal(info);
+        
         %% ========================grid================================================
         %                          GRID
         %                           - Projects grid onto inital frame
@@ -685,8 +687,6 @@ for dd = 2 : length(day_files)
         %                           - Data extraction frame rates
         %                           - Products
         %  ============================================================================
-        info = double(string(inputdlg({ 'z elevation (tide level in relevant datum)'}, 'Tide elevation')));
-        [Products.tide]=deal(info);
         save(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
         
         clear grid_text grid_plot

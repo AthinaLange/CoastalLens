@@ -39,19 +39,16 @@ Product.lat = origin_grid(1);
 Product.lon = origin_grid(2);
 Product.angle = origin_grid(3);
 
-
 info = inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (+m from Origin)', 'Onshore cross-shore extent (m from Origin, + is offshore)', ...
     'Alongshore location of transects (m from Origin, looking offshore, right side +) - e.g. -100, 0, 100 OR [-100:100:100]',...
-    'dx'}, 'xTransect Coordinates');
-
-answer = questdlg('Do you want to include a DEM?', 'DEM file', 'Yes', 'No', 'Yes');
+    'dx (Cross-shore Resolution m)'}, 'xTransect Coordinates');
 
 % check that there's a value in all the required fields
 if ~isempty(find(isnan(double(string(info([1 2 3 5])))), 1))
     disp('Please fill out all boxes (except z elevation if necessary)')
     info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin, + is offshore)', ...
         'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]',...
-        'dx'}, 'xTransect Coordinates')));
+        'dx (Cross-shore Resolution m)'}, 'xTransect Coordinates')));
 end % if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
 
 info_num = double(string(info([1 2 3 5]))); 
@@ -76,17 +73,9 @@ elseif length(yy) == 1
     yy = string(inputdlg({'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]'}));
 end % if contains(yy, ',')
 
-switch answer
-    case 'No'
-        Z = NaN(length(yy),1);
-    case 'Yes'
-       
-end % switch answer
-
 for ii = 1:length(yy)
     Products(ii) = Product;
     Products(ii).y = yy(ii);
-    Products(ii).z = Z(ii,:);
 end % for ii = 1:length(yy)
 
 end
