@@ -89,6 +89,7 @@ for dd = 1 : length(day_files)
         clearvars -except dd *_dir user_email day_files extract_Hz flights ff
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [day_files(dd).name '_' flights(ff).name];
+        disp(oname)
         cd(odir)
 
         assert(isfile(fullfile(odir, 'Processed_data', [oname '_IOEO.mat'])), ['Error (run_extrinsics): ' fullfile(odir, 'Processed_data', [oname '_IOEO.mat']) 'doesn''t exist. R variable must be stored there.'])

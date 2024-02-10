@@ -106,6 +106,7 @@ for  dd = 1 : length(day_files)
     for ff = 1 : length(flights)
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [day_files(dd).name '_' flights(ff).name];
+        disp(oname)
         cd(odir)
 
         load(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')

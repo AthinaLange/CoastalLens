@@ -99,7 +99,7 @@ for dd = 1:length(day_files)
                 % combine images extracted from video
                 combine_images(video_files, imageDirectory = imageDirectory)
 
-                % replacing 1st image with image extracted as initial frame for gcp and scp accuracy
+                % replacing 1st image with image extracted as initial frame for gcp accuracy
                 if ispc
                     system(['cp Processed_data\Initial_frame.jpg ' imageDirectory '\Frame_00001.jpg']);
                 else

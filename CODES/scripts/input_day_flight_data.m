@@ -630,7 +630,7 @@ for dd = 1 : length(day_files)
         %                           - Data extraction frame rates
         %                           - Products
         %  ============================================================================
-        save(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
+        save(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products', '-v7.3')
 
         clear grid_text grid_plot
         load(fullfile(odir, 'Processed_data', [oname '_IOEO']))

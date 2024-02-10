@@ -142,7 +142,7 @@ if isToolboxAvailable('Computer Vision Toolbox','warning')== 0
     disp('Please install the Computer Vision Toolbox before proceeding.')
 end % if isToolboxAvailable('Computer Vision Toolbox','warning')== 0
 
-
+warning('off', 'images:geotrans:transformationMatrixBadlyConditioned')
 clear *answer ans
 %% =============== Select days to process.  =================================
 % Load which data folders are to be processed

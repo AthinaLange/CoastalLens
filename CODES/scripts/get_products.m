@@ -106,6 +106,7 @@ for  dd = 1 : length(day_files)
     for ff = 1 : length(flights)
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [day_files(dd).name '_' flights(ff).name];
+        disp(oname)
         cd(odir)
 
         load(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
@@ -244,7 +245,7 @@ for  dd = 1 : length(day_files)
                 Products(pp).t=Products(pp).t(1:extract_Hz(hh)/Products(pp).frameRate:end);
             end %  for pp = 1:length(Products)
 
-            save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '-append')
+            save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '-append', '-v7.3')
 
 
         end % for hh = 1 : length(extract_Hz)

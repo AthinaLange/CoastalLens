@@ -699,7 +699,8 @@ for dd = 1 : length(day_files)
         %                           - Products
         %  ============================================================================
         [Products.tide]=deal(tide);
-        save(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products')
+        save(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products', '-v7.3')
+
 
         clear grid_text grid_plot
         load(fullfile(odir, 'Processed_data', [oname '_IOEO']))

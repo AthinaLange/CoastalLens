@@ -30,9 +30,11 @@ assert(isfield(Products,'localY'), 'Error (plot_rectified_image_rotation): Produ
 assert(isfield(Products,'Irgb_2d'), 'Error (plot_rectified_image_rotation): Products have Irgb_2d field.')
 assert(isfield(Products,'angle'), 'Error (plot_rectified_image_rotation): Products have angle field.')
 
+[y2,x2, ~] = ll_to_utm(Products.lat, Products.lon);
 figure(1);clf
 tiledlayout(1,2)
 nexttile()
+%yy = flipud(Products.Northings);
 H=tcolor(Products.Eastings, Products.Northings, squeeze(Products.Irgb_2d(1,:,:,:)));
 xlabel('Eastings (m)')
 ylabel('Northings (m)')
