@@ -1,4 +1,4 @@
-# CCoastalLens: A MATLAB UAV Video Stabilization & Rectification Framework
+# CoastalLens: A MATLAB UAV Video Stabilization & Rectification Framework
 Software to stabilize and rectify coastal imagery UAV data. <br />
 Developed from the [CIRN Qualitative Coastal Imagining Toolbox](https://github.com/Coastal-Imaging-Research-Network/CIRN-Quantitative-Coastal-Imaging-Toolbox). 
 
