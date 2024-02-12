@@ -1,5 +1,5 @@
 %% run_extrinsics
-% run_extrinsics returns the 2D projective transformation of the image to prove image stabilization through flight.
+% run_extrinsics returns the 2D projective transformation of the image to improve image stabilization through flight.
 %% Description
 %
 %   Inputs:

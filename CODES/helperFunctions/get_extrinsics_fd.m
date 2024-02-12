@@ -2,9 +2,9 @@ function [extrinsics] = get_extrinsics_fd( images, intrinsics, varargin)
 % get_extrinsics_fd returns 2D projective transformation between image frames using feature detection.
 %% Syntax
 %  [extrinsics] = get_extrinsics_fd(images, intrinsics)
-%  [extrinsics] = get_extrinsics_fd(images, intrinsics, Method = 'SURF')
+%  [extrinsics] = get_extrinsics_fd(images, intrinsics, Method = 'SIFT')
 %  [extrinsics] = get_extrinsics_fd(images, intrinsics, mask = R.mask)
-%  [extrinsics] = get_extrinsics_fd(images, intrinsics, Method = 'SURF', mask = R.mask)
+%  [extrinsics] = get_extrinsics_fd(images, intrinsics, Method = 'SIFT', mask = R.mask)
 %
 %% Description
 %
@@ -43,7 +43,7 @@ options.mask = imcomplement(poly2mask([0 n n 0], [1 1 0 0], m, n)); % mask cutof
 options = parseOptions( options , varargin );
 
 assert(isa(options.Method, 'char') || isa(options.Method, 'string'), 'Error (get_extrinsics_fd): Method must be a character string.')
-assert(contains(options.Method, {'SIFT' ,'SURF', 'BRISK', 'ORB', 'KAZE'}), 'Error (get_extrinsics_fd): Method must be one of the following allowed features: SIFT, BRISK, ORB, KAZE or SURF.')
+assert(contains(options.Method, {'SIFT' , 'BRISK', 'ORB', 'KAZE'}), 'Error (get_extrinsics_fd): Method must be one of the following allowed features: SIFT, BRISK, ORB, KAZE or SURF.')
 
 assert(isa(options.mask, 'logical'), 'Error (get_extrinsics_fd): mask must be an binary mask.')
 assert(sum(size(options.mask) == size(I, [1 2]))==2, 'Error (get_extrinsics_fd): mask must be the same size as I.')

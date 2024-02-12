@@ -58,7 +58,7 @@ xLimits = [xMin xMax];
 yLimits = [yMin yMax];
 panoramaView = imref2d([height width], xLimits, yLimits);
 %% Build panorama
-for i = 1:length(images.Files)
+for i = 1:30/(1/extract_Hz(hh)):length(images.Files)
 
     I = undistortImage(readimage(images, i), intrinsics);
 

@@ -30,7 +30,7 @@ function [Points] = detectFeatures(I, Method)
 %% Data
 assert(isa(I, 'uint8'), 'Error (detectFeatures): I must be an image.')
 assert(isa(Method, 'char') || isa(Method, 'string'), 'Error (detectFeatures): Method must be a string.')
-assert(contains(Method, {'SIFT' ,'SURF', 'BRISK', 'ORB', 'KAZE'}), 'Error (detectFeatures): Method must be one of the following allowed features: SIFT, BRISK, ORB, KAZE or SURF.')
+assert(contains(Method, {'SIFT', 'BRISK', 'ORB', 'KAZE'}), 'Error (detectFeatures): Method must be one of the following allowed features: SIFT, BRISK, ORB, KAZE or SURF.')
 
 if length(size(I))==3 % if still rgb
     I = im2gray(I);
@@ -44,8 +44,6 @@ elseif contains(Method, 'ORB')
     Points   = detectORBFeatures(I);
 elseif contains(Method, 'KAZE')
     Points   = detectKAZEFeatures(I);
-elseif contains(Method, 'SURF')
-    Points   = detectSURFFeatures(I);
 end % if contains(Method, 'SIFT')
 
 end
