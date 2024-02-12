@@ -91,7 +91,7 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 </tr>
 <tr class="odd">
 <td><code>input_day_flight_data</code></td>
-<td> <code>input_day_flight_data</code> returns all user-specified required input data for the UAV_automated_rectification toolbox. </td>
+<td> <code>input_day_flight_data</code> returns all user-specified required input data for CoastalLens. </td>
 </tr>
 <tr class="even">
 <td><code>extract_images_from_UAV</code></td>
