@@ -2,7 +2,7 @@
 Software to stabilize and rectify coastal imagery UAV data. <br />
 Developed from the [CIRN Qualitative Coastal Imagining Toolbox](https://github.com/Coastal-Imaging-Research-Network/CIRN-Quantitative-Coastal-Imaging-Toolbox). 
 
-Uncrewed aerial vehicles (UAVs) are an important tool for coastal monitoring with their relatively low-cost and rapid deployment capabilities. To generate scientific-grade image products, the UAV images/videos must be rectified into world coordinates, requiring GPS-surveyed ground and stability control points throughout the image to obtain the variable UAV extrinsics. Due to the limited stable region of coastal images suitable for control points,  the processing of  UAV-obtained videos can be time-consuming and resource-intensive. The necessity of stability control points increases the time in the field. We develop a new automated UAV rectification tool which utilizes widely available resources, such as airborne-LiDAR surveys and feature-detection algorithms, to reduce the amount of human oversight often required in these rectifications.  An automated rectification tool will allow more efficient processing of the ever-increasing coastal UAV datasets. 
+Uncrewed aerial vehicles (UAVs) are an important tool for coastal monitoring with their relatively low-cost and rapid deployment capabilities. To generate scientific-grade image products, the UAV images/videos must be stabilized and rectified into world coordinates. Due to the limited stable region of coastal images suitable for control points, the processing of  UAV-obtained videos can be time-consuming and resource-intensive. The CIRN Qualitative Coastal Imagining Toolbox provided a first-of-its-kind open-sourced code for rectifying these coastal UAV videos. Limitations of the toolbox, however, prompted the development of CoastalLens with an efficient data input procedure, providing capabilities to obtain drone position (extrinsics) from LiDAR surveys, and using a feature detection and matching algorithm to stabilize the video prior to rectification. This framework reduces the amount of human oversight, now only required during the data input processes. Removing the dependency on threshold stability control points can also result in less time in the field. We hope this framework will allow for more efficient processing of the ever-increasing coastal UAV datasets.  
 
 ## Installation
 Requires MATLAB (min v2022b - for estworldpose function, see [Input Requirements](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Input-Requirements/#GCP) for an alternative if using an older MATLAB version). Ubuntu users: See [Issue 11](https://github.com/AthinaLange/UAV_automated_rectification/issues/11)<br />
@@ -91,7 +91,7 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 </tr>
 <tr class="odd">
 <td><code>input_day_flight_data</code></td>
-<td> <code>input_day_flight_data</code> returns all user-specified required input data for the UAV_automated_rectification toolbox. </td>
+<td> <code>input_day_flight_data</code> returns all user-specified required input data for CoastalLens. </td>
 </tr>
 <tr class="even">
 <td><code>extract_images_from_UAV</code></td>
@@ -99,7 +99,7 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 </tr>
 <tr class="odd">
 <td><code>run_extrinsics</code></td>
-<td><code>run_extrinsics</code> returns the 2D projective transformation of the image to prove image stabilization through flight. </td>
+<td><code>run_extrinsics</code> returns the 2D projective transformation of the image to improve image stabilization through flight. </td>
 </tr>
 <tr class="even">
 <td><code>get_products</code></td>
@@ -235,9 +235,7 @@ If you run into any problems while running the code, or think other things shoul
 
 ## License
 
-The **UAV automated rectification toolbox** is provided under the [MIT license](https://opensource.org/licenses/MIT).
+**CoastalLens** is provided under the [MIT license](https://opensource.org/licenses/MIT).
 
 
 ## Cite As
-
-
