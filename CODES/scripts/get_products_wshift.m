@@ -187,8 +187,12 @@ for  dd = 1 : length(day_files)
                                 Products(pp).Eastings = Eastings;
                                 Products(pp).Northings = Northings;
                                 Products(pp).localZ = Z;
-
-                                Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics));
+                                %find orientation of original image in panoramaView
+                                mask = imwarp(true(size(I,1),size(I,2)), R.extrinsics_2d(viewId), 'OutputView', panoramaView);
+                                BW = boundarymask(mask);
+                                [row, col] = find(BW == 1, 1,'first');
+                                Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics))+[col row];
+                               % Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics));
                             end %  if viewId == 1
 
                             clear Irgb_temp
@@ -206,16 +210,6 @@ for  dd = 1 : length(day_files)
                                 Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
                             end % if contains(Products(pp).type, 'Grid')
 
-                            %% SCP
-                            if R.scp_flag == 1
-                                I = readimage(images, viewId);
-                                [IrIndv, ~,~,~,~,~] = getPixels(Products(pp), R.extrinsics_scp(viewId,:), R.intrinsics_CIRN, I);
-                                if contains(Products(pp).type, 'Grid')
-                                    Products(pp).Irgb_scp(viewId, :,:,:) = IrIndv;
-                                else
-                                    Products(pp).Irgb_scp(viewId, :,:) = permute(IrIndv,[2 1 3]);
-                                end % if contains(Products(pp).type, 'Grid')
-                            end % if R.scp_flag == 1
                         end %  if rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0
                     end % if extract_Hz(hh)== Products(pp).frameRate || rem(extract_Hz(hh),Products(pp).frameRate) == 0
 
@@ -255,7 +249,9 @@ for  dd = 1 : length(day_files)
                 Products(pp).t=Products(pp).t(1:extract_Hz(hh)/Products(pp).frameRate:end);
             end %  for pp = 1:length(Products)
 
-            save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '-append')
+            save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '-append', '-v7.3')
+
+
         end % for hh = 1 : length(extract_Hz)
         if exist('user_email', 'var')
             sendmail(user_email{2}, [oname '- Rectifying Products DONE'])

@@ -145,7 +145,7 @@ function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, 
                     %
                 end % for k = 2:length(L)
 
-
+%%
                 %  Saving Extrinsics and corresponding image names
                 extrinsics=extrinsicsVariable;
                 imageNames=images;

@@ -271,6 +271,7 @@ for dd = 1 : length(day_files)
 
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [day_files(dd).name '_' flights(ff).name];
+        disp(oname)
         cd(odir)
         if ~exist(fullfile(odir, 'Processed_data'), 'dir')
             mkdir 'Processed_data'

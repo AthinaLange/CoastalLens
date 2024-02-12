@@ -279,6 +279,7 @@ for dd = 1 : length(day_files)
 
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [day_files(dd).name '_' flights(ff).name];
+        disp(oname)
         cd(odir)
         if ~exist(fullfile(odir, 'Processed_data'), 'dir')
             mkdir 'Processed_data'
@@ -552,6 +553,7 @@ for dd = 1 : length(day_files)
             case 'Yes - compare methods'
                 R.scp_flag = 1;
                 disp('Please make sure to have downloaded the CIRN QCIT Toolbox.')
+                disp('Please select CIRN QCIT Toolbox directory.')
                 cirn_dir = uigetdir('.', 'Choose CIRN QCIT Toolbox directory.');
                 addpath(genpath(cirn_dir))
 
@@ -573,7 +575,7 @@ for dd = 1 : length(day_files)
                 R.intrinsics_CIRN(11) = R.intrinsics.TangentialDistortion(2);        % Tangential distortion coefficients
 
                 % CIRN extrinsics
-                load(fullfile(odir, 'Processed_data', 'Initial_coordinates.mat'), 'C', 'jpg_id', 'mov_id')
+                load(fullfile(odir, 'Processed_data', 'Inital_coordinates.mat'), 'C', 'jpg_id', 'mov_id')
                 lat = char(C.GPSLatitude(jpg_id));
                 lat = str2double(lat(1:10));
                 long = char(C.GPSLongitude(jpg_id));
@@ -586,7 +588,7 @@ for dd = 1 : length(day_files)
                 [UTMNorthing, UTMEasting, ~] = ll_to_utm(lat, long);
                 extrinsicsInitialGuess = [UTMEasting UTMNorthing C.AbsoluteAltitude(jpg_id)-zgeoid_offset deg2rad(C.CameraYaw(mov_id(1))+360) deg2rad(C.CameraPitch(mov_id(1))+90) deg2rad(C.CameraRoll(mov_id(1)))]; % [ x y z azimuth tilt swing]
                 extrinsicsKnownsFlag= [0 0 0 0 0 0];  % [ x y z azimuth tilt swing]
-                [extrinsics, ~]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag);
+                [extrinsics, ~]= extrinsicsSolver(extrinsicsInitialGuess, extrinsicsKnownsFlag,R.intrinsics_CIRN,R.image_gcp,R.world_gcp);
                 R.extrinsics_scp = extrinsics;
                 % defining SCP
                 [scp] = define_SCP(R.I, R.image_gcp, R.intrinsics_CIRN);
