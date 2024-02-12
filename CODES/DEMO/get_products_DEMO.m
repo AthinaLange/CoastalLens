@@ -187,8 +187,11 @@ for  dd = 1 : length(day_files)
                                 Products(pp).Eastings = Eastings;
                                 Products(pp).Northings = Northings;
                                 Products(pp).localZ = Z;
-
-                                Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics));
+                                % Find appropriate shift for panoramaView
+                                mask = imwarp(true(size(I,1),size(I,2)), R.extrinsics_2d(viewId), 'OutputView', panoramaView);
+                                BW = boundarymask(mask);
+                                [row, col] = find(BW == 1, 1,'first');
+                                Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics))+[col row];
                             end %  if viewId == 1
 
                             clear Irgb_temp
