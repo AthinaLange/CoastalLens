@@ -235,9 +235,12 @@ If you run into any problems while running the code, or think other things shoul
 
 ## License
 
-The **UAV automated rectification toolbox** is provided under the [MIT license](https://opensource.org/licenses/MIT).
+**CoastalLens** is provided under the [MIT license](https://opensource.org/licenses/MIT).
 
 
 ## Cite As
 
+CoastalLens is set up as 4 scripts (with an optional 5th script) run sequentially from a main code (UAV_rectification.mat). This allows users to execute parts or all of the full framework as is useful in their workflow. Input_day_flight_data returns all the user-specified required input data. The user is required to input data for each day and flight to process. This code requires user input about the video timezone, camera intrinsics, the Products to be generated (e.g. Grid/Rectified Image, xTransect or yTransect), and the ground control points to determine the camera world position (via GPS points or pointcloud). Users can load in pre-set values for the day relevant information from a configuration file. This is useful if similar UAV missions are flown repeatedly at the same location. extract_images_from_UAV extracts images from the video files at the specified frame rates. This is done via a system command to the ffmpeg command line tool. 
+run_extrinsics returns the 2D projective transformation of the image to improve image stabilization through flight. We take an approach similar to constructing a panorama image. Features (e.g. corners, windows, lines on the ground) are found in every frame. In subsequent frames, these features are matched and the movement/change in location of these features between the frames is used to estimate the change in position of frame 2 versus frame 1. This is used to warp the image into fitting into the full ‘panorama’ image. This approach allows for good estimates to be obtained even in cases where the UAV drift substantially. 
+The Products that have been previously defined have specific coordinates in the world coordinate system. These coordinates can be found in the original image from the camera world position and these image coordinates are used to extract the pixels from each frame. save_products is an optional code to save the resulting rectified images as png’s.
 
