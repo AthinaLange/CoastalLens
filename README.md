@@ -1,5 +1,5 @@
-# Coastal UAV rectification software
-Software to rectify and create data products for coastal imagery UAV data. <br />
+# CoastalLens: A MATLAB UAV Video Stabilization & Rectification Framework
+Software to stabilize and rectify coastal imagery UAV data. <br />
 Developed from the [CIRN Qualitative Coastal Imagining Toolbox](https://github.com/Coastal-Imaging-Research-Network/CIRN-Quantitative-Coastal-Imaging-Toolbox). 
 
 Uncrewed aerial vehicles (UAVs) are an important tool for coastal monitoring with their relatively low-cost and rapid deployment capabilities. To generate scientific-grade image products, the UAV images/videos must be rectified into world coordinates, requiring GPS-surveyed ground and stability control points throughout the image to obtain the variable UAV extrinsics. Due to the limited stable region of coastal images suitable for control points,  the processing of  UAV-obtained videos can be time-consuming and resource-intensive. The necessity of stability control points increases the time in the field. We develop a new automated UAV rectification tool which utilizes widely available resources, such as airborne-LiDAR surveys and feature-detection algorithms, to reduce the amount of human oversight often required in these rectifications.  An automated rectification tool will allow more efficient processing of the ever-increasing coastal UAV datasets. 
