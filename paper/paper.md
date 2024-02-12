@@ -19,18 +19,18 @@ authors:
     orcid: 
     equal-contrib: true
     affiliation: 3
-  - name: J.W. Fiedler
+  - name: Julia W. Fiedler
     orcid: 
     equal-contrib: true
     affiliation: 4
 affiliations:
   - name: Scripps Institution of Oceanography, University of California, San Diego, USA
     index: 1
-  - name: AI Werkstatt, Ft. Lauderdale, USA
+  - name: AI Werkstatt, USA
     index: 2
   - name: Coastal and Hydraulics Laboratory, US Army Engineer Research and Development Center, USA
     index: 3
-  - name: Sea Level Rise Center, University of Hawai’i Manoa, USA
+  - name: Sea Level Rise Center, University of Hawai’i at Manoa, USA
     index: 4
 date: 29 Feburary 2024
 bibliography: paper.bib
