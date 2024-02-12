@@ -8,7 +8,7 @@ tags:
   - Image Rectification
 authors: 
   - name: Athina M.Z. Lange
-    orcid: 
+    orcid: 0000-0002-7650-9976
     equal-contrib: true
     affiliation: 1
   - name: Holger Lange
@@ -20,7 +20,7 @@ authors:
     equal-contrib: true
     affiliation: 3
   - name: Julia W. Fiedler
-    orcid: 
+    orcid: 0000-0002-4797-8933
     equal-contrib: true
     affiliation: 4
 affiliations:
