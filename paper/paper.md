@@ -13,15 +13,12 @@ authors:
     affiliation: 1
   - name: Holger Lange
     orcid: 
-    equal-contrib: true
     affiliation: 2
   - name: Brittany L. Bruder
     orcid: 
-    equal-contrib: true
     affiliation: 3
   - name: Julia W. Fiedler
     orcid: 0000-0002-4797-8933
-    equal-contrib: true
     affiliation: 4
 affiliations:
   - name: Scripps Institution of Oceanography, University of California, San Diego, USA
