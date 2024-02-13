@@ -2,9 +2,6 @@ function [IrIndv, Xout, Yout, Z, Eastings, Northings] = getPixels(Products, extr
 
 [xyz, Xout, Yout, Z,Eastings, Northings] = getCoords(Products);
 
-%[y2,x2, ~] = ll_to_utm(Products.lat, Products.lon);
-%localExtrinsics = localTransformExtrinsics([x2 y2], Products.angle-270, 1, extrinsics);
-
 
 [P, ~, R, IC] = intrinsicsExtrinsics2P(intrinsics, extrinsics);
 

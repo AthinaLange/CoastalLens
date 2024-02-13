@@ -1,5 +1,5 @@
 function [id] = find_file_format_id(C, varargin)
-%   find_file_format_id returns id of files (listed in table C) matching specified file format.
+% find_file_format_id returns id of files (listed in table C) matching specified file format.
 %% Syntax
 %           [id] = find_file_format_id(C, file_format = 'JPG')
 %           [id] = find_file_format_id(C, file_format = {'MOV', 'MP4'})
@@ -15,7 +15,7 @@ function [id] = find_file_format_id(C, varargin)
 %           id (array) : list of ids that match file_format
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 
 %% Options

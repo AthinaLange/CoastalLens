@@ -1,6 +1,5 @@
 function [xyz, localX, localY, Z, Eastings, Northings] = getCoords(Products)
-%   getCoords returns the (x,y,z) world coordinates for the dimensions
-%   specified in Products.
+% getCoords returns the (x,y,z) world coordinates for the dimensions specified in Products.
 %% Syntax
 %            [xyz] = getCoords(Products)
 %
@@ -31,7 +30,7 @@ function [xyz, localX, localY, Z, Eastings, Northings] = getCoords(Products)
 %
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Jan 2024;
 
 %% Data

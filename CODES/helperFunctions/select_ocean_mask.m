@@ -13,7 +13,7 @@ function [mask] = select_ocean_mask(I)
 %                                               selected points (same dimensions as I)
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 
 %% Data

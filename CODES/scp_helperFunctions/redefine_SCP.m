@@ -26,8 +26,8 @@ function [scp] = redefine_SCP(scp, I, scpUVd_old)
 %% Example 1
 %
 %% Citation Info 
-% github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
+% github.com/AthinaLange/CoastalLens
+% Nov 2023; 
 
 hGCP=figure(100);clf
 imshow(I)

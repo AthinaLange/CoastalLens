@@ -21,7 +21,7 @@ function [survey_gcp] = select_pointcloud_gcp(pc, gcp_num, main_fig, zoom_fig)
 %
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023; 
 
 %% Data

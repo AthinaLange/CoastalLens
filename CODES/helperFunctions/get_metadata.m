@@ -26,7 +26,7 @@ function [C] = get_metadata(odir, oname, varargin)
 %  [C] = get_metadata('./DATA/20211215_Torrey/Flight_04/', '20211215_Torrey', file_prefix = 'DJI')
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 
 %% Data

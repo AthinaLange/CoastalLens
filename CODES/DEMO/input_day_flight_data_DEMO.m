@@ -60,7 +60,7 @@
 % define_ytransect
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Jan 2024;
 
 %% Data

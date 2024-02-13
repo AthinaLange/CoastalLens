@@ -20,7 +20,7 @@ function plot_grid(Products, I, intrinsics, worldPose)
 % plot_grid(Products(1), R.I, R.intrinsics, R.worldPose)
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 
 %% Data

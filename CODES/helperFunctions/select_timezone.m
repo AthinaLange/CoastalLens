@@ -19,7 +19,7 @@ function [timezone] = select_timezone
 % [timezone] = select_timezone;
 % datetime('now', 'TimeZone', timezone)
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 
 %% Select timezone

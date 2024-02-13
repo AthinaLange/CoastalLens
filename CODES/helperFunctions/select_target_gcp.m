@@ -16,12 +16,12 @@ function [target_gcp] = select_target_gcp
 %       select_data_from_text_file
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023; 
 
 %% Get target world coordinates from file
 
-% assuming that gps_northings in world coordinates and not in local grid system
+% assuming that GCP coordinates in world coordinates and not in local grid system
 disp('Load in target GCP coordinates file.')
 [target_gcp] = select_data_from_text_file;
 target_gcp = target_gcp(:, 2:4);

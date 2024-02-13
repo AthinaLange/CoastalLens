@@ -1,6 +1,5 @@
 function combine_images(data_files, varargin)
-%   combine_images combines images in sequence from multiple folders given
-%   in data_files.
+% combine_images combines images in sequence from multiple folders given in data_files.
 %% Syntax
 % combine_images(data_files)
 % combine_images(data_files, imageDirectory = pwd)
@@ -20,7 +19,7 @@ function combine_images(data_files, varargin)
 % combine_images(data_files, imageDirectory = 'DATA/20211215_Torrey/Flight_04/images_1Hz')
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 
 %% Options

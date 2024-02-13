@@ -12,7 +12,7 @@ function [pc] = load_pointcloud
 % Requires: Lidar Toolbox
 %
 %% Citation Info 
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023; 
 %%
 [temp_file, temp_file_path] = uigetfile({'*.las'}, 'Pointcloud location');

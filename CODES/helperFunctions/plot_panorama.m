@@ -19,7 +19,7 @@ function [panorama, panoramaView] = plot_panorama(images, intrinsics, extrinsics
 % [panorama] = plot_panorama(images, R.intrinsics, extrinsics);
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Jan 2024;
 
 %% Data

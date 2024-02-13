@@ -1,5 +1,5 @@
 function [Products] = user_input_products(global_dir)
-%   user_input_products returns structure with dimensions needed to construct cBathy-type grids, cross-shore and along-shore transects.
+% user_input_products returns structure with dimensions needed to construct cBathy-type grids, cross-shore and along-shore transects.
 %% Syntax
 %           [Products] = user_input_products(global_dir)
 %
@@ -27,7 +27,7 @@ function [Products] = user_input_products(global_dir)
 %
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Sept 2023;
 
 %% ===============ORIGIN FILE=====================================================

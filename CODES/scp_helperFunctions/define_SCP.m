@@ -26,8 +26,8 @@ function [scp] = define_SCP(I, image_gcp, intrinsics_CIRN)
 %% Example 1
 %
 %% Citation Info 
-% github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
+% github.com/AthinaLange/CoastalLens
+% Nov 2023; 
 
 
 %%

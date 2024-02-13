@@ -12,7 +12,7 @@ function [selected_data] = select_data_from_text_file
 % Data must be comma-separated list in .txt file
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 
 %% Load file and select data points

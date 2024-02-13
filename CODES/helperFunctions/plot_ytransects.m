@@ -20,7 +20,7 @@ function plot_ytransects(Products, I, intrinsics, worldPose)
 % plot_ytransect(Products, R.I, R.intrinsics, R.worldPose)
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 
 %% Data

@@ -25,8 +25,8 @@ function [extrinsics] = get_extrinsics_scp(odir,oname, extract_Hz, images, scp, 
 %  on least-squares optimization of scp location shifts between frames. 
 %
 %% Citation Info 
-% github.com/AthinaLange/UAV_automated_rectification
-% Nov 2023; Last revision: XXX
+% github.com/AthinaLange/CoastalLens
+% Nov 2023; 
 
 
                 In=undistortImage(readimage(images, 1), cameraParams);

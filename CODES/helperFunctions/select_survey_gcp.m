@@ -17,7 +17,7 @@ function [survey_gcp, image_gcp] = select_survey_gcp(I, image_fig, main_fig, zoo
 %  If LiDAR/SfM first: set number of GCPs you want to find.
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 
 %% Data

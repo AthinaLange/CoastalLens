@@ -17,7 +17,7 @@ function [selectedPoint, zoom_fig] = select_pcshow_point(pc, zoom_fig)
 %   Passing the figure handle is necessary.
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 
 %% Data

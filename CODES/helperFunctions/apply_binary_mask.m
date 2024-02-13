@@ -20,7 +20,7 @@ function [I_mask] = apply_binary_mask(I, mask)
 % image(I_mask)
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023;
 %%
 assert(isa(I, 'uint8'), 'Error (apply_binary_mask): I must be an image.')

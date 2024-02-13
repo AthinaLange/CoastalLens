@@ -28,7 +28,7 @@ function [extrinsics] = get_extrinsics_fd( images, intrinsics, varargin)
 % [extrinsics] = get_extrinsics_fd(images, intrinsics, mask = R.mask)
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Jan 2024;
 
 %% Data

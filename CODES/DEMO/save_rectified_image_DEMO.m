@@ -1,5 +1,5 @@
 function save_rectified_image_DEMO(oname, save_dir, Products)
-%   save_rectified_image saves the RGB images in Products as PNGs.
+% save_rectified_image saves the RGB images in Products as PNGs.
 %% Syntax
 % save_rectified_image(oname, save_dir, Products)
 %
@@ -32,7 +32,7 @@ function save_rectified_image_DEMO(oname, save_dir, Products)
 % save_rectified_image(oname, save_dir, Products)
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Jan 2024;
 
 %% Options

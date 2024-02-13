@@ -16,7 +16,7 @@ function [image_gcp] = select_image_gcp(I, image_fig)
 % Passing the figure handles is necessary.
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023; 
 
 %% Data

@@ -22,7 +22,7 @@
 % combine_images
 %
 %% Citation Info
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Sept 2023;
 
 %% Data

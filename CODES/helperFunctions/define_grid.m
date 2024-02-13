@@ -25,7 +25,7 @@ function [Product] = define_grid(origin_grid)
 % Angle: Shorenormal angle of the locally defined grid (CW from North)
 %
 %% Citation Info 
-% github.com/AthinaLange/UAV_automated_rectification
+% github.com/AthinaLange/CoastalLens
 % Nov 2023; 
 
 %%
