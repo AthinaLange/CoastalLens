@@ -20,6 +20,12 @@ authors:
   - name: Julia W. Fiedler
     orcid: 0000-0002-4797-8933
     affiliation: 4
+  - name: R.T. Guza
+    orcid: 
+    affiliation: 1
+- name: Mark A. Merrifield
+    orcid: 
+    affiliation: 1
 affiliations:
   - name: Scripps Institution of Oceanography, University of California, San Diego, USA
     index: 1
@@ -46,6 +52,6 @@ CoastalLens is set up as 4 scripts (with an optional 5th script) run sequentiall
 ![Figure 2: Example of 17 minutes of video stitched together. Extreme drift in the UAV can be seen, but horizon at the top and road at the bottom of the image remain stable.\label{fig:2}](https://github.com/AthinaLange/CoastalLens/blob/main/docs/20211026_Torrey_01_Panorama.png)
 
 # Acknowledgements
-This study was funded by the U.S. Army Corps of Engineers (W912HZ1920020) and the California Department of Parks and Recreation (C19E0026). Thank you to Rob Grenzeback, Alex Simpson and Holden Leslie-Bowles for help collecting this data and testing the framework. 
+This study was funded by the U.S. Army Corps of Engineers (W912HZ1920020) and the California Department of Parks and Recreation (C19E0026). Thank you to Rob Grenzeback, Julia Fiedler, Alex Simpson and Holden Leslie-Bole for help collecting this data and testing the framework. 
 
 # References
