@@ -20,9 +20,6 @@ authors:
   - name: Julia W. Fiedler
     orcid: 0000-0002-4797-8933
     affiliation: 4
-  - name: R.T. Guza
-    orcid: 
-    affiliation: 1
   - name: Mark A. Merrifield
     orcid: 
     affiliation: 1
