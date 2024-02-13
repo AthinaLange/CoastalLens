@@ -102,8 +102,8 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 <td><code>extract_images_from_UAV</code> extracts images from video files at specified frame rates for all flights on specified processing days. Requires ffmpeg.</td>
 </tr>
 <tr class="odd">
-<td><code>run_extrinsics</code></td>
-<td><code>run_extrinsics</code> returns the 2D projective transformation of the image to improve image stabilization through flight. </td>
+<td><code>stabilize_video</code></td>
+<td><code>stabilize_video</code> returns the 2D projective transformation of the image to improve image stabilization through flight. </td>
 </tr>
 <tr class="even">
 <td><code>get_products</code></td>
