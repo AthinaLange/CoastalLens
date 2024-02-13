@@ -37,10 +37,10 @@ Flight information:
 ![Example_input_file](https://github.com/AthinaLange/UAV_automated_rectification/blob/main/docs/Flight_info_sheet.png)
 
 Origin information:
-![Example_origin_file](https://github.com/AthinaLange/UAV_automated_rectification/blob/main/docs/Origin_Info_sheet.png)
+![Example_origin_file](https://github.com/AthinaLange/CoastalLens/blob/main/docs/Origin_Info_sheet.png)
 
 Products information:
-![Example_products_file](https://github.com/AthinaLange/UAV_automated_rectification/blob/main/docs/Products_Info_sheet.png)
+![Example_products_file](https://github.com/AthinaLange/CoastalLens/blob/main/docs/Products_Info_sheet.png)
 
 User prompts/direction is printed in the Command Window. 
 
