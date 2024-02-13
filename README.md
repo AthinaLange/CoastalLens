@@ -51,6 +51,10 @@ This toolbox is currently in testing phase on the following systems:
 - Linux (Ubuntu 22.04.3 LTS), Matlab 2022b
 - DJI Drones
 
+### Email Updates
+The code allows you to recieve email updates as it processes the data. If you do not want to recieve these, please select 'No' to 'Recieve update emails?'. <br/>
+If you do, we have set up a Gmail account 'coastallens1903' to use that will be sending the emails, although we recommend you setting up your own account and generating a static App password (16-character) for it moving forward to avoid any security risks. 
+
 
 ## General Folder Structure:
 Please set up your CODES and DATA folder in the following structure. The DATA folder may be located in a different folder than your general path, but must be organized as indicated, with all flights in the relevant day/location folder.
