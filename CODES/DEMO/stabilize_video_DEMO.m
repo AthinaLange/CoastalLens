@@ -1,5 +1,5 @@
-%% run_extrinsics
-% run_extrinsics returns the 2D projective transformation of the image to prove image stabilization through flight.
+%% stabilize_video
+% stabilize_video returns the 2D projective transformation of the image to prove image stabilization through flight.
 %% Description
 %
 %   Inputs:
@@ -45,7 +45,7 @@ if ~exist('global_dir', 'var') || ~exist('day_files', 'var') || ~isstruct(day_fi
     disp('Missing global_dir and day_files. Please load in processing_run_DD_Month_YYYY.mat that has the day folders that you would like to process. ')
     [temp_file, temp_file_path] = uigetfile(pwd, 'processing_run_.mat file');
     load(fullfile(temp_file_path, temp_file)); clear temp_file*
-    assert(isfolder(global_dir),['Error (run_extrinsics): ' global_dir 'doesn''t exist.']);
+    assert(isfolder(global_dir),['Error (stabilize_video): ' global_dir 'doesn''t exist.']);
 
     if ~exist('global_dir', 'var')
         disp('Please select the global directory.')
@@ -65,24 +65,24 @@ end % if exist('global_dir', 'var')
 
 % check that needed files exist
 for dd = 1:length(day_files)
-    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat')),['Error (run_extrinsics): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat') ' doesn''t exist.']);
+    assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat')),['Error (stabilize_video): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat') ' doesn''t exist.']);
     load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights')
     for ff = 1:length(flights)
-        assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat')), ['Error (run_extrinsics): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat') ' doesn''t exist.']);
+        assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat')), ['Error (stabilize_video): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat') ' doesn''t exist.']);
     end
 end
 
-%% run_extrinsics
+%% stabilize_video
 for dd = 1 : length(day_files)
     clearvars -except dd *_dir user_email day_files
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
     load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'extract_Hz', 'flights')
-    assert(exist('extract_Hz', 'var'), 'Error (run_extrinsics): extract_Hz must exist and be stored in ''day_config_file.mat''.')
-    assert(isa(extract_Hz, 'double'), 'Error (run_extrinsics): extract_Hz must be a double or array of doubles.')
-    assert(exist('flights', 'var'), 'Error (run_extrinsics): flights must exist and be stored in ''day_config_file.mat''.')
-    assert(isa(flights, 'struct'), 'Error (run_extrinsics): flights must be a structure.')
-    assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (run_extrinsics): flights must have fields .folder and .name.')
+    assert(exist('extract_Hz', 'var'), 'Error (stabilize_video): extract_Hz must exist and be stored in ''day_config_file.mat''.')
+    assert(isa(extract_Hz, 'double'), 'Error (stabilize_video): extract_Hz must be a double or array of doubles.')
+    assert(exist('flights', 'var'), 'Error (stabilize_video): flights must exist and be stored in ''day_config_file.mat''.')
+    assert(isa(flights, 'struct'), 'Error (stabilize_video): flights must be a structure.')
+    assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (stabilize_video): flights must have fields .folder and .name.')
 
     % repeat for each flight
     for ff = 1 : length(flights)
@@ -92,25 +92,25 @@ for dd = 1 : length(day_files)
         disp(oname)
         cd(odir)
 
-        assert(isfile(fullfile(odir, 'Processed_data', [oname '_IOEO.mat'])), ['Error (run_extrinsics): ' fullfile(odir, 'Processed_data', [oname '_IOEO.mat']) 'doesn''t exist. R variable must be stored there.'])
+        assert(isfile(fullfile(odir, 'Processed_data', [oname '_IOEO.mat'])), ['Error (stabilize_video): ' fullfile(odir, 'Processed_data', [oname '_IOEO.mat']) 'doesn''t exist. R variable must be stored there.'])
 
         for hh = 1 : length(extract_Hz)
             clear extrinsics R
             load(fullfile(odir, 'Processed_data', [oname '_IOEO']), 'R')
-            assert(exist('R', 'var'), ['Error (run_extrinsics): R must exist and be stored in ''' fullfile(odir, 'Processed_data', [oname '_IOEO.mat']) '''.'])
-            assert(isfield(R, 'intrinsics'), 'Error (run_extrinsics): R must contain a cameraIntrinsics object. Please add R.intrinsics and save before proceeding. ')
-            assert(isa(R.intrinsics, 'cameraIntrinsics'), 'Error (run_extrinsics): intrinsics must be a cameraIntrinsics object.')
+            assert(exist('R', 'var'), ['Error (stabilize_video): R must exist and be stored in ''' fullfile(odir, 'Processed_data', [oname '_IOEO.mat']) '''.'])
+            assert(isfield(R, 'intrinsics'), 'Error (stabilize_video): R must contain a cameraIntrinsics object. Please add R.intrinsics and save before proceeding. ')
+            assert(isa(R.intrinsics, 'cameraIntrinsics'), 'Error (stabilize_video): intrinsics must be a cameraIntrinsics object.')
 
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
             images = imageDatastore(imageDirectory);
 
             load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'C', 'mov_id', 'tz')
-            assert(exist('C', 'var'), 'Error (run_extrinsics): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
-            assert(isa(C, 'table'), 'Error (run_extrinsics): C must be a table. run get_metadata.')
-            assert(exist('mov_id', 'var'), 'Error (run_extrinsics): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
-            assert(isa(mov_id, 'double'), 'Error (run_extrinsics): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
-            assert(exist('tz', 'var'), 'Error (run_extrinsics): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
-            assert(isa(tz, 'char') || isa(tz, 'string'), 'Error (run_extrinsics): tz (timezone) must be timezone character string. run [tz] = select_timezone.')
+            assert(exist('C', 'var'), 'Error (stabilize_video): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
+            assert(isa(C, 'table'), 'Error (stabilize_video): C must be a table. run get_metadata.')
+            assert(exist('mov_id', 'var'), 'Error (stabilize_video): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
+            assert(isa(mov_id, 'double'), 'Error (stabilize_video): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
+            assert(exist('tz', 'var'), 'Error (stabilize_video): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
+            assert(isa(tz, 'char') || isa(tz, 'string'), 'Error (stabilize_video): tz (timezone) must be timezone character string. run [tz] = select_timezone.')
 
             R.frameRate = extract_Hz(hh);
             dts = 1/extract_Hz(hh);

@@ -130,12 +130,12 @@ for  dd = 1 : length(day_files)
 
             if ~isfield(R, 't')
                 load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'C', 'mov_id', 'tz')
-                assert(exist('C', 'var'), 'Error (run_extrinsics): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
-                assert(isa(C, 'table'), 'Error (run_extrinsics): C must be a table. run get_metadata.')
-                assert(exist('mov_id', 'var'), 'Error (run_extrinsics): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
-                assert(isa(mov_id, 'double'), 'Error (run_extrinsics): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
-                assert(exist('tz', 'var'), 'Error (run_extrinsics): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
-                assert(isa(tz, 'string') || isa(tz, 'char'), 'Error (run_extrinsics): tz (timezone) must be timezone string. run [tz] = select_timezone.')
+                assert(exist('C', 'var'), 'Error (get_products): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
+                assert(isa(C, 'table'), 'Error (get_products): C must be a table. run get_metadata.')
+                assert(exist('mov_id', 'var'), 'Error (get_products): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
+                assert(isa(mov_id, 'double'), 'Error (get_products): mov_id must be a double or array of doubles. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')
+                assert(exist('tz', 'var'), 'Error (get_products): tz (timezone) must exist and be stored in ''Initial_coordinates.mat''. run [tz] = select_timezone.')
+                assert(isa(tz, 'string') || isa(tz, 'char'), 'Error (get_products): tz (timezone) must be timezone string. run [tz] = select_timezone.')
 
                 dts = 1/extract_Hz(hh);
                 to = datetime(string(C.CreateDate(mov_id(1))), 'InputFormat', 'yyyy:MM:dd HH:mm:ss', 'TimeZone', tz);

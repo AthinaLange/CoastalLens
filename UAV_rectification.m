@@ -54,7 +54,7 @@
 %% Function Dependenies
 % input_day_flight_data
 % extract_images_from_UAV
-% run_extrinsics
+% stabilize_video
 % get_products
 % save_products
 %
@@ -198,11 +198,11 @@ input_day_flight_data
 extract_images_from_UAV
 
 %% ====================================================================
-%                           EXTRINSICS THROUGH TIME
+%                           STABILIZE VIDEO
 %                           - requires day_files and user_email (if emails wanted)
 %                           - Feature Detection (Monocular Visual Odometry) - 2D projective transformation
 %  =====================================================================
-run_extrinsics
+stabilize_video
 
 %% ====================================================================
 %                           EXTRACT PRODUCTS
