@@ -23,7 +23,7 @@ authors:
   - name: R.T. Guza
     orcid: 
     affiliation: 1
-- name: Mark A. Merrifield
+  - name: Mark A. Merrifield
     orcid: 
     affiliation: 1
 affiliations:
