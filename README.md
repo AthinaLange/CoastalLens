@@ -5,15 +5,15 @@ Developed from the [CIRN Qualitative Coastal Imagining Toolbox](https://github.c
 Uncrewed aerial vehicles (UAVs) are an important tool for coastal monitoring with their relatively low-cost and rapid deployment capabilities. To generate scientific-grade image products, the UAV images/videos must be stabilized and rectified into world coordinates. Due to the limited stable region of coastal images suitable for control points, the processing of  UAV-obtained videos can be time-consuming and resource-intensive. The CIRN Qualitative Coastal Imagining Toolbox provided a first-of-its-kind open-sourced code for rectifying these coastal UAV videos. Limitations of the toolbox, however, prompted the development of CoastalLens with an efficient data input procedure, providing capabilities to obtain drone position (extrinsics) from LiDAR surveys, and using a feature detection and matching algorithm to stabilize the video prior to rectification. This framework reduces the amount of human oversight, now only required during the data input processes. Removing the dependency on threshold stability control points can also result in less time in the field. We hope this framework will allow for more efficient processing of the ever-increasing coastal UAV datasets.  
 
 ## Installation
-Requires MATLAB (min v2022b - for estworldpose function, see [Input Requirements](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Input-Requirements/#GCP) for an alternative if using an older MATLAB version). Ubuntu users: See [Issue 11](https://github.com/AthinaLange/UAV_automated_rectification/issues/11)<br />
+Requires MATLAB (min v2022b - for estworldpose function, see [Input Requirements](https://github.com/AthinaLange/CoastalLens/wiki/Input-Requirements/#GCP) for an alternative if using an older MATLAB version). Ubuntu users: See [Issue 11](https://github.com/AthinaLange/CoastalLens/issues/11)<br />
 Required MATLAB toolboxes:
  - Image Processing Toolbox
  - Computer Vision Toolbox
  - LiDAR Toolbox (to use pointcloud). <br />
  
-Requires [exiftool](https://exiftool.org) (or metadata csv file : See [Input Requirements](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Input-Requirements/)) <br/>
+Requires [exiftool](https://exiftool.org) (or metadata csv file : See [Input Requirements](https://github.com/AthinaLange/CoastalLens/wiki/Input-Requirements/)) <br/>
 Requires [ffmpeg](https://ffmpeg.org/download.html). <br/>
-See [Installation Help](https://github.com/AthinaLange/UAV_automated_rectification/wiki/Installation-Help) for installation guides based on your OS. <br />
+See [Installation Help](https://github.com/AthinaLange/CoastalLens/wiki/Installation-Help) for installation guides based on your OS. <br />
 
 
 ## Running the Toolbox
@@ -24,7 +24,7 @@ Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
 
 Running <code>ver</code> in the Command Window will show your MATLAB version and installed toolboxes. <br/>
 
-You can find more details, including the information you need to run this on your own data in our [wiki](https://github.com/AthinaLange/UAV_automated_rectification/wiki/)!
+You can find more details, including the information you need to run this on your own data in our [wiki](https://github.com/AthinaLange/CoastalLens/wiki/)!
 
 ## Demo / Getting Started
 'UAV_rectification_DEMO.m' runs a demo version of the code and can also be used to compare the new algorithm versus the CIRN Stability Control Points method. This method requires stability control points to be visible within the field of view. 
@@ -34,7 +34,7 @@ Data to test the code is provided in the DATA folder and the video can be downlo
 Here is the input information required for the DEMO version. We recommend making a similar table to keep track of all the necessary information for your own drone flights. <br/>
 
 Flight information: 
-![Example_input_file](https://github.com/AthinaLange/UAV_automated_rectification/blob/main/docs/Flight_info_sheet.png)
+![Example_input_file](https://github.com/AthinaLange/CoastalLens/blob/main/docs/Flight_info_sheet.png)
 
 Origin information:
 ![Example_origin_file](https://github.com/AthinaLange/CoastalLens/blob/main/docs/Origin_Info_sheet.png)
