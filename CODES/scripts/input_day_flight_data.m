@@ -124,7 +124,7 @@ end
 %                               - specify ocean mask to reduce processing time
 %                               - check products
 %  ===============================================================================
-for dd = 1 : length(day_files)
+for dd = 1  : length(day_files)
     %% ==========================Housekeeping======================================
     clearvars -except dd *_dir user_email day_files
     cd([day_files(dd).folder '/' day_files(dd).name])
@@ -664,7 +664,11 @@ for dd = 1 : length(day_files)
             grid_plot{length(grid_plot)+1} = fullfile(odir ,'Processed_data', [oname '_yTransects.png' ]);
         end % if ~isempty(ids_ytransect)
         if exist('user_email', 'var') && ~isempty(user_email)
-            sendmail(user_email{2}, [oname '- Input Data'], grid_text, grid_plot)
+            try
+                sendmail(user_email{2}, [oname '- Input Data'], grid_text, grid_plot)
+            catch
+                sendmail(user_email{2}, [oname '- Input Data'], grid_text)
+            end % try
         end % if exist('user_email', 'var') && ~isempty(user_email)
 
         close all

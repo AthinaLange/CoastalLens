@@ -735,7 +735,11 @@ for dd = 1 : length(day_files)
             grid_plot{length(grid_plot)+1} = fullfile(odir ,'Processed_data', [oname '_yTransects.png' ]);
         end % if ~isempty(ids_ytransect)
         if exist('user_email', 'var') && ~isempty(user_email)
-            sendmail(user_email{2}, [oname '- Input Data'], grid_text, grid_plot)
+            try
+                sendmail(user_email{2}, [oname '- Input Data'], grid_text, grid_plot)
+            catch
+                sendmail(user_email{2}, [oname '- Input Data'], grid_text)
+            end % try
         end % if exist('user_email', 'var') && ~isempty(user_email)
 
         close all
