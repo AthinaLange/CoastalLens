@@ -90,14 +90,12 @@ else
 end
 disp(platform)
 
-if ismac || isunix
-    disp('Choose global (repository) folder - ''UAV_automated_rectification''.')
-end
-global_dir = uigetdir('.', 'Choose global (repository) folder - ''UAV_automated_rectification''.');
-cd(global_dir)
 if ismac
+    disp('Choose global (repository) folder - ''CoastalLens''.')
     setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
 end
+global_dir = uigetdir('.', 'Choose global (repository) folder - ''CoastalLens''.');
+cd(global_dir)
 
 %% =============== Check that all necessary codes are loaded. =================
 code_dir = fullfile(global_dir, 'CODES');
@@ -174,7 +172,7 @@ switch answer
         setpref('Internet','SMTP_Server','smtp.gmail.com');
         setpref('Internet','SMTP_Username','coastallens1903');
         setpref('Internet', 'SMTP_Password', 'krrq pufl tqcp hjrw')
-        sendmail(user_email{2}, 'UAV Toolbox test email', [user_email{1} ' is processing UAV data from ' day_files.name '.'])
+        sendmail(user_email{2}, 'UAV Toolbox test email', [user_email{1} ' is processing UAV data from ' {day_files.name} ''])
 
         save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files', 'user_email')
     case 'No'

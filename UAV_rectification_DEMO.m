@@ -90,14 +90,13 @@ else
 end
 disp(platform)
 
-if ismac || isunix
-    disp('Choose global (repository) folder - ''UAV_automated_rectification''.')
-end
-global_dir = uigetdir('.', 'Choose global (repository) folder - ''UAV_automated_rectification''.');
-cd(global_dir)
 if ismac
+    disp('Choose global (repository) folder - ''CoastalLens''.')
     setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
 end
+global_dir = uigetdir('.', 'Choose global (repository) folder - ''CoastalLens''.');
+cd(global_dir)
+
 
 %% =============== Check that all necessary codes are loaded. =================
 code_dir = fullfile(global_dir, 'CODES');

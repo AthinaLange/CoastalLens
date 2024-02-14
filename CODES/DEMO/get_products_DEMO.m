@@ -114,6 +114,8 @@ for  dd = 1 : length(day_files)
         assert((isfield(Products, 'type') && isfield(Products, 'frameRate')), 'Error (get_products): Products must be a stucture as defined in user_input_products.')
 
         assert(isfile(fullfile(odir, 'Processed_data', [oname '_IOEO.mat'])), ['Error (get_products): ' fullfile(odir, 'Processed_data', [oname '_IOEO.mat']) 'doesn''t exist. R variable must be stored there.'])
+        load(fullfile(odir, 'Processed_data', [oname '_IOEO.mat']), 'R')
+        assert(sum(R.worldPose.Translation) ~=0, 'Error (get_products): WorldPose must not be [0,0,0].')
 
         for hh = 1 : length(extract_Hz)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));

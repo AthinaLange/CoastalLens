@@ -486,7 +486,7 @@ for dd = 1 : length(day_files)
                 [image_gcp] = select_image_gcp(I, image_fig);
                 disp('For DEMO: Under the DATA/20211215_Torrey/GCP_coordinates.txt')
                 [world_gcp] = select_target_gcp;
-            elseif ind_gcp_option == 3 % no other option
+            elseif ind_gcp_option2 == 3 % no other option
                 image_gcp = [];
                 world_gcp=[];
             end % if ind_gcp_option2 == 1
@@ -531,7 +531,7 @@ for dd = 1 : length(day_files)
         %% ========================Feature Detection Region & Method =====================
 
         disp('For DEMO: Please leave as SIFT Features.')
-        feature_types = {'SIFT', 'SURF', 'BRISK', 'ORB', 'KAZE'};
+        feature_types = {'SIFT', 'BRISK', 'ORB', 'KAZE'};
         [ind_type,~] = listdlg('ListString', feature_types, 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Which feature types do you want to use?(default: SIFT)',''}, 'ListSize',[500 300]);
         R.feature_method = feature_types{ind_type};
 
