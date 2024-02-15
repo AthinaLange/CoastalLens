@@ -42,9 +42,7 @@ end % switch answer2
 
 if ~exist('survey_gcp', 'var') || size(survey_gcp,2) ~= 3
     disp('Find local LiDAR/SfM survey folder.')
-    disp('For CPG LiDAR: CPG_data/LiDAR/20230220_NAD83_UTM11N_NAVD88_TorreyLot.las')
-    disp('For CPG SfM: CPG_data/20220817_00581_00590_NoWaves_TorreyCobble_P4RTK_epoch2010_geoid12b.las')
-
+    
     [pc] = load_pointcloud;
     answer = questdlg('Do you want to select from LiDAR/SfM or image first?', 'GCP locations', 'Image', 'LiDAR/SfM', 'Image');
     switch answer

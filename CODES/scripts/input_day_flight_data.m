@@ -124,7 +124,7 @@ end
 %                               - specify ocean mask to reduce processing time
 %                               - check products
 %  ===============================================================================
-for dd = 1  : length(day_files)
+for  dd = 1:length(day_files)
     %% ==========================Housekeeping======================================
     clearvars -except dd *_dir user_email day_files
     cd([day_files(dd).folder '/' day_files(dd).name])
@@ -483,13 +483,17 @@ for dd = 1  : length(day_files)
                 worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics);
             catch
                 try
-                    worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics, 'MaxReprojectionError',3);
+                    worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics, 'MaxReprojectionError',5);
                 catch
-                    worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
-                    disp('World Pose not found.')
-                    if exist('user_email', 'var')
-                        sendmail(user_email{2}, [oname '- World Pose not found'])
-                    end % if exist('user_email', 'var')
+                    try
+                        worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics, 'MaxReprojectionError',10);
+                    catch
+                        worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
+                        disp('World Pose not found.')
+                        if exist('user_email', 'var')
+                            sendmail(user_email{2}, [oname '- World Pose not found'])
+                        end % if exist('user_email', 'var')
+                    end % try
                 end % try
             end % try
         end % try
@@ -559,8 +563,11 @@ for dd = 1  : length(day_files)
                     case 'No - redefine'
                         disp('Please change grid.')
                         origin_grid = [Products(pp).lat Products(pp).lon, Products(pp).angle];
+                        tide = Products(pp).tide;
                         [Product1] = define_grid(origin_grid);
+                        Product1.tide = tide;
                         Products(pp) = Product1;
+                        
                 end % switch answer
             end % while gridChangeIndex == 0
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))
@@ -577,7 +584,7 @@ for dd = 1  : length(day_files)
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
                 plot_xtransects(Products, R.I, R.intrinsics, R.worldPose)
-                answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No', 'Yes');
+                answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No - redefine', 'Yes');
                 switch answer
                     case 'Yes'
                         gridChangeIndex = 1;
@@ -585,9 +592,11 @@ for dd = 1  : length(day_files)
                         disp('Please change transects.')
                         ids_xtransect = find(ismember(string({Products.type}), 'xTransect'));
                         origin_grid = [Products(ids_xtransect(1)).lat Products(ids_xtransect(1)).lon, Products(ids_xtransect(1)).angle];
+                        tide = Products(ids_xtransect(1)).tide;
                         Products(ids_xtransect) = [];
                         productCounter = length(Products);
                         [Product1] = define_xtransect(origin_grid);
+                        [Product1.tide] = deal(tide);
                         Products(productCounter+1:productCounter+length(Product1))=Product1;
                 end % switch answer
             end % while gridChangeIndex == 0
@@ -604,17 +613,19 @@ for dd = 1  : length(day_files)
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
                 plot_ytransects(Products, R.I, R.intrinsics, R.worldPose)
-                answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No', 'Yes');
+                answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No - redefine', 'Yes');
                 switch answer
                     case 'Yes'
                         gridChangeIndex = 1;
-                    case 'No'
+                    case 'No - redefine'
                         disp('Please change transects.')
                         ids_ytransect = find(ismember(string({Products.type}), 'yTransect'));
                         origin_grid = [Products(ids_ytransect(1)).lat Products(ids_ytransect(1)).lon, Products(ids_ytransect(1)).angle];
+                        tide = Products(ids_ytransect(1)).tide;
                         Products(ids_ytransect) = [];
                         productCounter = length(Products);
                         [Product1] = define_ytransect(origin_grid);
+                        [Product1.tide] = deal(tide);
                         Products(productCounter+1:productCounter+length(Product1))=Product1;
                 end % switch answer
             end % while gridChangeIndex == 0

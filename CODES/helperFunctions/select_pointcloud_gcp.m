@@ -60,7 +60,8 @@ for ii = 1:gcp_num % repeat for all gcps
     answer = 'Reselect';
     while contains(answer , 'Reselect')
         figure(zoom_fig)
-        [selectedPoint, zoom_fig] = select_pcshow_point(pc_small, zoom_fig);
+        [selectedPoint, ~] = select_pcshow_point(pc_small, zoom_fig);
+        clf;ax3 = axes('Parent', zoom_fig);
         pcshow(pc_small, 'Parent', ax3);hold on
         scatter3(selectedPoint(1), selectedPoint(2), selectedPoint(3), 100, 'r', 'filled', 'Parent', ax3)
         set(ax3, 'Xlim', [selectedPoint(1)-25 selectedPoint(1)+25], 'Ylim', [selectedPoint(2)-25 selectedPoint(2)+25])
