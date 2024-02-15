@@ -20,9 +20,6 @@ authors:
   - name: Julia W. Fiedler
     orcid: 0000-0002-4797-8933
     affiliation: 4
-  - name: Mark A. Merrifield
-    orcid: 
-    affiliation: 1
 affiliations:
   - name: Scripps Institution of Oceanography, University of California, San Diego, USA
     index: 1
