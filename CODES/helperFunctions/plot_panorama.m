@@ -1,13 +1,16 @@
-function [panorama, panoramaView] = plot_panorama(images, intrinsics, extrinsics)
+function [panorama, panoramaView] = plot_panorama(images, intrinsics, extrinsics, varargin)
 %   plot_panorama returns a panorama image from image sequence and corresponding extrinsics.
 %% Syntax
 %           [panorama] = plot_panorama(images, intrinsics, extrinsics)
+%           [panorama] = plot_panorama(images, intrinsics, extrinsics, extract_Hz = 2)
 %
 %% Description
 %   Args:
 %           images (imageDatastore) : image dataset (m images) to use to construct panorama
 %           intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
 %           extrinsics (projtform2d) : [1 x m] projection for m images
+%           varargin :
+%                       extract_Hz (double) : extraction framerate.
 %
 %   Returns:
 %           panorama (uint8 image): stitched panorama image
@@ -27,6 +30,9 @@ assert(strcmp(class(images), 'matlab.io.datastore.ImageDatastore'), 'Error (plot
 assert(size(images.Files,1)==size(extrinsics,2), 'Error (plot_panorama): Number of files in ''images'' and ''extrinsics'' must be the same.')
 assert(isa(intrinsics, 'cameraIntrinsics'), 'Error (plot_panorama): intrinsics must be a cameraIntrinsics object.')
 assert(isa(extrinsics, 'projtform2d'), 'Error (plot_panorama): extrinsics must be projtform2d array.')
+
+options.extract_Hz = 2;
+options = parseOptions(options , varargin);
 
 %% Define panorama view
 I = undistortImage(readimage(images, 1), intrinsics);
@@ -58,7 +64,7 @@ xLimits = [xMin xMax];
 yLimits = [yMin yMax];
 panoramaView = imref2d([height width], xLimits, yLimits);
 %% Build panorama
-for i = 1:30/(1/extract_Hz(hh)):length(images.Files)
+for i = 1:30/(1/options.extract_Hz):length(images.Files)
 
     I = undistortImage(readimage(images, i), intrinsics);
 

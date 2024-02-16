@@ -1,3 +1,3 @@
 SourceFile,FileName,CreateDate,Duration,CameraPitch,CameraYaw,CameraRoll,AbsoluteAltitude,RelativeAltitude,GPSLatitude,GPSLongitude
-/Users/athinalange/Desktop/DATA/Work/UAV_rectification/Athina_Automated_rectification/UAV_automated_rectification/DATA/20211215_Torrey/Flight_04/DJI_0001.JPG,DJI_0001.JPG,2021:12:15 09:11:38,,-24.70,-83.30,+0.00,+48.56,+77.26,32.92706480555555259571 N,117.25826672222221702668 W
-/Users/athinalange/Desktop/DATA/Work/UAV_rectification/Athina_Automated_rectification/UAV_automated_rectification/DATA/20211215_Torrey/Flight_04/DJI_0002.MOV,DJI_0002.MOV,2024:02:06 15:31:43,0:01:00,-21.70,-63.50,+0.00,,,32.92707200000000256068 N,117.25826899999999852753 W
+CoastalLens-main/DATA/20211215_Torrey/Flight_04/DJI_0001.JPG,DJI_0001.JPG,2021:12:15 09:11:38,,-24.70,-83.30,0.00,48.56,77.26,32.92706480555555259571 N,117.25826672222221702668 W
+CoastalLens-main/DATA/20211215_Torrey/Flight_04/DJI_0002.MOV,DJI_0002.MOV,2024:02:06 15:31:43,0:01:00,-21.70,-63.50,0.00,,,32.92707200000000256068 N,117.25826899999999852753 W
