@@ -226,6 +226,8 @@ Please set up your CODES and DATA folder in the following structure. The DATA fo
 </tbody>
 </table>
 
+## Known Bugs
+- Estimating the world camera pose based on from 3-D to 2-D point correspondences can sometime require different combinations of points. More points are not always better. We are looking into ways to improve the robustness of this step. 
 
 ## Contributing
 Contributions to the toolbox are very welcome! Here are some ways to do that:<br />
