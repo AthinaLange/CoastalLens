@@ -245,3 +245,4 @@ If you run into any problems while running the code, or think other things shoul
 
 
 ## Cite As
+A.M.Z. Lange, H. Lange, B.L. Bruder and J.W. Fiedler "CoastalLens: A MATLAB UAV Video Stabilization & Rectification Framework"
