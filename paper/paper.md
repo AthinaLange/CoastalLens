@@ -27,7 +27,7 @@ affiliations:
     index: 2
   - name: Coastal and Hydraulics Laboratory, US Army Engineer Research and Development Center, USA
     index: 3
-  - name: Sea Level Rise Center, University of Hawai’i at Manoa, USA
+  - name: University of Hawai’i Sea Level Center, USA
     index: 4
 date: 29 Feburary 2024
 bibliography: paper.bib
