@@ -4,6 +4,8 @@ Developed from the [CIRN Qualitative Coastal Imagining Toolbox](https://github.c
 
 Uncrewed aerial vehicles (UAVs) are an important tool for coastal monitoring with their relatively low-cost and rapid deployment capabilities. To generate scientific-grade image products, the UAV images/videos must be stabilized and rectified into world coordinates. Due to the limited stable region of coastal images suitable for control points, the processing of  UAV-obtained videos can be time-consuming and resource-intensive. The CIRN Qualitative Coastal Imagining Toolbox provided a first-of-its-kind open-sourced code for rectifying these coastal UAV videos. Limitations of the toolbox, however, prompted the development of CoastalLens with an efficient data input procedure, providing capabilities to obtain drone position (extrinsics) from LiDAR surveys, and using a feature detection and matching algorithm to stabilize the video prior to rectification. This framework reduces the amount of human oversight, now only required during the data input processes. Removing the dependency on threshold stability control points can also result in less time in the field. We hope this framework will allow for more efficient processing of the ever-increasing coastal UAV datasets.  
 
+![Rectification Example](https://github.com/AthinaLange/CoastalLens/blob/main/docs/Rectification_example.png)
+
 ## Installation
 Requires MATLAB (min v2022b - for estworldpose function, see [Input Requirements](https://github.com/AthinaLange/CoastalLens/wiki/Input-Requirements/#GCP) for an alternative if using an older MATLAB version). Ubuntu users: See [Issue 11](https://github.com/AthinaLange/CoastalLens/issues/11)<br />
 Required MATLAB toolboxes:
