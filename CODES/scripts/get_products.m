@@ -131,7 +131,7 @@ for  dd = 1 : length(day_files)
             assert(isa(R.worldPose, 'rigidtform3d'), 'Error (get_products): extrinsics must be rigidtform3d object.')
 
             if ~isfield(R, 't')
-                load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'C', 'mov_id', 'tz')
+                load(fullfile(odir, 'Processed_data', 'Initial_coordinates'), 'C', 'mov_id', 'tz')
                 assert(exist('C', 'var'), 'Error (get_products): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
                 assert(isa(C, 'table'), 'Error (get_products): C must be a table. run get_metadata.')
                 assert(exist('mov_id', 'var'), 'Error (get_products): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')

@@ -54,7 +54,7 @@ for dd = 1:length(day_files)
     assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat')),['Error (extract_images_from_UAV): ' fullfile(day_files(dd).folder, day_files(dd).name, 'config_file.mat') ' doesn''t exist.']);
     load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights')
     for ff = 1:length(flights)
-        assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat')), ['Error (extract_images_from_UAV): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat') ' doesn''t exist.']);
+        assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Initial_coordinates.mat')), ['Error (extract_images_from_UAV): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Initial_coordinates.mat') ' doesn''t exist.']);
     end
 end
 
@@ -76,7 +76,7 @@ for dd = 1:length(day_files)
         oname = [day_files(dd).name '_' flights(ff).name];
         cd(odir)
 
-        load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'mov_id', 'C')
+        load(fullfile(odir, 'Processed_data', 'Initial_coordinates'), 'mov_id', 'C')
         assert(exist('C', 'var'), 'Error (extract_images_from_UAV): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
         assert(isa(C, 'table'), 'Error (extract_images_from_UAV): C must be a table. run get_metadata.')
         assert(exist('mov_id', 'var'), 'Error (extract_images_from_UAV): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')

@@ -68,7 +68,7 @@ for dd = 1:length(day_files)
     assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat')),['Error (stabilize_video): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat') ' doesn''t exist.']);
     load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights')
     for ff = 1:length(flights)
-        assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat')), ['Error (stabilize_video): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Inital_coordinates.mat') ' doesn''t exist.']);
+        assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Initial_coordinates.mat')), ['Error (stabilize_video): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Initial_coordinates.mat') ' doesn''t exist.']);
     end
 end
 
@@ -104,7 +104,7 @@ for dd = 1 : length(day_files)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
             images = imageDatastore(imageDirectory);
 
-            load(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'C', 'mov_id', 'tz')
+            load(fullfile(odir, 'Processed_data', 'Initial_coordinates'), 'C', 'mov_id', 'tz')
             assert(exist('C', 'var'), 'Error (stabilize_video): C must exist and be stored in ''Initial_coordinates.mat''. run get_metadata.')
             assert(isa(C, 'table'), 'Error (stabilize_video): C must be a table. run get_metadata.')
             assert(exist('mov_id', 'var'), 'Error (stabilize_video): mov_id must exist and be stored in ''Initial_coordinates.mat''. run [mov_id] = find_file_format_id(C, file_format = {''MOV'', ''MP4''}).')

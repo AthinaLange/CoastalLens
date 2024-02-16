@@ -33,7 +33,7 @@
 %                       intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
 %                       I (uint8 image) : undistorted initial frame
 %                       world_gcp (double) : [n x 3] ground control location in world coordinate frame (x,y,z)
-%                       image_gcp (double) : [n x 2] ground control location in inital frame
+%                       image_gcp (double) : [n x 2] ground control location in initial frame
 %                       worldPose (rigidtform3d) : orientation and location of camera in world coordinates, based off ground control location (pose, not extrinsic)
 %                       mask (logical) : mask over ocean region (same dimensions as image) - used to speed up computational time (optional)
 %                       feature_method (string): feature type to use in feature detection algorithm (default: `SIFT`, must be `SIFT`, `SURF`, `BRISK`, `ORB`, `KAZE`) (optional)
@@ -120,7 +120,7 @@ end
 %                               - Pull initial drone position and pose from metadata (using exiftool)
 %                               - extract initial frame (using ffmpeg)
 %                               - confirm distortion
-%                               - confirm inital drone position and pose from gcps
+%                               - confirm initial drone position and pose from gcps
 %                               - specify ocean mask to reduce processing time
 %                               - check products
 %  ===============================================================================
@@ -283,7 +283,7 @@ for  dd = 1:length(day_files)
         %                          INITIAL DRONE COORDINATES FROM METADATA
         %                           - Use exiftool to pull metadata from images and video
         %                               - mov_id indicates which movies to use in image extraction
-        %                               - get inital camera position and pose from metadata
+        %                               - get initial camera position and pose from metadata
         %  ============================================================================
         % Determine file name prefix if necessary.
         if exist('drone_type', 'var') && contains(drone_type, 'DJI')
@@ -346,7 +346,7 @@ for  dd = 1:length(day_files)
         [id, ~] = listdlg('ListString', append(string(C.FileName(mov_id)), ' - ',  string(C.Duration(mov_id))), 'SelectionMode','multiple', 'InitialValue', 1:length(mov_id), 'PromptString', {'What movies do you want to use? (command + for multiple)'}, 'ListSize', [500 300]);
         mov_id = mov_id(id);
 
-        save(fullfile(odir, 'Processed_data', 'Inital_coordinates'), 'jpg_id', 'mov_id', 'C', 'tz')
+        save(fullfile(odir, 'Processed_data', 'Initial_coordinates'), 'jpg_id', 'mov_id', 'C', 'tz')
 
         clearvars answer2 id drone_file_name drone_type jpg_id
         %% ========================initialFrame=========================================
@@ -360,7 +360,7 @@ for  dd = 1:length(day_files)
                 system(['ffmpeg -ss 00:00:00 -i ' char(string(C.FileName(mov_id(1)))) ' -frames:v 1 -loglevel quiet -stats -qscale:v 2 Processed_data/Initial_frame.jpg']);
             end % ispc
         end % if ~exist(fullfile(odir, 'Processed_data', 'Initial_frame.jpg'), 'file')
-        assert(isfile(fullfile(odir, 'Processed_data', 'Initial_frame.jpg')), 'Error (input_day_flight_data): Please install ffmpeg. Problem extracting inital frame.')
+        assert(isfile(fullfile(odir, 'Processed_data', 'Initial_frame.jpg')), 'Error (input_day_flight_data): Please install ffmpeg. Problem extracting initial frame.')
         clear C mov_id
         %% ========================distortion===========================================
         %                          CONFIRM DISTORTION
@@ -540,7 +540,7 @@ for  dd = 1:length(day_files)
         %% ========================productsCheck=======================================
         %                          CHECK PRODUCTS ON INITIAL IMAGE
         %                           - Load in all required data -
-        %                             extrinsics, intrinsics, inital frame, input data, products
+        %                             extrinsics, intrinsics, initial frame, input data, products
         %  ============================================================================
 
         load(fullfile(odir, 'Processed_data', [oname '_IOEO']),'R')
@@ -550,7 +550,7 @@ for  dd = 1:length(day_files)
 
         %% ========================grid================================================
         %                          GRID
-        %                           - Projects grid onto inital frame
+        %                           - Projects grid onto initial frame
         %                           - If unhappy, can reinput grid data
         %  ============================================================================
         ids_grid = find(ismember(string({Products.type}), 'Grid'));
@@ -579,7 +579,7 @@ for  dd = 1:length(day_files)
 
         %% ========================xTransects==========================================
         %                          xTransects
-        %                           - Projects all xTransects onto inital frame
+        %                           - Projects all xTransects onto initial frame
         %                           - If unhappy, can reinput transect data
         %  ============================================================================
         if ~isempty(find(ismember(string({Products.type}), 'xTransect')))
@@ -608,7 +608,7 @@ for  dd = 1:length(day_files)
         end % if ~isempty(ffind(ismember(string({Products.type}), 'xTransect')))
         %% ========================yTransects==========================================
         %                         yTransects
-        %                           - Projects all yTransects onto inital frame
+        %                           - Projects all yTransects onto initial frame
         %                           - If unhappy, can reinput transect data
         %  ============================================================================
         if ~isempty(find(ismember(string({Products.type}), 'yTransect')))
