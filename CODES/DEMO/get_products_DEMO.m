@@ -149,35 +149,12 @@ for  dd = 1 : length(day_files)
             end %  if ~isfield(R, 't')
             [Products.t] =  deal(R.t);
 
-            %% construct panorama box
-            imageSize= size(readimage(images,1));
-            for i = 1:numel(R.extrinsics_2d)
-                [xlim(i,:), ylim(i,:)] = outputLimits(R.extrinsics_2d(i), [1 imageSize(2)], [1 imageSize(1)]);
-            end %  for i = 1:numel(R.extrinsics_2d)
-
-            % Find the minimum and maximum output limits.
-            xMin = min([1; xlim(:)]);
-            xMax = max([imageSize(2); xlim(:)]);
-
-            yMin = min([1; ylim(:)]);
-            yMax = max([imageSize(1); ylim(:)]);
-
-            % Width and height of panorama.
-            width  = round(xMax - xMin);
-            height = round(yMax - yMin);
-
-            % Create a 2-D spatial reference object defining the size of the panorama.
-            xLimits = [xMin xMax];
-            yLimits = [yMin yMax];
-            panoramaView = imref2d([height width], xLimits, yLimits);
-
-            clear imageSize xlim ylim xMin xMax yMin yMax width height xLimits yLimits
             %% =========================== Products ==================================
             for viewId = 1:length(images.Files)
                 if rem(viewId, 30/(1/extract_Hz(hh))) == 0 % show viewId every 30 sec
                     fprintf('viewId = %i\n', viewId)
                 end % if rem(viewId, 30/(1/extract_Hz(hh))) == 0
-                I = imwarp(undistortImage(readimage(images, viewId), R.intrinsics), R.extrinsics_2d(viewId), 'OutputView', panoramaView);
+                I = imwarp(undistortImage(readimage(images, viewId), R.intrinsics), R.extrinsics_2d(viewId), 'OutputView', R.panoramaView);
                 for pp = 1:length(Products)
                     if extract_Hz(hh)== Products(pp).frameRate || rem(extract_Hz(hh),Products(pp).frameRate) == 0 % if sampleRate = frameRate or can be subsampled from frameRate
                         if rem(viewId-1, extract_Hz(hh)/Products(pp).frameRate)==0 % if subsampled framerate
@@ -190,7 +167,7 @@ for  dd = 1 : length(day_files)
                                 Products(pp).Northings = Northings;
                                 Products(pp).localZ = Z;
                                 % Find appropriate shift for panoramaView
-                                mask = imwarp(true(size(I,1),size(I,2)), R.extrinsics_2d(viewId), 'OutputView', panoramaView);
+                                mask = imwarp(true(size(I,1),size(I,2)), R.extrinsics_2d(viewId), 'OutputView', R.panoramaView);
                                 BW = boundarymask(mask);
                                 [row, col] = find(BW == 1, 1,'first');
                                 Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics))+[col row];
@@ -198,11 +175,11 @@ for  dd = 1 : length(day_files)
 
                             clear Irgb_temp
                             for ii = 1:length(Products(pp).iP)
-                                if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= panoramaView.ImageSize)
+                                if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= R.panoramaView.ImageSize)
                                     Irgb_temp(ii, :) = uint8([0 0 0]);
                                 else
                                     Irgb_temp(ii, :) = I(Products(pp).iP(ii,2), Products(pp).iP(ii,1),:);
-                                end % if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= panoramaView.ImageSize)
+                                end % if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= R.panoramaView.ImageSize)
                             end %  for ii = 1:length(Products(pp).iP)
 
                             if contains(Products(pp).type, 'Grid')

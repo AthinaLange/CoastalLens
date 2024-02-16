@@ -102,8 +102,8 @@ switch answer
         props.setProperty('mail.smtp.starttls.enable','true');
 
         setpref('Internet','SMTP_Server','smtp.gmail.com');
-        setpref('Internet','SMTP_Username','athinalange1996');
-        setpref('Internet', 'SMTP_Password', 'baundwhnctgbsykb')
+        setpref('Internet','SMTP_Username','coastallens1903');
+        setpref('Internet', 'SMTP_Password', 'krrq pufl tqcp hjrw')
         sendmail(user_email{2}, 'UAV Toolbox test email', [user_email{1} ' is processing UAV data from ' day_files.name '.'])
 
         return
@@ -253,9 +253,11 @@ for  dd = 1:length(day_files)
     %                          SAVE DAY RELEVANT DATA
     %                           - Save camera intrinsics, extraction frame rates, products, flights for specific day, drone type and timezone
     %  ==============================================================================
-    flights = dir(fullfile(day_files(dd).folder, day_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
+    flights = dir(fullfile(day_files(dd).folder, day_files(dd).name)); flights([flights.isdir]==0)=[];
+    flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
 
-    save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
+    save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'),...
+        'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
 
     %% =============================================================================
     %                          PROCESS EACH FLIGHT
@@ -567,7 +569,7 @@ for  dd = 1:length(day_files)
                         [Product1] = define_grid(origin_grid);
                         Product1.tide = tide;
                         Products(pp) = Product1;
-                        
+
                 end % switch answer
             end % while gridChangeIndex == 0
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))

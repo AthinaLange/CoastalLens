@@ -103,8 +103,8 @@ switch answer
         props.setProperty('mail.smtp.starttls.enable','true');
 
         setpref('Internet','SMTP_Server','smtp.gmail.com');
-        setpref('Internet','SMTP_Username','athinalange1996');
-        setpref('Internet', 'SMTP_Password', 'baundwhnctgbsykb')
+        setpref('Internet','SMTP_Username','coastallens1903');
+        setpref('Internet', 'SMTP_Password', 'krrq pufl tqcp hjrw')
         sendmail(user_email{2}, 'UAV Toolbox test email', [user_email{1} ' is processing UAV data from ' day_files.name '.'])
 
         return
@@ -174,7 +174,7 @@ for dd = 1 : length(day_files)
             switch answer
                 case 'Yes'
                     disp('Load in camera calibration file.')
-                    disp('For DEMO: under demo_files/cameraParams_whitecap.mat') %% XXX
+                    disp('For DEMO: under demo_files/cameraParams_whitecap.mat')
                     [temp_file, temp_file_path] = uigetfile(global_dir, 'Camera Parameters');
                     load(fullfile(temp_file_path, temp_file)); clear temp_file*
 
@@ -261,9 +261,11 @@ for dd = 1 : length(day_files)
     %                          SAVE DAY RELEVANT DATA
     %                           - Save camera intrinsics, extraction frame rates, products, flights for specific day, drone type and timezone
     %  ==============================================================================
-    flights = dir(fullfile(day_files(dd).folder, day_files(dd).name)); flights([flights.isdir]==0)=[]; flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
+    flights = dir(fullfile(day_files(dd).folder, day_files(dd).name)); flights([flights.isdir]==0)=[];
+    flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
 
-    save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
+    save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'),...
+        'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
 
     %% =============================================================================
     %                          PROCESS EACH FLIGHT
@@ -497,13 +499,17 @@ for dd = 1 : length(day_files)
                 worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics);
             catch
                 try
-                    worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics, 'MaxReprojectionError',3);
+                    worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics, 'MaxReprojectionError',5);
                 catch
-                    worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
-                    disp('World Pose not found.')
-                    if exist('user_email', 'var')
-                        sendmail(user_email{2}, [oname '- World Pose not found'])
-                    end % if exist('user_email', 'var')
+                    try
+                        worldPose = estworldpose(image_gcp,world_gcp, R.intrinsics, 'MaxReprojectionError',10);
+                    catch
+                        worldPose = rigidtform3d(eul2rotm([0 0 0]), [0 0 0]);
+                        disp('World Pose not found.')
+                        if exist('user_email', 'var')
+                            sendmail(user_email{2}, [oname '- World Pose not found'])
+                        end % if exist('user_email', 'var')
+                    end % try
                 end % try
             end % try
         end % try
@@ -626,8 +632,11 @@ for dd = 1 : length(day_files)
                     case 'No - redefine'
                         disp('Please change grid.')
                         origin_grid = [Products(pp).lat Products(pp).lon, Products(pp).angle];
+                        tide = Products(pp).tide;
                         [Product1] = define_grid(origin_grid);
+                        Product1.tide = tide;
                         Products(pp) = Product1;
+
                 end % switch answer
             end % while gridChangeIndex == 0
             print(gcf,'-dpng', fullfile(odir, 'Processed_data', [oname '_' char(string(pp)) '_Grid_Local.png' ]))
@@ -644,7 +653,7 @@ for dd = 1 : length(day_files)
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
                 plot_xtransects(Products, R.I, R.intrinsics, R.worldPose)
-                answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No', 'Yes');
+                answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No - redefine', 'Yes');
                 switch answer
                     case 'Yes'
                         gridChangeIndex = 1;
@@ -652,9 +661,11 @@ for dd = 1 : length(day_files)
                         disp('Please change transects.')
                         ids_xtransect = find(ismember(string({Products.type}), 'xTransect'));
                         origin_grid = [Products(ids_xtransect(1)).lat Products(ids_xtransect(1)).lon, Products(ids_xtransect(1)).angle];
+                        tide = Products(ids_xtransect(1)).tide;
                         Products(ids_xtransect) = [];
                         productCounter = length(Products);
                         [Product1] = define_xtransect(origin_grid);
+                        [Product1.tide] = deal(tide);
                         Products(productCounter+1:productCounter+length(Product1))=Product1;
                 end % switch answer
             end % while gridChangeIndex == 0
@@ -671,17 +682,19 @@ for dd = 1 : length(day_files)
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
                 plot_ytransects(Products, R.I, R.intrinsics, R.worldPose)
-                answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No', 'Yes');
+                answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No - redefine', 'Yes');
                 switch answer
                     case 'Yes'
                         gridChangeIndex = 1;
-                    case 'No'
+                    case 'No - redefine'
                         disp('Please change transects.')
                         ids_ytransect = find(ismember(string({Products.type}), 'yTransect'));
                         origin_grid = [Products(ids_ytransect(1)).lat Products(ids_ytransect(1)).lon, Products(ids_ytransect(1)).angle];
+                        tide = Products(ids_ytransect(1)).tide;
                         Products(ids_ytransect) = [];
                         productCounter = length(Products);
                         [Product1] = define_ytransect(origin_grid);
+                        [Product1.tide] = deal(tide);
                         Products(productCounter+1:productCounter+length(Product1))=Product1;
                 end % switch answer
             end % while gridChangeIndex == 0
@@ -689,9 +702,6 @@ for dd = 1 : length(day_files)
 
             clearvars  gridChangeIndex answer origin_grid Product1 productCounter
         end %  if ~isempty(find(ismember(string({Products.type}), 'yTransect')))
-
-
-
         %% ========================email===============================================
         %                         SEND EMAIL WITH INPUT DATA
         %                           - Origin of Coordinate System
@@ -700,9 +710,7 @@ for dd = 1 : length(day_files)
         %                           - Data extraction frame rates
         %                           - Products
         %  ============================================================================
-        [Products.tide]=deal(tide);
         save(fullfile(odir, 'Processed_data', [oname '_Products.mat']), 'Products', '-v7.3')
-
 
         clear grid_text grid_plot
         load(fullfile(odir, 'Processed_data', [oname '_IOEO']))
