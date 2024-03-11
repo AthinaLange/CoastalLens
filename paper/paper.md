@@ -28,7 +28,7 @@ affiliations:
     index: 3
   - name: University of Hawai’i Sea Level Center, USA
     index: 4
-date: 11 March 2024
+date: March 11 2024
 bibliography: paper.bib
 ---
 
