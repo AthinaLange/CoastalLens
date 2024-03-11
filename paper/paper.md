@@ -9,7 +9,6 @@ tags:
 authors: 
   - name: Athina M.Z. Lange
     orcid: 0000-0002-7650-9976
-    equal-contrib: true
     affiliation: 1
   - name: Holger Lange
     orcid: 
