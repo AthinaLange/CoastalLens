@@ -13,21 +13,22 @@ authors:
   - name: Holger Lange
     orcid: 
     affiliation: 2
-  - name: Brittany L. Bruder
-    orcid: 
-    affiliation: 3
   - name: Julia W. Fiedler
     orcid: 0000-0002-4797-8933
+    affiliation: 3
+  - name: Brittany L. Bruder
+    orcid: 
     affiliation: 4
 affiliations:
   - name: Scripps Institution of Oceanography, University of California, San Diego, USA
     index: 1
   - name: AI Werkstatt, USA
     index: 2
-  - name: Coastal and Hydraulics Laboratory, US Army Engineer Research and Development Center, USA
-    index: 3
   - name: University of Hawai’i Sea Level Center, USA
+    index: 3
+  - name: Coastal and Hydraulics Laboratory, US Army Engineer Research and Development Center, USA
     index: 4
+
 date: March 11 2024
 bibliography: paper.bib
 ---
