@@ -21,7 +21,7 @@
 %                       feature_method (string): feature type to use in feature detection algorithm (default: `SIFT`, must be `SIFT`, `SURF`, `BRISK`, `ORB`, `KAZE`) (optional)
 %                       frameRate (double) : frame rate of extrinsics (Hz)
 %                       t (datetime array) : [1 x m] datetime of images at various extraction rates in UTC
-%                       extrinsics_2d (projtform2d) : [1 x m] 2d projective transformation of m images
+%                       extrinsics_2d (projtform2d) : [1 x m] 2d projective transformation of m images (with respect to 1st frame).
 %
 %
 % For each extraction frame rate:

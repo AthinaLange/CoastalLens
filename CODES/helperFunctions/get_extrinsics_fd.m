@@ -16,7 +16,7 @@ function [extrinsics] = get_extrinsics_fd( images, intrinsics, varargin)
 %                       mask (logical) :  binary mask (same dimensions as images). helps cut down on processing time.
 %
 %   Returns:
-%          extrinsics (array) : [1 x m] 2D projective transformation between subsequent frames
+%          extrinsics (array) : [1 x m] 2D projective transformation from 1st frame (as determined between subsequent frames)
 %
 %
 %% Example 1

@@ -9,7 +9,7 @@
 %           extract_Hz (double) : extraction frame rate (Hz) - obtained from Products
 %           R (structure) : extrinsics/intrinsics information
 %                       intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
-%                       extrinsics_2d (projtform2d) : [1 x m] 2d projective transformation of m images
+%                       extrinsics_2d (projtform2d) : [1 x m] 2d projective transformation of m images (with respect to 1st frame)
 %                       worldPose (rigidtform3d) : orientation and location of camera in world coordinates, based off ground control location (pose, not extrinsic)
 %                       t (datetime array) : [1 x m] datetime of images at various extraction rates in UTC
 %           Products (structure) : Data products
