@@ -31,7 +31,7 @@ You can find more details, including the information you need to run this on you
 ## Demo / Getting Started
 'UAV_rectification_DEMO.m' runs a demo version of the code and can also be used to compare the new algorithm versus the CIRN Stability Control Points method. This method requires stability control points to be visible within the field of view. 
 
-Data to test the code is provided in the DATA folder and the video can be downloaded [here](https://drive.google.com/file/d/1Qk1q1i75eXTYNB92fwHlcD6Yg7p0FV_W/view?usp=drive_link) (716MB). Save this video in DATA/20211215_Torrey/Flight_04/.
+Data to test the code is provided in the DATA folder and the video can be downloaded [here]([https://zenodo.org/records/10810778]) (716MB). Save this video in DATA/20211215_Torrey/Flight_04/.
 
 Here is the input information required for the DEMO version. We recommend making a similar table to keep track of all the necessary information for your own drone flights. <br/>
 
