@@ -90,7 +90,7 @@ for dd = 1:length(day_files)
             imageDirectory = sprintf('images_%iHz', extract_Hz(hh));
             % check if folder exists or is just empty
             iDir = dir(imageDirectory); iDir([iDir.isdir]==1)=[];
-            if isfolder(imageDirectory) || isempty(iDir)
+            if ~isfolder(imageDirectory) || isempty(iDir)
                 mkdir(sprintf('images_%iHz', extract_Hz(hh)))
 
                 % extract images at extract_Hz rate with ffmpeg
