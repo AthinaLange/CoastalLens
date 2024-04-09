@@ -161,7 +161,6 @@ for  dd = 1 : length(day_files)
                             %% FD
                             if viewId == 1
                                 if exist('DEM', 'var')
-                                    disp('Running with DEM.')
                                     [xyz, localX, localY, Z, Eastings, Northings] = getCoords_DEM(Products(pp), DEM);
                                 else
                                     [xyz, localX, localY, Z, Eastings, Northings] = getCoords(Products(pp));
@@ -180,7 +179,7 @@ for  dd = 1 : length(day_files)
 
                             clear Irgb_temp
                             for ii = 1:length(Products(pp).iP)
-                                if any(isnan(Products(pp).iP(ii,:))) || any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= R.panoramaView.ImageSize)
+                                if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= R.panoramaView.ImageSize)
                                     Irgb_temp(ii, :) = uint8([0 0 0]);
                                 else
                                     Irgb_temp(ii, :) = I(Products(pp).iP(ii,2), Products(pp).iP(ii,1),:);
@@ -231,14 +230,12 @@ for  dd = 1 : length(day_files)
                 Products(pp).t=Products(pp).t(1:extract_Hz(hh)/Products(pp).frameRate:end);
             end %  for pp = 1:length(Products)
 
-            save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '--append', '-v7.3')
+            save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '-append', '-v7.3')
 
 
         end % for hh = 1 : length(extract_Hz)
         if exist('user_email', 'var')
-            try
-                sendmail(user_email{2}, [oname '- Rectifying Products DONE'])
-            end
+            sendmail(user_email{2}, [oname '- Rectifying Products DONE'])
         end % if exist('user_email', 'var')
     end %  for ff = 1 : length(flights)
 end % for  dd = 1 : length(day_files)

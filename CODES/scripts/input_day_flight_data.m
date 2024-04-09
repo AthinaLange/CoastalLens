@@ -232,6 +232,28 @@ for  dd = 1:length(day_files)
         clear answer
 
     end % if ~exist('Products', 'var') || ~isstruct(Products)
+    %% ==========================DEM======================================
+    %                          Load in topography DEM
+    %                           - Requires time, X_gridded, Y_gridded,
+    %                           Z_gridded data in world coordinates
+    %  ==============================================================================
+    if ~exist('DEM', 'var')
+        answer = questdlg('Do you want to use a topography DEM?', 'Topo DEM', 'Yes', 'No', 'No');
+        switch answer
+            case 'Yes'
+                disp('Please load in DEM topo file.')
+                [temp_file, temp_file_path] = uigetfile(global_dir, 'DEM topo file');
+                load(fullfile(temp_file_path, temp_file)); clear temp_file*
+                assert(isfield(DEM, 'time'), 'Error (input_day_flight_data.m): DEM does not have time field.')
+                assert(isfield(DEM, 'X_gridded'), 'Error (input_day_flight_data.m): DEM does not have X_gridded field.')
+                assert(isfield(DEM, 'Y_gridded'), 'Error (input_day_flight_data.m): DEM does not have Y_gridded field.')
+                assert(isfield(DEM, 'Z_gridded'), 'Error (input_day_flight_data.m): DEM does not have Z_gridded field.')
+
+                [~,date_id]=min(abs(datetime(day_files(dd).name(1:8), 'InputFormat', 'yyyyMMdd')-[DEM.time]));
+
+                DEM = DEM(date_id);
+        end
+    end
     %% ==========================extractionRate======================================
     %                          EXTRACTION FRAME RATES
     %                           - Find frame rates of products
@@ -255,9 +277,13 @@ for  dd = 1:length(day_files)
     %  ==============================================================================
     flights = dir(fullfile(day_files(dd).folder, day_files(dd).name)); flights([flights.isdir]==0)=[];
     flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
-
-    save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'),...
-        'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
+    if exist('DEM', 'var')
+        save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'),...
+            'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz', 'DEM')
+    else
+        save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'),...
+            'cameraParams*', 'extract_Hz', 'Products', 'flights', 'drone_type', 'tz')
+    end
 
     %% =============================================================================
     %                          PROCESS EACH FLIGHT
@@ -557,7 +583,7 @@ for  dd = 1:length(day_files)
         for pp = ids_grid % repeat for all grids
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                plot_grid(Products(pp), R.I, R.intrinsics, R.worldPose)
+                plot_grid(Products(pp), R.I, R.intrinsics, R.worldPose, DEM=DEM)
                 answer = questdlg('Happy with grid projection?', 'Grid projection', 'Yes', 'No - redefine', 'Yes');
                 switch answer
                     case 'Yes'
@@ -585,7 +611,7 @@ for  dd = 1:length(day_files)
         if ~isempty(find(ismember(string({Products.type}), 'xTransect')))
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                plot_xtransects(Products, R.I, R.intrinsics, R.worldPose)
+                plot_xtransects(Products, R.I, R.intrinsics, R.worldPose, DEM = DEM)
                 answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No - redefine', 'Yes');
                 switch answer
                     case 'Yes'
@@ -614,7 +640,7 @@ for  dd = 1:length(day_files)
         if ~isempty(find(ismember(string({Products.type}), 'yTransect')))
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                plot_ytransects(Products, R.I, R.intrinsics, R.worldPose)
+                plot_ytransects(Products, R.I, R.intrinsics, R.worldPose, DEM=DEM)
                 answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No - redefine', 'Yes');
                 switch answer
                     case 'Yes'

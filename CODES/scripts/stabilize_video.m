@@ -66,7 +66,10 @@ end % if exist('global_dir', 'var')
 % check that needed files exist
 for dd = 1:length(day_files)
     assert(isfile(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat')),['Error (stabilize_video): ' fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat') ' doesn''t exist.']);
-    load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights')
+    flights = dir(fullfile(day_files(dd).folder, day_files(dd).name)); flights([flights.isdir]==0)=[];
+    flights(contains({flights.name}, '.'))=[]; flights(contains({flights.name}, 'GCP'))=[];
+
+    save(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights', '-append')
     for ff = 1:length(flights)
         assert(isfile(fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Initial_coordinates.mat')), ['Error (stabilize_video): ' fullfile(flights(ff).folder, flights(ff).name, 'Processed_data', 'Initial_coordinates.mat') ' doesn''t exist.']);
     end
@@ -85,7 +88,7 @@ for dd = 1 : length(day_files)
     assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (stabilize_video): flights must have fields .folder and .name.')
 
     % repeat for each flight
-    for ff = 1 : length(flights)
+    for ff = 2%3 : length(flights)
         clearvars -except dd *_dir user_email day_files extract_Hz flights ff
         odir = fullfile(flights(ff).folder, flights(ff).name);
         oname = [day_files(dd).name '_' flights(ff).name];
@@ -125,27 +128,31 @@ for dd = 1 : length(day_files)
             %           - Using neighboring images for feature detection
             %  ===================================================================================
             if isfield(R, 'mask') && ~isfield(R, 'feature_method')
-                [extrinsics] = get_extrinsics_fd(images, R.intrinsics, mask=R.mask);
+                [extrinsics] = get_extrinsics_fd_og(images, R.intrinsics, mask=R.mask);
             elseif isfield(R, 'mask') && isfield(R, 'feature_method')
-                [extrinsics] = get_extrinsics_fd(images, R.intrinsics, mask=R.mask, Method = R.feature_method);
+                [extrinsics] = get_extrinsics_fd_og(images, R.intrinsics, mask=R.mask, Method = R.feature_method);
             elseif ~isfield(R, 'mask') && isfield(R, 'feature_method')
-                [extrinsics] = get_extrinsics_fd(images, R.intrinsics, Method = R.feature_method);
+                [extrinsics] = get_extrinsics_fd_og(images, R.intrinsics, Method = R.feature_method);
             elseif ~isfield(R, 'mask') && ~isfield(R, 'feature_method')
-                [extrinsics] = get_extrinsics_fd(images, R.intrinsics);
+                [extrinsics] = get_extrinsics_fd_og(images, R.intrinsics);
             end %  if isfield(R, 'mask') && ~isfield(R, 'feature_method')
-            % Create the panorama.
-            [panorama, panoramaView] = plot_panorama(images, R.intrinsics, extrinsics, extract_Hz = extract_Hz(hh));
-            %  Save File
-            figure(1);clf
-            imshow(panorama)
-            saveas(gca, fullfile(odir, 'Processed_data', [oname '_Panorama.png']))
             R.extrinsics_2d = extrinsics;
-            R.panoramaView = panoramaView;
+            % Create the panorama.
+            try
+                [panorama, panoramaView] = plot_panorama(images, R.intrinsics, extrinsics, extract_Hz = extract_Hz(hh));
+                %  Save File
+                figure(1);clf
+                imshow(panorama)
+                saveas(gca, fullfile(odir, 'Processed_data', [oname '_Panorama.png']))
+                R.panoramaView = panoramaView;
+            end
             save(fullfile(odir, 'Processed_data', [oname '_IOEO_' char(string(extract_Hz(hh))) 'Hz.mat' ]),'R')
 
         end % for hh = 1 : length(extract_Hz)
         if exist('user_email', 'var')
-            sendmail(user_email{2}, [oname '- Extrinsics through time DONE'])
+            try
+                sendmail(user_email{2}, [oname '- Extrinsics through time DONE'])
+            end % try
         end % if exist('user_email', 'var')
     end % for ff = 1 : length(flights)
 end % for dd = 1 : length(day_files)
