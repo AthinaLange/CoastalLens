@@ -1,4 +1,4 @@
-function plot_xtransects(Products, I, intrinsics, worldPose)
+function plot_xtransects(Products, I, intrinsics, worldPose,varargin)
 %   plot_xtransects plots cross-shore transects on oblique image as specified output from define_xtransect.
 %% Syntax
 %           plot_xtransects(Products, I, intrinsics, worldPose)
@@ -29,6 +29,11 @@ assert(isa(I, 'uint8'), 'Error (plot_xtransects): I must be a uint8 image.')
 assert(isa(intrinsics, 'cameraIntrinsics'), 'Error (plot_xtransects): intrinsics must be a cameraIntrinsics object.')
 assert(isa(worldPose, 'rigidtform3d'), 'Error (plot_xtransects): worldPose must be a rigidtform3d object.')
 
+options.DEM = [];
+options = parseOptions( options , varargin );
+if ~isempty(options.DEM)
+    DEM = options.DEM;
+end
 %% Get coordinates and pixel location
 ids_xtransect = find(ismember(string({Products.type}), 'xTransect'));
 
@@ -40,7 +45,11 @@ title('Timestack')
 jj=0;
 for pp = ids_xtransect % repeat for all xtransects
     jj=jj+1;
-    [xyz,~,~,~,~,~] = getCoords(Products(pp));
+    if exist('DEM', 'var')
+        [xyz,~,~,~,~,~] = getCoords_DEM(Products(pp), DEM);
+    else
+        [xyz,~,~,~,~,~] = getCoords(Products(pp));
+    end
     iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
 
     scatter(iP(:,1), iP(:,2), 25, 'filled')

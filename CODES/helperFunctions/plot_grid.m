@@ -1,4 +1,4 @@
-function plot_grid(Products, I, intrinsics, worldPose)
+function plot_grid(Products, I, intrinsics, worldPose,  varargin )
 %   plot_grid plots grid points on oblique image as specified output from define_grid.
 %% Syntax
 %           plot_grid(Products, I, intrinsics, worldPose)
@@ -9,6 +9,8 @@ function plot_grid(Products, I, intrinsics, worldPose)
 %           I (uint8 image) : Oblique image
 %           intrinsics (cameraIntrinsics) : camera intrinsics as calibrated in the cameraCalibrator tool
 %           worldPose (rigidtform3d) : worldPose of oblique image
+%           vargin:
+%                   DEM (structure) : Digital Elevation Map of Topography
 %
 %   Returns:
 %
@@ -30,8 +32,19 @@ assert(isa(I, 'uint8'), 'Error (plot_grid): I must be a uint8 image.')
 assert(isa(intrinsics, 'cameraIntrinsics'), 'Error (plot_grid): intrinsics must be a cameraIntrinsics object.')
 assert(isa(worldPose, 'rigidtform3d'), 'Error (plot_grid): worldPose must be a rigidtform3d object.')
 
+options.DEM = [];
+options = parseOptions( options , varargin );
+if ~isempty(options.DEM)
+    DEM = options.DEM;
+end
 %% Get coordinates and pixel location
-[xyz,~,~,~,~,~] = getCoords(Products);
+
+if exist('DEM', 'var')
+    disp('Ran with DEM.')
+    [xyz,~,~,~,~,~] = getCoords_DEM(Products, DEM);
+else
+    [xyz,~,~,~,~,~] = getCoords(Products);
+end
 [y2,x2, ~] = ll_to_utm(Products.lat, Products.lon);
 aa=xyz-[x2 y2 0];
 iP = round(world2img(xyz, pose2extr(worldPose), intrinsics));
