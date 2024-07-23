@@ -1,98 +1,251 @@
-# UAV_automated_rectification
-Toolbox to rectify UAV video in coastal oceanography
+# CoastalLens: A MATLAB UAV Video Stabilization & Rectification Framework
+Software to stabilize and rectify coastal imagery UAV data. <br />
+Developed from the [CIRN Qualitative Coastal Imagining Toolbox](https://github.com/Coastal-Imaging-Research-Network/CIRN-Quantitative-Coastal-Imaging-Toolbox). 
 
-#### Testing:
+Uncrewed aerial vehicles (UAVs) are an important tool for coastal monitoring with their relatively low-cost and rapid deployment capabilities. To generate scientific-grade image products, the UAV images/videos must be stabilized and rectified into world coordinates. Due to the limited stable region of coastal images suitable for control points, the processing of  UAV-obtained videos can be time-consuming and resource-intensive. The CIRN Qualitative Coastal Imagining Toolbox provided a first-of-its-kind open-sourced code for rectifying these coastal UAV videos. Limitations of the toolbox, however, prompted the development of CoastalLens with an efficient data input procedure, providing capabilities to obtain drone position (extrinsics) from LiDAR surveys, and using a feature detection and matching algorithm to stabilize the video prior to rectification. This framework reduces the amount of human oversight, now only required during the data input processes. Removing the dependency on threshold stability control points can also result in less time in the field. We hope this framework will allow for more efficient processing of the ever-increasing coastal UAV datasets.  
+
+![Rectification Example](https://github.com/AthinaLange/CoastalLens/blob/main/docs/Rectification_example.png)
+
+## Installation
+Requires MATLAB (min v2022b - for estworldpose function, see [Input Requirements](https://github.com/AthinaLange/CoastalLens/wiki/Input-Requirements/#GCP) for an alternative if using an older MATLAB version). Ubuntu users: See [Issue 11](https://github.com/AthinaLange/CoastalLens/issues/11)<br />
+Required MATLAB toolboxes:
+ - Image Processing Toolbox
+ - Computer Vision Toolbox
+ - LiDAR Toolbox (to use pointcloud). <br />
+ 
+Requires [exiftool](https://exiftool.org) (or metadata csv file : See [Input Requirements](https://github.com/AthinaLange/CoastalLens/wiki/Input-Requirements/)) <br/>
+Requires [ffmpeg](https://ffmpeg.org/download.html). <br/>
+See [Installation Help](https://github.com/AthinaLange/CoastalLens/wiki/Installation-Help) for installation guides based on your OS. <br />
+
+
+## Running the Toolbox
+Download or clone the repository. 
+Run 'UAV_rectification.m' <br />
+Will run core scripts in CODES/scripts/ <br />
+Requires dependencies in CODES/basicFunctions and CODES/helperFunctions <br />
+
+Running <code>ver</code> in the Command Window will show your MATLAB version and installed toolboxes. <br/>
+
+You can find more details, including the information you need to run this on your own data in our [wiki](https://github.com/AthinaLange/CoastalLens/wiki/)!
+
+## Demo / Getting Started
+'UAV_rectification_DEMO.m' runs a demo version of the code and can also be used to compare the new algorithm versus the CIRN Stability Control Points method. This method requires stability control points to be visible within the field of view. 
+
+Data to test the code is provided in the DATA folder and the video can be downloaded [here](https://zenodo.org/records/10810778) (716MB). Save this video in DATA/20211215_Torrey/Flight_04/.
+
+Here is the input information required for the DEMO version. We recommend making a similar table to keep track of all the necessary information for your own drone flights. <br/>
+
+Flight information: 
+![Example_input_file](https://github.com/AthinaLange/CoastalLens/blob/main/docs/Flight_info_sheet.png)
+
+Origin information:
+![Example_origin_file](https://github.com/AthinaLange/CoastalLens/blob/main/docs/Origin_Info_sheet.png)
+
+Products information:
+![Example_products_file](https://github.com/AthinaLange/CoastalLens/blob/main/docs/Products_Info_sheet.png)
+
+User prompts/direction is printed in the Command Window. 
+
+## Testing
 This toolbox is currently in testing phase on the following systems:
 - MacBook Pro M1 2020 (OS 12.6), Matlab 2022b
+- MacBook Pro M2 2023 (OS 13.2.1), Matlab 2023a
+- Linux (Ubuntu 22.04.3 LTS), Matlab 2022b
+- DJI Drones
 
-#### Flight recommendations:
-- take pre- and post-video image for additional metadata, including RTK data
-- Toggle distortion correction on
+### Email Updates
+The code allows you to recieve email updates as it processes the data. If you do not want to recieve these, please select 'No' to 'Recieve update emails?'. <br/>
+If you do, we have set up a Gmail account 'coastallens1903' to use that will be sending the emails, although we recommend you setting up your own account and generating a static App password (16-character) for it moving forward to avoid any security risks. 
 
-## To get started:
- - Download the movie at drone/data/cbathy/20211026_Torrey/1/DJI_0003.MOV to get and put it in folder DATA/20211026_Torrey/01 (see folder structure below) as sample data.
- - Install exiftool (details on how to install here: https://exiftool.org/). This will be used to extract the metadata from the images.
- - Install ffmpeg (details here: https://ffmpeg.org/download.html). Note to ARM mac users (M1, M2 silicon): ffmpeg is not built for ARM macs, but the intel install should work fine. You will need to allow ffmpeg to run on your computer by explicity allowing the application in the security & privacy tab of system preferences.
- - _TODO_ What should be in the cBathy2.0 folder?? Should it be the full cBathy-Toolbox repo? (details here: https://github.com/Coastal-Imaging-Research-Network/cBathy-Toolbox)
 
-#### General Folder Structure:
+## General Folder Structure:
+Please set up your CODES and DATA folder in the following structure. The DATA folder may be located in a different folder than your general path, but must be organized as indicated, with all flights in the relevant day/location folder.
+
 ```bash
 .
 ├── CODES
-│ ├── CIRN
+│ ├── scripts
 │ ├── basicFunctions
-│ ├── cBathy_2.0
+│ ├── helperFunctions
 ├── DATA
 │ └── YYYYMMDD_Location1
-│     ├── 01
-│     ├── 02
-│     ├── 03
+│     ├── Flight_01
+│     ├── Flight_02
+│     ├── Flight_03
 │ └── YYYYMMDD_Location2
-│     ├── 01
-│     ├── 02
-│     ├── 03
+│     ├── Flight_01
+│     ├── Flight_02
+│     ├── Flight_03
 ```
 
-
-## To Run:
-UAV_rectification_v08_2023_function_based.mlx (will then run user_input_data.m and user_input_products.m)
-_TODO_ What's the best way to run this? I am confused by the live scripts...
-
-Housekeeping:
-- find global directory where CODES and DATA folder are stored.
-- specify which UAV hovers you want to process (have to do all of a given day at once)
-- Input name and email where test emails will go to
-- Save: directory paths, data_folders to process and user email
-
-User Input:
-- confirm that you get test email
-- for every hover day folder repeat process:
-    - find MATLAB camera calibration file for UAV (cameraParameters) - otherwise go do that and come back - should have a distortion and undistorted version of camera calibration (cameraParams_distorted and cameraParams_undistorted) - if only a single calibration (cameraParams)
-    - define your data products to be created (do you want to load in a Products .mat file or define them here?)
-        - load in .mat file of origin data grid = (Lat, Lon, shorenormal angle) OR define in pop-up window - lat has to be +-90deg, lon +-180 and shorenormal angle within 360deg defined CC from North (see CDIP MOP angle definitions for examples)
-        - for every data product that you want to define - select from Grid (cBathy), xTransect (Timestack) or yTransect (there is the option to self define but that still needs to be expanded on)
-        - Input for every data type:
-            - for Grid:
-               - frame rate (assuming max frame rate of the camera is 30Hz) 
-               - Offshore cross-shore extent in meters from Origin - grid extended to 700m offshore? -> 700
-               - Onshore cross-shore extent in meters from Origin - grid starts at 100m back/onshore from origin -> 100
-               - southern alongshore extent in meters from Origin - grid extends 300m south of origin -> 300 (if shorenormal angle < 180deg, assuming East Coast and southern limit is to the right of origin when looking offshore, if shorenormal angle > 180deg, assuming West Coast and southern limit is to the left of origin, looking offshore)
-               - northern alongshore extent in meters from Origin - grid extends 300m north of origin -> 300 (if shorenormal angle < 180deg, assuming East Coast and northern limit is to the left of origin when looking offshore, if shorenormal angle > 180deg, assuming West Coast and northern limit is to the right of origin, looking offshore)
-               - dx and dy in meters - cross-shore and alongshore grid spacing
-               - z in appropriate datum - STILL NEED TO ADD IN DEM OPTION
-              
-            - for xTransect:
-               - frame rate (assuming max frame rate of the camera is 30Hz)
-               - Offshore cross-shore extent in meters from Origin - timestack extended to 700m offshore? -> 700
-               - Onshore cross-shore extent in meters from Origin - timestack starts at 100m back/onshore from origin -> 100
-               - alongshore locations of transects in meters from Origin - can be either comma-separated list (-100, 0, 100) or array ([-100: 100:100])
-               - dx in meters - cross-shore spacing
-               - z in appropriate datum - STILL NEED TO ADD IN DEM OPTION
-            - for yTransect:
-               - frame rate (assuming max frame rate of the camera is 30Hz)
-               - southern alongshore extent in meters from Origin - transect extends 300m south of origin -> 300 (if shorenormal angle < 180deg, assuming East Coast and southern limit is to the right of origin when looking offshore, if shorenormal angle > 180deg, assuming West Coast and southern limit is to the left of origin, looking offshore)
-               - northern alongshore extent in meters from Origin - transect extends 300m north of origin -> 300 (if shorenormal angle < 180deg, assuming East Coast and northern limit is to the left of origin when looking offshore, if shorenormal angle > 180deg, assuming West Coast and northern limit is to the right of origin, looking offshore)
-               - cross-shore locations of transects in meters from Origin - can be either comma-separated list (100, 200, 300) or array ([100: 100:300]) - assuming only looking offshore of origin
-               - dy in meters - alongshore spacing
-               - z in appropriate datum - STILL NEED TO ADD IN DEM OPTION
-          
-    - find the minimum number of frames needed to be extracted (2Hz data can be pulled from 10Hz images, but 3Hz cannot. Code will then extract frames at 3Hz and 10Hz)
-    
-    - Save cameraParameters, extraction frame rate, Products data and number of flights on given day
- 
-    - for every flight repeat process:
-        - extract meta data from images and videos (REQUIRES EXIFTOOL) - to account for false-start videos, only starting at first full length video (DJI: 5:28min) and going to end - MORE INPUT FROM OTHER SYSTEMS/USES REQUIRED
-        - making initial extrinsics guess based on meta data [GPSLatitude, GPSLongitude, RelativeAltitude - zgeoid_offset, CameraYaw + 360, CameraPitch+90, CameraRoll]
-        - Extract 1st frame of video to do initial extrinsics calibration on
-        - Confirm whether correct cameraParameters are used - assuming a distorted and undistorted camera calibration has been done, confirm which distortion model to use - Default for our flights is distortion correction ON, so cameraParams_undistorted would be used. 
-    -   check that grid dimensions for cBathy data and timestacks is appropriate. If not, follow prompt until you are happy (currently requires input, changed grid cannot be a file).
-    -   send email with provided information:
-        - Origin coordinates
-        - initial extrinsics guess (and TBD LiDAR-based correction)
-        - frame rate of data to be extracted
-        - Products to produce with type, frame rate and dimensions
-        - Intrinsics corrected image, Rectified grid, and timestacks on oblique image
+## Core Scripts
+<table>
+<colgroup>
+<col width="17%" />
+<col width="82%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Scripts</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code> UAV_rectification </code></td>
+<td>The main code. Used to rectify and generate data products for user-selected days. </td>
+</tr>
+<tr class="odd">
+<td><code>input_day_flight_data</code></td>
+<td> <code>input_day_flight_data</code> returns all user-specified required input data for CoastalLens. </td>
+</tr>
+<tr class="even">
+<td><code>extract_images_from_UAV</code></td>
+<td><code>extract_images_from_UAV</code> extracts images from video files at specified frame rates for all flights on specified processing days. Requires ffmpeg.</td>
+</tr>
+<tr class="odd">
+<td><code>stabilize_video</code></td>
+<td><code>stabilize_video</code> returns the 2D projective transformation of the image to improve image stabilization through flight. </td>
+</tr>
+<tr class="even">
+<td><code>get_products</code></td>
+<td><code>get_products</code> returns extracted image pixel for coordinates of Products and saves Timex, Brightest and Darkest image products. </td>
+</tr>
+<tr class="odd">
+<td><code>save_products</code></td>
+<td><code>save_products</code> saves rectified image products from Products in Rectified_images folder. </td>
+</tr>
+</tbody>
+</table>
 
 
+## Data Output
+<table>
+<colgroup>
+<col width="17%" />
+<col width="17%" />
+<col width="66%" />
+</colgroup>
+  
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th> Fields </th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>R</code> (structure)</td>
+<td> </td>
+<td>extrinsics & intrinsics information (stored in *_IOEO_*Hz.mat) </td>
+</tr>
+<tr class="even"><td> </td>
+<td><code>intrinsics</code>(cameraIntrinsics)</td>
+<td> camera intrinsic as calibrated in the cameraCalibrator tool</td>
+</tr>
+<tr class="even"><td> </td>
+<td><code>I</code> (uint8 image)</td>
+<td> undistorted initial frame </td>
+</tr>
+<tr class="odd"><td> </td>
+<td><code>image_gcp</code> (double)</td>
+<td>[n x 2] ground control location in inital frame </td>
+</tr>
+<tr class="even"><td> </td>
+<td><code>world_gcp</code> (double)</td>
+<td>[n x 3] ground control location in world coordinate frame (x,y,z) </td>
+</tr>
+<tr class="even"><td> </td>
+<td><code>worldPose</code>(rigidtform3d)</td>
+<td>orientation and location of camera in world coordinates, based off ground control location (pose, not extrinsic)</td>
+</tr>
+<tr class="odd"><td> </td>
+<td><code>mask</code>(logical)</td>
+<td> mask over ocean region (same dimension as I) - used to speed up computational time (optional) </td>
+</tr>
+<tr class="odd"><td> </td>
+<td><code>feature_method</code>(string)</td>
+<td> feature type to use in feature detection algorithm (default: `SIFT`, must be `SIFT`, `SURF`, `BRISK`, `ORB`, `KAZE`)</td>
+</tr>
+<tr class="odd"><td> </td><td><code>frameRate</code>(double)</td>
+<td> frame rate of extrinsics (Hz)</td></tr>
+<tr class="odd"><td> </td>
+<td><code>extrinsics_2d</code>(projtform2d)</td>
+<td> [1 x m] 2d projective transformation of m images. </td>
+</tr>
+
+  
+<tr class="odd">
+<td><code>Products</code>(structure)</td> <td> </td>
+<td>Data Products (stored in *_Products.mat)</td>
+</tr>
+<tr class="even"><td> </td><td><code>productType</code>(string)</td>
+<td> 'cBathy' , 'Timestack', 'yTransect'</td></tr>
+
+<tr class="odd"><td> </td><td><code>type</code> (string)</td>
+<td> 'Grid', 'xTransect', 'yTransect' </td></tr>
+
+<tr class="even"><td> </td><td><code>frameRate</code> (double) </td>
+<td> frame rate of product (Hz) </td></tr>
+
+<tr class="odd"><td> </td><td><code>lat</code> (double)</td>
+<td> latitude of origin grid </td></tr>
+
+<tr class="even"><td> </td><td><code>lon</code> (double)</td>
+<td> longitude of origin grid </td></tr>
+
+<tr class="odd"><td> </td><td><code>angle</code> (double)</td>
+<td> shorenormal angle of origin grid (deg CW from North) </td></tr>
+
+<tr class="odd"><td> </td><td><code>xlim / ylim</code> (double)</td>
+<td>cross-/along-shore limits (+ is offshore of origin / right of origin looking offshore) (m)</td></tr>
+
+<tr class="even"><td> </td><td><code>dx/dy</code> (double)</td>
+<td> Cross-/along-shore resolution (m) </td></tr>
+
+<tr class="odd"><td> </td><td><code>x / y</code> (double) </td>
+<td> Cross-/along-shore distance from origin (m). Used for transects. </td></tr>
+
+<tr class="even"><td> </td><td><code>z</code> (double)</td>
+<td> Elevation (m in standard reference frame). Can be NaN (will be projected to 0)or DEM. </td></tr>
+
+<tr class="even"><td> </td><td><code>tide</code> (double)</td>
+<td> Tide level (m in standard reference frame). </td></tr>
+
+<tr class="even"><td> </td><td><code>t</code> (datetime array)</td>
+<td> [1 x m] datetime of images at given extraction rate in UTC. </td></tr>
+
+<tr class="odd"><td> </td><td><code>localX / localY / localZ</code> (double)</td>
+<td> X,Y,Z coordinates of data product in local reference frame (m) </td></tr>
+
+<tr class="odd"><td> </td><td><code>Eastings / Northings </code> (double)</td>
+<td> Eastings and Northings coordinates of data product (m) </td></tr>
+
+<tr class="even"><td> </td><td><code>Irgb_2d</code> (uint8 image)</td>
+<td> [m x y_length x x_length x 3] timeseries of pixels extracted according to dimensions of xlim and ylim</td></tr>
+
+</tbody>
+</table>
+
+## Known Bugs
+- Estimating the world camera pose based on from 3-D to 2-D point correspondences can sometime require different combinations of points. More points are not always better. We are looking into ways to improve the robustness of this step. 
+
+## Contributing
+Contributions to the toolbox are very welcome! Here are some ways to do that:<br />
+- A number of features that we want to include in the future are listed as 'issues'. <br />
+- We also want to make sure that we can accommodate other UAV platforms/locations. If you include any changes to be able to process your data in a forked branch, please open a 'pull request' to merge it so other's can also use the addition.  <br />
+- One of our goals is to write a Python version of this toolbox, so please let us know if you are interested.  <br />
+- Let us know of any other features you would want included.  <br />
+
+If you run into any problems while running the code, or think other things should be included, please let us know by opening an 'issue' or emailing me at alange@ucsd.edu.  
 
 
+## License
+
+**CoastalLens** is provided under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+## Cite As
+A.M.Z. Lange, H. Lange, B.L. Bruder and J.W. Fiedler "CoastalLens: A MATLAB UAV Video Stabilization & Rectification Framework" (2024) 
+[![DOI](https://zenodo.org/badge/670724614.svg)](https://zenodo.org/doi/10.5281/zenodo.10672509)
