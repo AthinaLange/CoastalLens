@@ -251,15 +251,19 @@ for  dd = 1:length(day_files)
                         assert(isfield(DEM, 'X_gridded'), 'Error (input_day_flight_data.m): DEM does not have X_gridded field.')
                         assert(isfield(DEM, 'Y_gridded'), 'Error (input_day_flight_data.m): DEM does not have Y_gridded field.')
                         assert(isfield(DEM, 'Z_gridded'), 'Error (input_day_flight_data.m): DEM does not have Z_gridded field.')
-
-                        [~,date_id]=min(abs(datetime(day_files(dd).name(1:8), 'InputFormat', 'yyyyMMdd')-[DEM.time]));
-
-                        DEM = DEM(date_id);
                     case 'No'
                         [DEM] = define_DEM;
-                        [~,date_id]=min(abs(datetime(day_files(dd).name(1:8), 'InputFormat', 'yyyyMMdd')-[DEM.time]));
-                        DEM = DEM(date_id);
+                        answer4 = questdlg('Do you want to save this DEM file for the future?', 'Save DEM file', 'Yes', 'No', 'Yes');
+                        switch answer4
+                            case 'Yes'
+                                info = inputdlg({'Filename to be saved'});
+                                disp('Location where DEM file to be saved.')
+                                temp_file_path = uigetdir(global_dir, 'DEM file save location');
+                                save(fullfile(temp_file_path, [info{1} '.mat']), 'DEM')
+                        end % switch answer4
                 end
+                [~,date_id]=min(abs(datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime')-[DEM.time]));
+                DEM = DEM(date_id);
         end
     end
     %% ==========================extractionRate======================================

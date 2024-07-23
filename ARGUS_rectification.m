@@ -268,7 +268,7 @@ if ~exist('DEM', 'var')
                         case 'Yes'
                             info = inputdlg({'Filename to be saved'});
                             disp('Location where DEM file to be saved.')
-                            temp_file_path = uigetdir(pwd, 'DEM file save location');
+                            temp_file_path = uigetdir(global_dir, 'DEM file save location');
                             save(fullfile(temp_file_path, [info{1} '.mat']), 'DEM')
                     end % switch answer4
             end
