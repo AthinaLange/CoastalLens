@@ -156,7 +156,7 @@ switch answer
         setpref('Internet','SMTP_Server','smtp.gmail.com');
         setpref('Internet','SMTP_Username','coastallens1903');
         setpref('Internet', 'SMTP_Password', 'krrq pufl tqcp hjrw')
-        sendmail(user_email{2}, 'UAV Toolbox test email', [user_email{1} ' is processing UAV data from ' {day_files.name} ''])
+        sendmail(user_email{2}, 'CoastalLens test email', [user_email{1} ' is processing ARGUS data from ' {day_files.name} ''])
 
         save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files', 'user_email')
     case 'No'
