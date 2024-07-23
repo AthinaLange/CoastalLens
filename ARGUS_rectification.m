@@ -130,15 +130,19 @@ if ~exist(fullfile(data_dir, 'Processed_data'), 'dir')
     mkdir(fullfile(data_dir, 'Processed_data'))
 end %  if ~exist(fullfile(data_dir, 'Processed_data'), 'dir')
 %% =============== Removes any days already processed. =====================
-processed_files = dir(fullfile(data_dir, 'Processed_data')); processed_files([processed_files.isdir] == 1)=[];
-processed_files(~contains({processed_files.name}, 'Products'))=[];
-% if file already processed - don't reprocess
-if ~isempty(processed_files)
-    for ii = length(day_files):-1:1
-        if contains([processed_files.name], day_files(ii).name)
-            day_files(ii) = [];
+input_answer = questdlg('Do you want to process only new files?','New files?', 'Yes', 'No - Reprocess Everythin', 'Yes');
+switch input_answer
+    case 'Yes'
+        processed_files = dir(fullfile(data_dir, 'Processed_data')); processed_files([processed_files.isdir] == 1)=[];
+        processed_files(~contains({processed_files.name}, 'Products'))=[];
+        % if file already processed - don't reprocess
+        if ~isempty(processed_files)
+            for ii = length(day_files):-1:1
+                if contains([processed_files.name], day_files(ii).name)
+                    day_files(ii) = [];
+                end
+            end
         end
-    end
 end
 %% =============== Confirm update emails and get email address. ===============
 % Get user email
@@ -243,9 +247,7 @@ clear answer
 
 %% =============== DEM. ================================================
 %                          Load in topography DEM
-%                           - Requires time, X_gridded, Y_gridded,
-%                           Z_gridded data in world coordinates
-%           This can be built based off Torrey_beach_DEM.mat code
+%                           - Requires time, X, Y, Z data in world coordinates
 %  ==============================================================================
 if ~exist('DEM', 'var')
     answer = questdlg('Do you want to use a topography DEM?', 'Topo DEM', 'Yes', 'No', 'Yes');
@@ -262,7 +264,7 @@ if ~exist('DEM', 'var')
                     assert(isfield(DEM, 'Y_gridded'), 'Error (input_day_flight_data.m): DEM does not have Y_gridded field.')
                     assert(isfield(DEM, 'Z_gridded'), 'Error (input_day_flight_data.m): DEM does not have Z_gridded field.')
                 case 'No'
-                    [DEM]=define_DEM;
+                    [DEM] = define_DEM;
                     answer4 = questdlg('Do you want to save this DEM file for the future?', 'Save DEM file', 'Yes', 'No', 'Yes');
                     switch answer4
                         case 'Yes'

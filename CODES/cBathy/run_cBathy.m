@@ -284,6 +284,7 @@ for  dd = 1 : length(day_files)
             plotBathyCollect(bathy)
             sgtitle([oname])
             %% Kalman step can be implemented here.
+            
             %%
             [Xo Yo]=meshgrid(bathy.xm,bathy.ym);
 
