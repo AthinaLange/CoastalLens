@@ -3,7 +3,7 @@
 %           Global Directory Selection: Asks the user to choose the root directory for UAV rectification.
 %           Directory Checking: Checks if required code directories and MATLAB toolboxes exist, prompting the user to download them if not. Adds required code directories to MATLAB's search path
 %           Folder Selection: Allows the user to choose which days to process.
-%   2. User Input Section
+%   2. User Input Section%%
 %           Camera Intrinsics: User inputs camera intrinsics file and related details.
 %           Products Definition: User inputs or loads grid and transect coordinates.
 %           Initial Camera Extrinsics: Use ground control points to define camera world pose.
@@ -259,10 +259,10 @@ if ~exist('DEM', 'var')
                     disp('Please load in DEM topo file.')
                     [temp_file, temp_file_path] = uigetfile(global_dir, 'DEM topo file');
                     load(fullfile(temp_file_path, temp_file)); clear temp_file*
-                    assert(isfield(DEM, 'time'), 'Error (input_day_flight_data.m): DEM does not have time field.')
-                    assert(isfield(DEM, 'X_gridded'), 'Error (input_day_flight_data.m): DEM does not have X_gridded field.')
-                    assert(isfield(DEM, 'Y_gridded'), 'Error (input_day_flight_data.m): DEM does not have Y_gridded field.')
-                    assert(isfield(DEM, 'Z_gridded'), 'Error (input_day_flight_data.m): DEM does not have Z_gridded field.')
+                    assert(isfield(DEM, 'time'), 'Error (ARGUS_rectification.m): DEM does not have time field.')
+                    assert(isfield(DEM, 'X'), 'Error (ARGUS_rectification.m): DEM does not have X field.')
+                    assert(isfield(DEM, 'Y'), 'Error (ARGUS_rectification.m): DEM does not have Y field.')
+                    assert(isfield(DEM, 'Z'), 'Error (ARGUS_rectification.m): DEM does not have Z field.')
                 case 'No'
                     [DEM] = define_DEM;
                     answer4 = questdlg('Do you want to save this DEM file for the future?', 'Save DEM file', 'Yes', 'No', 'Yes');
@@ -284,70 +284,74 @@ end
 %                             extrinsics, intrinsics, initial frame, input data, products
 %  =====================================================================
 [Products.tide] = deal(0);
-for cc = 1:cam_num
 
-    [xyz,~,~,~,~,~] = getCoords(Products(1));
-    [y2,x2, ~] = ll_to_utm(Products(1).lat, Products(1).lon);
+ids_grid = find(ismember(string({Products.type}), 'Grid'));
+for pp = ids_grid
+    for cc = 1:cam_num
 
-    %aa=xyz-[x2 y2 0];
-    %id_origin=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
-    %iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-    %iP_origin = iP(id_origin);
-    clear aa iP
+        [xyz,~,~,~,~,~] = getCoords(Products(pp));
+        [y2,x2, ~] = ll_to_utm(Products(pp).lat, Products(pp).lon);
 
-    aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
-    % This is built in for Fletcher - might not be valid for other sites
-    if Products(1).angle > 180
-        if cc == 1
-            id=[];
-            % behind camera
-            for ii = 1:length(aa)
-                if aa(ii,1) > 0 & aa(ii,2) < 0
-                    id = [id ii];
-                end
-            end
-            % left of camera
-            for ii = 1:length(aa)
-                if aa(ii,1) < 0 & aa(ii,2) < 0
-                    id = [id ii];
-                end
-            end
+        %aa=xyz-[x2 y2 0];
+        %id_origin=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
+        %iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
+        %iP_origin = iP(id_origin);
+        clear aa iP
 
-        elseif cc == 2
-            id=[];
-            % behind camera
-            for ii = 1:length(aa)
-                if aa(ii,1) > 0 & aa(ii,2) > 0
-                    id = [id ii];
-                end
-            end
+        aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
+        % This is built in for Fletcher - might not be valid for other sites
+        % if Products(1).angle > 180
+        %     if cc == 1
+        %         id=[];
+        %         % behind camera
+        %         for ii = 1:length(aa)
+        %             if aa(ii,1) > 0 & aa(ii,2) < 0
+        %                 id = [id ii];
+        %             end
+        %         end
+        %         % left of camera
+        %         for ii = 1:length(aa)
+        %             if aa(ii,1) < 0 & aa(ii,2) < 0
+        %                 id = [id ii];
+        %             end
+        %         end
+        %
+        %     elseif cc == 2
+        %         id=[];
+        %         % behind camera
+        %         for ii = 1:length(aa)
+        %             if aa(ii,1) > 0 & aa(ii,2) > 0
+        %                 id = [id ii];
+        %             end
+        %         end
+        %
+        %         % right of camera
+        %         for ii = 1:length(aa)
+        %             if aa(ii,1) < 0 & aa(ii,2) > 0
+        %                 id = [id ii];
+        %             end
+        %         end
+        %     end
+        %
+        %     xyz(id,:)=[];
+        % end
+        aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
 
-            % right of camera
-            for ii = 1:length(aa)
-                if aa(ii,1) < 0 & aa(ii,2) > 0
-                    id = [id ii];
-                end
-            end
-        end
+        iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
 
-        xyz(id,:)=[];
+        figure(cc);clf
+        imshow(R(cc).I)
+        hold on
+        title('Grid')
+        scatter(iP(:,1), iP(:,2), 25,'r', 'filled')
+        xlim([0 size(R(cc).I,2)])
+        ylim([0 size(R(cc).I,1)])
+
+        id=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
+        scatter(iP(id(1),1), iP(id(1),2),50, 'g', 'filled')
+        legend('Grid', 'Origin')
+        set(gca, 'FontSize', 20)
     end
-    aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
-
-    iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-
-    figure(cc);clf
-    imshow(R(cc).I)
-    hold on
-    title('Grid')
-    scatter(iP(:,1), iP(:,2), 25,'r', 'filled')
-    xlim([0 size(R(cc).I,2)])
-    ylim([0 size(R(cc).I,1)])
-
-    id=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
-    scatter(iP(id(1),1), iP(id(1),2),50, 'g', 'filled')
-    legend('Grid', 'Origin')
-    set(gca, 'FontSize', 20)
 end
 %% =============== x_transects. ==========================================
 for cc = 1:cam_num
@@ -366,12 +370,13 @@ end
 close all
 
 for dd = 1:length(day_files)
-    tic
+tic
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
     time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
     [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
     [Products.t] = deal(time);
     [Products.tide]=deal(mean(verified));
+    clear IrIndv
     for cc = 1:cam_num
         if isfield(Products, 'iP')
             Products = rmfield(Products, 'iP');
@@ -389,38 +394,7 @@ for dd = 1:length(day_files)
             end
             aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
 
-            % if cc == 1
-            %     id=[];
-            %     % behind camera
-            %     for ii = 1:length(aa)
-            %         if aa(ii,1) > 0 & aa(ii,2) < 0
-            %             id = [id ii];
-            %         end
-            %     end
-            %     % left of camera
-            %     for ii = 1:length(aa)
-            %         if aa(ii,1) < 0 & aa(ii,2) < 0
-            %             id = [id ii];
-            %         end
-            %     end
-            % 
-            % elseif cc == 2
-            %     id=[];
-            %     % behind camera
-            %     for ii = 1:length(aa)
-            %         if aa(ii,1) > 0 & aa(ii,2) > 0
-            %             id = [id ii];
-            %         end
-            %     end
-            % 
-            %     % right of camera
-            %     for ii = 1:length(aa)
-            %         if aa(ii,1) < 0 & aa(ii,2) > 0
-            %             id = [id ii];
-            %         end
-            %     end
-            % end
-
+          
             Products(pp).xyz = xyz;
             Products(pp).localX = localX;
             Products(pp).localY = localY;
@@ -434,37 +408,45 @@ for dd = 1:length(day_files)
 
         for pp = 1:length(Products)
             Products(pp).iP = round(world2img(Products(pp).xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-            %Products(pp).iP(id,:)=NaN;
+            iP_u = reshape(Products(pp).iP(:,2), size(Products(pp).localX,1), size(Products(pp).localX,2));
+            iP_v = reshape(Products(pp).iP(:,1), size(Products(pp).localX,1), size(Products(pp).localX,2));
+            iP_u(iP_u <= 0) = NaN; iP_u(iP_u >= size(I,1)) = NaN;
+            iP_v(iP_v <= 0) = NaN; iP_v(iP_v >= size(I,2)) = NaN;
+            iP_u(isnan(iP_v)) = NaN; iP_v(isnan(iP_u)) = NaN;
+            Products(pp).iP_u = iP_u;
+            Products(pp).iP_v = iP_v;
         end
 
         images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
         eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')])
-
+toc
         for viewId = 1:length(images.Files)
-            tic
+    
             I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
             for pp = 1:length(Products)
                 clear Irgb_temp
-                for ii = 1:length(Products(pp).iP)
-                    if any(isnan(Products(pp).iP(ii,:))) || any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= size(I, [1 2]))
-                        Irgb_temp(ii, :) = uint8([0 0 0]);
-                    else
-                        Irgb_temp(ii, :) = I(Products(pp).iP(ii,2), Products(pp).iP(ii,1),:);
-                    end % if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= size(I))
-                end %  for ii = 1:length(Products(pp).iP)
 
+                [rows, cols, numChannels] = size(I);
+                Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
+
+                for i = 1:numChannels
+                        channel = I(:,:,i);
+                        Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
+                end
+                Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
+            
                 if contains(Products(pp).type, 'Grid')
-                    Products(pp).Irgb_2d(viewId, :,:,:) = reshape(Irgb_temp, size(Products(pp).localX,1), size(Products(pp).localX,2), 3);
+                    Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp;
                 else
                     Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
                 end % if contains(Products(pp).type, 'Grid')
 
             end
-            toc
+       toc
         end
         
         save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products')),'Products', 'cam_num', '-v7.3')
-        toc
+
          if contains(Products(1).type, 'Grid')
             IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
          end
@@ -485,174 +467,9 @@ for dd = 1:length(day_files)
         saveas(gcf, fullfile(data_dir, 'Processed_data', strcat('ARGUS_', day_files(dd).name, '_Grid.png')))
     end
         Products = rmfield(Products, 'iP');
+        Products = rmfield(Products, 'iP_u');
+        Products = rmfield(Products, 'iP_v');
 end % for dd = 1:length(day_files)
 %% =============== save timestacks. ======================================
 save_timestacks_ARGUS
 
-%% =============== cBathy. ==============================================
-
-close all
-for  dd = 1 : length(day_files)
-    clearvars -except dd *_dir user_email day_files
-    cd(fullfile(day_files(dd).folder, day_files(dd).name))
-
-    % repeat for each flight
-    for cc = 1:2
-        oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);
-        disp(oname)
-
-        load(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products.mat')), 'Products')
-        assert(isa(Products, 'struct'), 'Error (run_cBathy): Products must be a stucture as defined in user_input_products.')
-        assert((isfield(Products, 'type') && isfield(Products, 'frameRate')), 'Error (run_cBathy): Products must be a stucture as defined in user_input_products.')
-
-        ids_grid = find(ismember(string({Products.type}), 'Grid'));
-        for pp = ids_grid % repeat for all grids
-            clear Xout Yout Zout Igray
-            %% run cBathy 2.0
-            for viewId = 1:size(Products(pp).Irgb_2d,1)
-                Igray(:,:,viewId) = im2gray(squeeze(Products(pp).Irgb_2d(viewId, :,:,:)));
-            end
-            % Remove Nans
-            [r c tt]=size(Igray);
-            for k=1:r
-                for j=1:c
-                    bind =find(isnan(Igray(k,j,:))==1);
-                    gind =find(isnan(Igray(k,j,:))==0);
-                    Igray(k,j,bind)=nanmean(Igray(k,j,gind));
-                end
-            end
-            if Products(pp).angle < 180 % East Coast
-                Xout = Products(pp).localX;
-                Yout = Products(pp).localY;
-            elseif Products(pp).angle >180 % West Coast
-                Xout=-(Products(pp).localX.*cosd(180)+Products(pp).localY.*sind(180));
-                Yout=-(Products(pp).localY.*cosd(180)-Products(pp).localX.*sind(180));
-            end % if Products(pp).angle < 180 % East Coast
-            Zout = Products(pp).localZ;
-
-            %Demo Plot
-            figure(1);clf
-            subplot(121)
-            pcolor(Products(pp).localX,Products(pp).localY,Igray(:,:,1))
-            shading flat
-            set(gca, 'XDir', 'reverse')
-            title('Original localX/Y')
-            subplot(122)
-            pcolor(Xout,Yout, Igray(:,:,1))
-            shading flat
-            title('Rotated localX/Y - waves coming from east')
-
-            [~,cutoff_0]=min(abs(Yout(:,1)-0));
-            if cc == 1
-                Xout = Xout(cutoff_0:end,:);
-                Yout = Yout(cutoff_0:end,:);
-                Zout = Zout(cutoff_0:end,:);
-                Igray = Igray(cutoff_0:end,:,:);
-            elseif cc == 2
-                Xout = Xout(1:cutoff_0,:);
-                Yout = Yout(1:cutoff_0,:);
-                Zout = Zout(1:cutoff_0,:);
-                Igray = Igray(1:cutoff_0,:,:);
-            end
-
-            xyz=[Xout(:) Yout(:) Zout(:)];
-
-            m = size(Igray,1);
-            n = size(Igray,2);
-            tt = size(Igray,3);
-            data=zeros(tt,m*n);
-
-            [xindgrid,yindgrid]=meshgrid(1:n,1:m);
-            rowIND=yindgrid(:);
-            colIND=xindgrid(:);
-
-            for i=1:length(rowIND(:))
-                data(:,i)=reshape(Igray(rowIND(i),colIND(i),:),tt,1);
-            end
-
-            %% Loading CIRN data
-            clearvars -except dd *_dir user_email day_files cc pp ids_grid Products xyz data oname R
-
-            % Fill in cam requirement
-            cam=xyz.*0+1;
-
-            % Get into Epoch time
-            epoch=posixtime(Products(pp).t);
-            %% cBathy Parameters
-            % cBathyTideTorrey pulls from NOAA SIO tide gauge. If tide diccerent, use
-            % diccerent function
-
-            %%% Site-specific Inputs
-            params.stationStr = oname;
-            params.dxm = Products(pp).dx;%5;                    % analysis domain spacing in x
-            params.dym = Products(pp).dy;%10;                    % analysis domain spacing in y
-            params.xyMinMax = [min(xyz(:,1)) max(xyz(:,1)) min(xyz(:,2)) max(xyz(:,2))];   % min, max of x, then y
-            % default to [] for cBathy to choose
-            params.tideFunction = 'cBathyTideneutral';  % tide level function for evel
-
-            %%%%%%%   Power user settings from here down   %%%%%%%
-            params.MINDEPTH = 0.25;             % for initialization and final QC
-            params.MAXDEPTH = 20;             % for initialization and final QC
-            params.QTOL = 0.5;                  % reject skill below this in csm
-            params.minLam = 12;                 % min normalized eigenvalue to proceed
-            params.Lx = 25;%3*params.dxm;           % tomographic domain smoothing
-            params.Ly = 50;%3*params.dym;           %
-            params.kappa0 = 2;                  % increase in smoothing at outer xm
-            params.DECIMATE = 1;                % decimate pixels to reduce work load.
-            params.maxNPix = 80;                % max num pixels per tile (decimate excess)
-            params.minValsForBathyEst = 4;
-
-            % f-domain etc.
-            params.fB = [1/18: 1/50: 1/4];		% frequencies for analysis (~40 dof)
-            params.nKeep = 4;                   % number of frequencies to keep
-
-            % debugging options
-            params.debug.production = 0;
-            params.debug.DOPLOTSTACKANDPHASEMAPS = 0;  % top level debug of phase
-            params.debug.DOSHOWPROGRESS = 1;		  % show progress of tiles
-            params.debug.DOPLOTPHASETILE = 0;		  % observed and EOF results per pt
-            params.debug.TRANSECTX = 200;		  % for plotStacksAndPhaseMaps
-            params.debug.TRANSECTY = 900;		  % for plotStacksAndPhaseMaps
-
-            % default occshore wave angle.  For search seeds.
-            params.occshoreRadCCWFromx = 0;
-            params.nlinfit=1;
-            %% Run Cbathy
-
-            bathy.params = params;
-            bathy.epoch  = num2str(epoch(1));
-            bathy.sName  = oname;
-
-            bathy = analyzeBathyCollect(xyz, epoch, (data), cam, bathy)
-            figure
-            bathy.params.debug.production=1;
-            plotBathyCollect(bathy)
-            sgtitle([oname])
-            %%
-            [Xo Yo]=meshgrid(bathy.xm,bathy.ym);
-
-            if Products(pp).angle < 180 % East Coast
-
-            elseif Products(pp).angle > 180 % West Coast
-                Xo=-(Xo.*cosd(180)+Yo.*sind(180));
-                Yo=-(Yo.*cosd(180)-Xo.*sind(180));
-                bathy.fCombined.h = fliplr(bathy.fCombined.h);
-                bathy.fCombined.hErr = fliplr(bathy.fCombined.hErr);
-            end % if Products(pp).angle < 180 % East Coast
-
-            bathy.coords.Xo = Xo; bathy.coords.Eout = Products(pp).Eastings;
-            bathy.coords.Yo = Yo; bathy.coords.Nout = Products(pp).Northings;
-
-            save(fullfile(odir, 'Processed_data', [oname '_cBathy']),'bathy', '-v7.3')
-
-        end % for pp = ids_grid % repeat for all grids
-
-        if exist('user_email', 'var')
-            try
-                sendmail(user_email{2}, [oname '- Rectifying Products DONE'])
-            end
-        end % if exist('user_email', 'var')
-    end %  for cc = 1 : length(flights)
-end % for  dd = 1 : length(day_files)
-close all
-cd(global_dir)

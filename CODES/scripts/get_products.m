@@ -176,19 +176,28 @@ for  dd = 1 : length(day_files)
                                 BW = boundarymask(mask);
                                 [row, col] = find(BW == 1, 1,'first');
                                 Products(pp).iP = round(world2img(xyz, pose2extr(R.worldPose), R.intrinsics))+[col row];
+                                iP_u = reshape(Products(pp).iP(:,2), size(Products(pp).localX,1), size(Products(pp).localX,2));
+                                iP_v = reshape(Products(pp).iP(:,1), size(Products(pp).localX,1), size(Products(pp).localX,2));
+                                iP_u(iP_u <= 0) = NaN; iP_u(iP_u >= R.panoramaView.ImageSize(1)) = NaN;
+                                iP_v(iP_v <= 0) = NaN; iP_v(iP_v >= R.panoramaView.ImageSize(2)) = NaN;
+                                iP_u(isnan(iP_v)) = NaN; iP_v(isnan(iP_u)) = NaN;
+                                Products(pp).iP_u = iP_u;
+                                Products(pp).iP_v = iP_v;
                             end %  if viewId == 1
 
                             clear Irgb_temp
-                            for ii = 1:length(Products(pp).iP)
-                                if any(isnan(Products(pp).iP(ii,:))) || any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= R.panoramaView.ImageSize)
-                                    Irgb_temp(ii, :) = uint8([0 0 0]);
-                                else
-                                    Irgb_temp(ii, :) = I(Products(pp).iP(ii,2), Products(pp).iP(ii,1),:);
-                                end % if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= R.panoramaView.ImageSize)
-                            end %  for ii = 1:length(Products(pp).iP)
 
+                            [rows, cols, numChannels] = size(I);
+                            Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
+            
+                            for i = 1:numChannels
+                                    channel = I(:,:,i);
+                                    Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
+                            end
+                            Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
+                        
                             if contains(Products(pp).type, 'Grid')
-                                Products(pp).Irgb_2d(viewId, :,:,:) = reshape(Irgb_temp, size(Products(pp).localX,1), size(Products(pp).localX,2), 3);
+                                Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp;
                             else
                                 Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
                             end % if contains(Products(pp).type, 'Grid')
