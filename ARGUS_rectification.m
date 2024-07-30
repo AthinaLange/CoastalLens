@@ -380,6 +380,8 @@ tic
     for cc = 1:cam_num
         if isfield(Products, 'iP')
             Products = rmfield(Products, 'iP');
+            Products = rmfield(Products, 'iP_u');
+            Products = rmfield(Products, 'iP_v');
         end
 
         if isfield(Products, 'Irgb_2d')
@@ -452,7 +454,16 @@ toc
          end
     end % for cc = 1 : 2 % Cam 1 or 2
     
+    
+
     if sum(IrIndv(:)) ~= 0 % some color values present
+        % Fletcher Cove specific
+        if cam_num == 3
+            I_temp(:,:,:,1)=IrIndv(:,:,:,1);
+            I_temp(:,:,:,2)=IrIndv(:,:,:,3);
+            I_temp(:,:,:,3)=IrIndv(:,:,:,2);
+            IrIndv=I_temp;
+        end
         [Ir] =cameraSeamBlend(IrIndv);
         figure(1);clf
         image(Products(1).localX(:), Products(1).localY(:), Ir)
