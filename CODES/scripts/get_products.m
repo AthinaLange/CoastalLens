@@ -233,6 +233,8 @@ for  dd = 1 : length(day_files)
             imwrite(iDark, fullfile(odir, 'Processed_data', 'Darkest.png'))
             if isfield(Products, 'iP')
                 Products = rmfield(Products, 'iP');
+                Products = rmfield(Products, 'iP_u');
+                Products = rmfield(Products, 'iP_v');
             end % if isfield(Products, 'iP')
 
             for pp = 1:length(Products)

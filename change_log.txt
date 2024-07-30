@@ -4,3 +4,4 @@ v1.0.01
 - changed reference image for stabilization to 1st frame
 - integrated ARGUS option
 - created cBathy and cBathyCT workflow
+- improved pixel extraction method - no longer requires for loop over all pixels
