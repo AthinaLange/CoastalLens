@@ -446,7 +446,9 @@ toc
             end
        toc
         end
-        
+        for pp = 1:length(Products)
+            Products(pp).Irgb_2d = uint8(Products(pp).Irgb_2d);
+        end
         save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products')),'Products', 'cam_num', '-v7.3')
 
          if contains(Products(1).type, 'Grid')

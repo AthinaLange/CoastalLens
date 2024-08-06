@@ -144,7 +144,7 @@ for  dd = 1 : length(day_files)
 
     switch camera_type
         case 'UAV'
-            load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights', 'DEM')
+            load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights')
             assert(exist('flights', 'var'), 'Error (run_cBathy): flights must exist and be stored in ''day_config_file.mat''.')
             assert(isa(flights, 'struct'), 'Error (run_cBathy): flights must be a structure.')
             assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (run_cBathy): flights must have fields .folder and .name.')

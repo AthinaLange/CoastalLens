@@ -160,9 +160,13 @@ timestack_dir = uigetdir('.', 'Choose Timestack Prediction (repository) folder.'
 timestack_png = imageDatastore(fullfile(timestack_dir, 'Timestacks'));
 prediction_png = imageDatastore(fullfile(timestack_dir, 'Prediction'));
 
-disp('Please choose DEM topo file.')
+
+disp('Please choose DEM topo / survey file.')
+disp('This is required for the subaerial beach survey. The format should be the same as the cBathy grid.')
 [temp_file, temp_file_path] = uigetfile(pwd, 'DEM file');
 load(fullfile(temp_file_path, temp_file)); clear temp_file*
+
+
 %%
 close all
 switch camera_type
@@ -172,12 +176,12 @@ switch camera_type
 end
 
 for  dd = 1 : length(day_files)
-    clearvars -except dd *_dir user_email day_files DEM *_png cam_num camera_type
+    clearvars -except dd *_dir user_email day_files DEM* *_png cam_num camera_type
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
 
     switch camera_type
         case 'UAV'
-            load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights', 'DEM')
+            load(fullfile(day_files(dd).folder, day_files(dd).name, 'day_config_file.mat'), 'flights')
             assert(exist('flights', 'var'), 'Error (run_cBathy): flights must exist and be stored in ''day_config_file.mat''.')
             assert(isa(flights, 'struct'), 'Error (run_cBathy): flights must be a structure.')
             assert((isfield(flights, 'folder') && isfield(flights, 'name')), 'Error (run_cBathy): flights must have fields .folder and .name.')

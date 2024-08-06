@@ -192,7 +192,7 @@ for  dd = 1 : length(day_files)
             
                             for i = 1:numChannels
                                     channel = I(:,:,i);
-                                    Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
+                                    Irgb_temp(~isnan(Products(pp).iP_u),i) = channel(sub2ind([rows, cols], Products(pp).iP_u(~isnan(Products(pp).iP_u)), Products(pp).iP_v(~isnan(Products(pp).iP_u))));
                             end
                             Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
                         
@@ -237,11 +237,14 @@ for  dd = 1 : length(day_files)
                 Products = rmfield(Products, 'iP_v');
             end % if isfield(Products, 'iP')
 
+
             for pp = 1:length(Products)
                 Products(pp).Irgb_2d=Products(pp).Irgb_2d(1:extract_Hz(hh)/Products(pp).frameRate:end,:,:,:);
                 Products(pp).t=Products(pp).t(1:extract_Hz(hh)/Products(pp).frameRate:end);
             end %  for pp = 1:length(Products)
-
+            for pp = 1:length(Products)
+                Products(pp).Irgb_2d = uint8(Products(pp).Irgb_2d);
+            end
             save(fullfile(odir, 'Processed_data', [oname '_Products']),'Products', '-v7.3')
 
 
