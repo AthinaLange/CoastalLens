@@ -595,7 +595,11 @@ for  dd = 1:length(day_files)
         for pp = ids_grid % repeat for all grids
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                plot_grid(Products(pp), R.I, R.intrinsics, R.worldPose, DEM=DEM)
+                if exist('DEM', 'var')
+                    plot_grid(Products(pp), R.I, R.intrinsics, R.worldPose, DEM=DEM)
+                else
+                    plot_grid(Products(pp), R.I, R.intrinsics, R.worldPose)
+                end
                 answer = questdlg('Happy with grid projection?', 'Grid projection', 'Yes', 'No - redefine', 'Yes');
                 switch answer
                     case 'Yes'
@@ -623,7 +627,7 @@ for  dd = 1:length(day_files)
         if ~isempty(find(ismember(string({Products.type}), 'xTransect')))
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                plot_xtransects(Products, R.I, R.intrinsics, R.worldPose, DEM = DEM)
+                plot_xtransects(Products, R.I, R.intrinsics, R.worldPose)
                 answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No - redefine', 'Yes');
                 switch answer
                     case 'Yes'
@@ -652,7 +656,7 @@ for  dd = 1:length(day_files)
         if ~isempty(find(ismember(string({Products.type}), 'yTransect')))
             gridChangeIndex = 0; % check grid
             while gridChangeIndex == 0
-                plot_ytransects(Products, R.I, R.intrinsics, R.worldPose, DEM=DEM)
+                plot_ytransects(Products, R.I, R.intrinsics, R.worldPose)
                 answer = questdlg('Happy with transects?', 'Transects', 'Yes', 'No - redefine', 'Yes');
                 switch answer
                     case 'Yes'
