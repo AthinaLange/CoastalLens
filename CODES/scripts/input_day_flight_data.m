@@ -234,8 +234,7 @@ for  dd = 1:length(day_files)
     end % if ~exist('Products', 'var') || ~isstruct(Products)
     %% ==========================DEM======================================
     %                          Load in topography DEM
-    %                           - Requires time, X_gridded, Y_gridded,
-    %                           Z_gridded data in world coordinates
+    %                           - Requires time, X, Y, Z data in world coordinates
     %  ==============================================================================
     if ~exist('DEM', 'var')
         answer = questdlg('Do you want to use a topography DEM?', 'Topo DEM', 'Yes', 'No', 'No');
@@ -248,9 +247,9 @@ for  dd = 1:length(day_files)
                         [temp_file, temp_file_path] = uigetfile(global_dir, 'DEM topo file');
                         load(fullfile(temp_file_path, temp_file)); clear temp_file*
                         assert(isfield(DEM, 'time'), 'Error (input_day_flight_data.m): DEM does not have time field.')
-                        assert(isfield(DEM, 'X_gridded'), 'Error (input_day_flight_data.m): DEM does not have X_gridded field.')
-                        assert(isfield(DEM, 'Y_gridded'), 'Error (input_day_flight_data.m): DEM does not have Y_gridded field.')
-                        assert(isfield(DEM, 'Z_gridded'), 'Error (input_day_flight_data.m): DEM does not have Z_gridded field.')
+                        assert(isfield(DEM, 'X'), 'Error (input_day_flight_data.m): DEM does not have X field.')
+                        assert(isfield(DEM, 'Y'), 'Error (input_day_flight_data.m): DEM does not have Y field.')
+                        assert(isfield(DEM, 'Z'), 'Error (input_day_flight_data.m): DEM does not have Z field.')
                     case 'No'
                         [DEM] = define_DEM;
                         answer4 = questdlg('Do you want to save this DEM file for the future?', 'Save DEM file', 'Yes', 'No', 'Yes');
