@@ -474,6 +474,7 @@ for dd = 1 : length(day_files)
         catch % get more points
             iGCP = image_gcp; clear image_gcp
             wGCP = world_gcp; clear world_gcp
+            disp('If you have selected all 5 GCPs, please select ''No more points possible''. If worldPose is not found, please reattempt this section.')
             [ind_gcp_option2,~] = listdlg('ListString',[{'Select points from LiDAR/SfM'}, {'Select GCP targets'}, {'No more points possible'}],...
                 'SelectionMode','single', 'InitialValue',1, 'PromptString', {'Requires more GCP points'}, 'ListSize', [500 300]);
 
