@@ -40,14 +40,14 @@ Product.lon = origin_grid(2);
 Product.angle = origin_grid(3);
 
 info = inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (+m from Origin)', 'Onshore cross-shore extent (m from Origin, + is offshore)', ...
-    'Alongshore location of transects (m from Origin, looking offshore, right side +) - e.g. -100, 0, 100 OR [-100:100:100]',...
+    'Alongshore location of transects (m from Origin, looking offshore, right side +) - e.g. -100, 0, 100 OR -100:100:100',...
     'dx (Cross-shore Resolution m)'}, 'xTransect Coordinates');
 
 % check that there's a value in all the required fields
 if ~isempty(find(isnan(double(string(info([1 2 3 5])))), 1))
     disp('Please fill out all boxes (except z elevation if necessary)')
     info = double(string(inputdlg({'Frame Rate (Hz)', 'Offshore cross-shore extent (m from Origin)', 'Onshore cross-shore extent (m from Origin, + is offshore)', ...
-        'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]',...
+        'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR -100:100:100',...
         'dx (Cross-shore Resolution m)'}, 'xTransect Coordinates')));
 end % if ~isempty(find(isnan(double(string(info([1 2 3 5]))))))
 
@@ -69,8 +69,8 @@ elseif contains(yy, ':')
 elseif length(yy) == 1
     yy=double(yy);
  else
-    disp('Please input in the correct format (comma-separated list or [ylim1:dy:ylim2])')
-    yy = string(inputdlg({'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR [-100:100:100]'}));
+    disp('Please input in the correct format (comma-separated list or ylim1:dy:ylim2)')
+    yy = string(inputdlg({'Alongshore location of transects (m from Origin) - e.g. -100, 0, 100 OR -100:100:100'}));
 end % if contains(yy, ',')
 
 for ii = 1:length(yy)
