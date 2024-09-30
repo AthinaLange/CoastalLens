@@ -30,7 +30,7 @@
 %                       coords (structure) :
 %                                   Eout (array) :  [y_length x x_length] cross-shore location in Eastings
 %                                   Nout (array) :  [y_length x x_length] cross-shore location in Northings
-%           DEM (structure) : Digital Elevation Map Data
+%           DEM (structure) : Digital Elevation Map Data - define_DEM.m
 %                       time (datetime) : date of jumbo survey used
 %                       type (cell array) : Survey type for each transect
 %                       MOP (cell array) : Mop number of each x transect
