@@ -163,9 +163,9 @@ Video.cbathy.cbathy_hErr(Video.cbathy.zerr_interp_m > 0.5) = NaN;
 x10_temp=Video.x10;
 x10_temp(isnan(Video.cbathy.cbathy_hErr))=[];Video.cbathy.cbathy_hErr(isnan(Video.cbathy.cbathy_hErr))=[];
 if ~isempty(x10_temp)
-    Video.cbathy.cbathy_hErr_m = interp1(x10_temp, Video.cbathy.cbathy_hErr, Video.x10);
+    Video.cbathy.cbathy_hErr = interp1(x10_temp, Video.cbathy.cbathy_hErr, Video.x10);
 else
-    Video.cbathy.cbathy_hErr_m = NaN(size(Video.x10,1), size(Video.x10,2));
+    Video.cbathy.cbathy_hErr = NaN(size(Video.x10,1), size(Video.x10,2));
 end
 %% Foreshore Beach
 date = Video.date;
@@ -215,13 +215,13 @@ end
 
 % Offshore bathy
 x_cb = Video.x10;
-z_cb = Video.cbathy.cbathy_hErr_m;
+z_cb = Video.cbathy.cbathy_hErr;
 if isnan(id_ocean_cb)
-    try
-        id_ocean_cb = max([min(find(~isnan(z_cb)==1)) find(x_sz(end)==x_cb)]);
-    catch
-        id_ocean_cb = 1;
-    end
+try
+    id_ocean_cb = max([min(find(~isnan(z_cb)==1)) find(x_sz(end)==x_cb)]);
+catch
+id_ocean_cb = 1;
+end
 end
 z_cb(1:id_ocean_cb) = NaN;
 x_cb(isnan(z_cb)) = []; z_cb(isnan(z_cb)) = [];
@@ -254,13 +254,13 @@ Video.composite.cbathyCT = smoothdata(interp1(x, z, Video.x10),'Gaussian', windo
 %     Video.composite.stitch.cbathyCT_beach = x_upper(i1);
 % end
 % Video.composite.cbathyCT = interp1(x, z, Video.x10);
-%
+% 
 % if ~isempty(x_cb) &&  ~isnan(x_cb(1))
 %     Video.composite.stitch.cbathyCT_offshore = x_cb(1);
 % elseif ~isempty(x_sz) &&  ~isnan(x_sz(end))
 %     Video.composite.stitch.cbathyCT_offshore = x_sz(end);
 % end
-%
+% 
 % index of [1st BP valid onshore point, onshore cutoff of breaking, offshore cutoff of breaking]
 % Video.lims = (round([shore_id*2; id_shore; id_ocean]));
 % if id_sz == 1; Video.check.CT = 'Yes'; else Video.check.CT = 'No';end

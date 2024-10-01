@@ -238,14 +238,14 @@ for  dd = 1 : length(day_files)
 
             % Get into Epoch time
             epoch=posixtime(Products(pp).t);
-            %% cBathy Parameters
+            %% cBathy Parameter
             % cBathyTideTorrey pulls from NOAA SIO tide gauge. If tide different, use
             % different function
 
             %%% Site-specific Inputs
             params.stationStr = oname;
-            params.dxm = Products(pp).dx;%5;                    % analysis domain spacing in x
-            params.dym = Products(pp).dy;%10;                    % analysis domain spacing in y
+            params.dxm = 5;%Products(pp).dx;%5;                    % analysis domain spacing in x
+            params.dym = 5;                    % analysis domain spacing in y
             params.xyMinMax = [min(xyz(:,1)) max(xyz(:,1)) min(xyz(:,2)) max(xyz(:,2))];   % min, max of x, then y
             % default to [] for cBathy to choose
             params.tideFunction = 'cBathyTideneutral';  % tide level function for evel
@@ -302,8 +302,17 @@ for  dd = 1 : length(day_files)
                 bathy.fCombined.hErr = fliplr(bathy.fCombined.hErr);
             end % if Products(pp).angle < 180 % East Coast
 
-            bathy.coords.Xo = Xo; bathy.coords.Eout = Products(pp).Eastings;
-            bathy.coords.Yo = Yo; bathy.coords.Nout = Products(pp).Northings;
+            bathy.coords.Xo = Xo; bathy.coords.Yo = Yo; 
+            if Products(pp).dx == bathy.params.dxm && Products(pp).dy == bathy.params.dym
+                bathy.coords.Eout = fliplr(Products(pp).Eastings);
+                bathy.coords.Nout = Products(pp).Northings;
+            else
+                clear idx idy
+                idx = bathy.params.dxm/Products(pp).dx;
+                idy = bathy.params.dym/Products(pp).dy;
+                bathy.coords.Eout = fliplr(Products(pp).Eastings(1:idx:end,1:idy:end));
+                bathy.coords.Nout = Products(pp).Northings(1:idx:end,1:idy:end);
+            end
 
             tide = Products(pp).tide;
             bathy.fDependent.hTemp = bathy.fDependent.hTemp + tide;

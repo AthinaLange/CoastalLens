@@ -60,9 +60,9 @@ function bp = breakpt_calculator(Video)
         splitthres = mean([highthres lowthres]);
     end
     
-    % p(1) = plot([lowthres lowthres], [0 6000000], 'LineWidth', 7,'Color', 'g');
-    % p(2) = plot([highthres highthres], [0 6000000], 'LineWidth', 7,'Color', 'r');
-    % p(3) = plot([splitthres splitthres], [0 6000000], 'LineWidth', 7,'Color', 'b');
+    % p(1) = plot([lowthres lowthres], [0 max([y(:);y2(:)])*1.1], 'LineWidth', 7,'Color', 'g');
+    % p(2) = plot([highthres highthres], [0 max([y(:);y2(:)])*1.1], 'LineWidth', 7,'Color', 'r');
+    % p(3) = plot([splitthres splitthres], [0 max([y(:);y2(:)])*1.1], 'LineWidth', 7,'Color', 'b');
     % 
     % fig = plot(f,x,y);
     % set(fig, 'LineWidth', 4, 'Color', 'g')
@@ -237,29 +237,29 @@ function bp = breakpt_calculator(Video)
             end % end of 1st pass clean blue or white
         end % end of loop through wave tracks
 %% Plot        
-    %     figure;clf
-    %     image(Video.timestack)
-    %     hold on
-    %     plot(Video.crests.t.*10,Video.crests.x.*10, 'r')
-    % 
-    %     for id = 1:size(Video.crests.t,2)
-    %         idx = Video.crests.x(:,id).*10;
-    %         idt=Video.crests.t(:,id).*10;
-    %         idx(isnan(idx))=[];
-    %         idt(isnan(idt))=[];
-    %         if bp(id)~=0
-    %             if bp(id) == 5001
-    %                 plot(idt(end),idx(end), 'b.', 'MarkerSize', 30)
-    %             elseif isnan(bp(id))
-    %                 plot(idt(1),idx(1), 'r.', 'MarkerSize', 30)
-    %             else
-    %                 maxloc_id = find(bp(id) == idx);
-    %                 plot(idt(maxloc_id), idx(maxloc_id), 'g.', 'MarkerSize', 30)
-    %             end
-    %         end
-    %     end
-    % 
-    % else % if no high threshold present - return all 0
-    %     bp = 0;
-    % end % end of high threshold present
+        figure;clf
+        image(Video.timestack)
+        hold on
+        plot(Video.crests.t.*10,Video.crests.x.*10, 'r', 'LineWidth', 3)
+
+        for id = 1:size(Video.crests.t,2)
+            idx = Video.crests.x(:,id).*10;
+            idt=Video.crests.t(:,id).*10;
+            idx(isnan(idx))=[];
+            idt(isnan(idt))=[];
+            if bp(id)~=0
+                if bp(id) == 5001
+                    plot(idt(end),idx(end), 'b.', 'MarkerSize', 30)
+                elseif isnan(bp(id))
+                    plot(idt(1),idx(1), 'r.', 'MarkerSize', 30)
+                else
+                    maxloc_id = find(bp(id) == idx);
+                    plot(idt(maxloc_id), idx(maxloc_id), 'g.', 'MarkerSize', 30)
+                end
+            end
+        end
+
+    else % if no high threshold present - return all 0
+        bp = 0;
+    end % end of high threshold present
 end % end of function

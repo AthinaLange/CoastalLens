@@ -87,7 +87,7 @@ end
 %  data (handled in csmInvertKAlpha). 
 
 % first, do we still have any data? 
-if ~isempty(subG)
+if ~isempty(subG) & ~isnan(subG)
     
     [ugly, bad] = find(isnan(subG)); 
     all = 1:size(subG,2);
@@ -96,7 +96,7 @@ if ~isempty(subG)
     subG = subG(:,good); 
     subxy = subxy(good,:);
 end
-if isempty(subG) % if there's no data, don't calculate
+if isempty(subG) | any(isnan(subG(:))) % if there's no data, don't calculate
     validTile = 0;
 end
 if size(subxy,1) <= minNPix % if there's not enough data, don't calculate

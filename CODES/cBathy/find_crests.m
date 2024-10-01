@@ -251,8 +251,8 @@ Video.crests.t = crests_t;
 Video.crests.x = crests_x;
 Video.crests.t_for_c = t_slots;
 Video.crests.x_for_c = repmat(x10', 1,size(crests_t,2));
-Video.crests.c = c_real;
-Video.crests.c_15m_avg = c_short;
-Video.crests.c_25m_avg = c_long;
+Video.crests.c = flipud(c_real);
+Video.crests.c_15m_avg = flipud(c_short);
+Video.crests.c_25m_avg = flipud(c_long);
 
 end

@@ -265,11 +265,11 @@ for  dd = 1 : length(day_files)
             cBathyCT(pp).survey.y = DEM_day.Y(i,:);
             cBathyCT(pp).survey.z = DEM_day.Z(i,:);
 
-            cBathyCT(pp).ct.x = Products(pp).Eastings;
-            cBathyCT(pp).ct.y = Products(pp).Northings;
+            cBathyCT(pp).ct.x = fliplr(Products(pp).Eastings);
+            cBathyCT(pp).ct.y = fliplr(Products(pp).Northings);
 
-            cBathyCT(pp).survey.z_interp = (interp1(cBathyCT(pp).survey.x, cBathyCT(pp).survey.z, cBathyCT(pp).ct.x));
-            cBathyCT(pp).survey.z_interp_m = flipud(cBathyCT(pp).survey.z_interp);
+            cBathyCT(pp).survey.z_interp = interp1(cBathyCT(pp).survey.x, cBathyCT(pp).survey.z, cBathyCT(pp).ct.x);
+
             cBathyCT(pp).tide = Products(pp).tide;
             cBathyCT(pp).min_tide=DEM_day.min_tide;
 
@@ -307,8 +307,8 @@ for  dd = 1 : length(day_files)
 
                     [idx,idy]=find(bathy.fCombined.h(:,3*round(size(bathy.fCombined.h,2)/4):end) < 5);
                     bathy.fCombined.h(idx, 3*round(size(bathy.fCombined.h,2)/4)-1+idy)=NaN;
-                    bathy.fCombined.h = (bathy.fCombined.h)-cBathyCT(pp).tide;
-                    bathy.fCombined.hErr = (bathy.fCombined.hErr);
+                    bathy.fCombined.h = fliplr(bathy.fCombined.h)-cBathyCT(pp).tide;
+                    bathy.fCombined.hErr = fliplr(bathy.fCombined.hErr);
 
                     %% cBathyCT
                     [~,dist] = dsearchn(cBathyCT(pp).origin.utm,[bathy.coords.Eout(:) bathy.coords.Nout(:)]);
@@ -318,10 +318,8 @@ for  dd = 1 : length(day_files)
                         cBathyCT(pp).cbathy.y = bathy.coords.Nout(i,:);
                         cBathyCT(pp).cbathy.z = -bathy.fCombined.h(i,:);
                         cBathyCT(pp).cbathy.zerr = bathy.fCombined.hErr(i,:);
-                        cBathyCT(pp).cbathy.z_interp = (interp1(cBathyCT(pp).cbathy.x, cBathyCT(pp).cbathy.z, cBathyCT(pp).ct.x));
-                        cBathyCT(pp).cbathy.zerr_interp = (interp1(cBathyCT(pp).cbathy.x, cBathyCT(pp).cbathy.zerr, cBathyCT(pp).ct.x));
-                        cBathyCT(pp).cbathy.z_interp_m = flipud(cBathyCT(pp).cbathy.z_interp);
-                        cBathyCT(pp).cbathy.zerr_interp_m = flipud(cBathyCT(pp).cbathy.zerr_interp);
+                        cBathyCT(pp).cbathy.z_interp = flipud(interp1(cBathyCT(pp).cbathy.x, cBathyCT(pp).cbathy.z, cBathyCT(pp).ct.x);
+                        cBathyCT(pp).cbathy.zerr_interp = flipud(interp1(cBathyCT(pp).cbathy.x, cBathyCT(pp).cbathy.zerr, cBathyCT(pp).ct.x);
 
                         %% Wave Celerity
                         Video = find_crests(cBathyCT(pp));
@@ -331,7 +329,7 @@ for  dd = 1 : length(day_files)
                         cBathyCT(pp).bp = breakpt_calculator(cBathyCT(pp));
                         % Blue dot: Unbroken, dot at end of track
                         % Green dot: Breakpoint location along wave track
-                        % Red dot: Entire wave track broken, dot at beginning of track (NaN)
+                        % Red dot: Entire wave track broken, dot at beginning of track
 
                         %% cBathyCT
                         switch camera_type
@@ -363,9 +361,9 @@ for  dd = 1 : length(day_files)
                         cBathyCT(pp).ct = Video.ct;
                         cBathyCT(pp).cbathy = Video.cbathy;
                         cBathyCT(pp).composite = Video.composite;
-                        %cBathyCT(pp).lims = Video.lims;
-                        %cBathyCT(pp).check = Video.check;
-                        %cBathyCT(pp).Error = Video.Error;
+                        cBathyCT(pp).lims = Video.lims;
+                        cBathyCT(pp).check = Video.check;
+                        cBathyCT(pp).Error = Video.Error;
                     end % if i ~= 0
                 end % if image less than 25% black
 
@@ -378,7 +376,7 @@ for  dd = 1 : length(day_files)
         hold on
         for pp = 1:length(cBathyCT)
             if ~isempty(cBathyCT(pp).composite)
-                scatter3(cBathyCT(pp).ct.x,cBathyCT(pp).ct.y, flipud(cBathyCT(pp).cbathy.cbathy_hErr_m), 'r')
+                scatter3(cBathyCT(pp).ct.x,cBathyCT(pp).ct.y, flipud(cBathyCT(pp).composite.cbathy_hErr), 'r')
                 scatter3(cBathyCT(pp).ct.x,cBathyCT(pp).ct.y, flipud(cBathyCT(pp).composite.cbathyCT), 'g')
             end
         end
