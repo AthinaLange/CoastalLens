@@ -214,5 +214,5 @@ get_products_DEMO
 input_answer = questdlg('Do you want to save all the rectified images?','Save images', 'Yes', 'No', 'Yes');
 switch input_answer
     case 'Yes'
-        save_products_DEMO
+        save_products
 end % switch input_answer
