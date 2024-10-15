@@ -128,7 +128,7 @@ exiftool_answer = questdlg('Is exiftool installed?','exiftool Installation', 'Ye
 switch exiftool_answer
     case 'No'
         disp('Please go to https://exiftool.org and install exiftool before proceeding.')
-        ffmpeg_answer = questdlg('Is exiftool installed now?','exiftool Installation', 'Yes', 'No', 'Yes');
+        exiftool_answer = questdlg('Is exiftool installed now?','exiftool Installation', 'Yes', 'No', 'Yes');
 end % switch exiftool_answer
 
 addpath(genpath(code_dir))
