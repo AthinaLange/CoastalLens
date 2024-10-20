@@ -236,4 +236,5 @@ for  dd = 1 : length(day_files)
     end %  for ff = 1 : length(flights)
 end % for  dd = 1 : length(day_files)
 close all
+clearvars -except *_dir user_email day_files Products R
 cd(global_dir)
