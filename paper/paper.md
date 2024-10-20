@@ -20,13 +20,13 @@ authors:
     orcid: 
     affiliation: 4
 affiliations:
-  - name: Scripps Institution of Oceanography, University of California, San Diego, USA
+  - name: Scripps Institution of Oceanography, University of California, San Diego, United States of America
     index: 1
-  - name: AI Werkstatt, USA
+  - name: AI Werkstatt, United States of America
     index: 2
-  - name: University of Hawai’i Sea Level Center, USA
+  - name: University of Hawai’i Sea Level Center, United States of America
     index: 3
-  - name: Coastal and Hydraulics Laboratory, US Army Engineer Research and Development Center, USA
+  - name: Coastal and Hydraulics Laboratory, US Army Engineer Research and Development Center, United States of America
     index: 4
 
 date: March 11 2024
