@@ -1,5 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13958678.svg)](https://doi.org/10.5281/zenodo.13958678)
-
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13958678.svg)](https://doi.org/10.5281/zenodo.13958678) [![DOI](https://joss.theoj.org/papers/10.21105/joss.07111/status.svg)](https://doi.org/10.21105/joss.07111)
 # CoastalLens: A MATLAB UAV Video Stabilization & Rectification Framework
 Software to stabilize and rectify coastal imagery UAV data. <br />
 Developed from the [CIRN Qualitative Coastal Imagining Toolbox](https://github.com/Coastal-Imaging-Research-Network/CIRN-Quantitative-Coastal-Imaging-Toolbox). 
